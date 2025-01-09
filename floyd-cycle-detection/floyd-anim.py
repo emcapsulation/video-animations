@@ -203,7 +203,7 @@ class LinkedList:
     # The traversal of a linked list with one pointer
     def traversal_animation(self, scene):
         # Create a pointer (represented by a larger dot)
-        pointer = Dot(color=YELLOW).move_to(self.get_head().get_dot().get_center())
+        pointer = Dot(color=ORANGE).move_to(self.get_head().get_dot().get_center())
         scene.play(pointer.animate.move_to(self.get_head().get_dot().get_center()))
 
         if not self.has_cycle:   
@@ -241,7 +241,7 @@ class LinkedList:
     # The traversal of a linked list by marking nodes as visted
     def traversal_animation_set(self, scene):
         # Create a pointer (represented by a larger dot)
-        pointer = Dot(color=YELLOW).move_to(self.get_head().get_dot().get_center())
+        pointer = Dot(color=ORANGE).move_to(self.get_head().get_dot().get_center())
 
         # Animation: move the pointer along the linked list
         visited_nodes = []
@@ -261,10 +261,38 @@ class LinkedList:
         scene.wait(4)
 
 
+    # Stepping to the meeting point
+    def step_backwards(self, scene, hare, tortoise):
+        # Create a pointer (represented by a larger dot)
+        pointer = Dot(color=ORANGE).move_to(tortoise.get_dot().get_center())
+        pointer2 = Dot(color=GREEN).move_to(hare.get_dot().get_center())
+
+        scene.add(pointer, pointer2)
+
+        # Move the tortoise to head
+        scene.play(pointer.animate.move_to(self.get_head().get_dot().get_center()))
+        tortoise = self.get_head()
+
+        while tortoise.get_dot() != hare.get_dot():
+            scene.play(
+                pointer.animate.move_to(tortoise.get_next().get_dot().get_center()).set_run_time(1),
+                pointer2.animate.move_to(hare.get_next().get_dot().get_center()).set_run_time(1)
+            )
+
+            tortoise = tortoise.get_next()
+            hare = hare.get_next()
+
+        scene.play(
+            pointer.animate.set_color(RED),
+            pointer2.animate.set_color(RED)
+        )
+        scene.wait(4)
+
+
     # The Floyd cycle finding animation
     def floyd_animation(self, scene):
         # Create a pointer (represented by a larger dot)
-        pointer = Dot(color=YELLOW).move_to(self.get_head().get_dot().get_center())
+        pointer = Dot(color=ORANGE).move_to(self.get_head().get_dot().get_center())
         pointer2 = Dot(color=GREEN).move_to(self.get_head().get_dot().get_center())
 
         # Animation: move the pointer along the linked list
@@ -295,6 +323,15 @@ class LinkedList:
             pointer.animate.set_color(RED),
             pointer2.animate.set_color(RED)
         )
+        scene.wait(4)
+        scene.remove(pointer, pointer2)
+
+        self.step_backwards(scene, hare, tortoise)
+
+
+    # The proof
+    def proof_animation(self, scene):
+        pass
 
 
 
@@ -353,3 +390,12 @@ class FloydCycleAnimation(Scene):
         LL.set_nodes(9)
         LL.add_linked_list(self)
         LL.floyd_animation(self)
+
+
+
+class FloydCycleProof(Scene):  
+    def construct(self):
+        LL = LinkedList(True)
+        LL.set_nodes(9)
+        LL.add_linked_list(self)
+        LL.proof_animation(self)
