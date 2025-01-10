@@ -97,7 +97,7 @@ class LinkedList:
             next_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift-2*i) + DOWN*1))
             next_node.set_label(Text(str(i+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
-            cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left(), buff=0.2))
+            cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
             cur_node.set_next(next_node)
             cur_node = next_node
 
@@ -130,23 +130,23 @@ class LinkedList:
             # Set arrows
             # Super ugly but I just need to make a hexagon
             if i%self.cycle_size == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left()))
             elif i%1 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
             elif i%2 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
             elif i%3 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
             elif i%4 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right()))
             else:
-                cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right()))
 
             cur_node.set_next(next_node)
             cur_node = next_node
 
         cur_node.set_next(cycle_head)
-        cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right(), buff=0.2))
+        cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right()))
 
 
     def set_nodes(self, num_nodes):
@@ -177,7 +177,7 @@ class LinkedList:
                     next_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift-shift_multiplier*i) + DOWN*1))
                     next_node.set_label(Text(str(i+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
-                cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left(), buff=1.2/self.get_num_nodes()))
+                cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
                 cur_node.set_next(next_node)
                 cur_node = next_node
 
@@ -231,23 +231,98 @@ class LinkedList:
             # Set arrows
             # Super ugly but I just need to make a hexagon
             if i%self.cycle_size == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left()))
             elif i%1 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
             elif i%2 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
             elif i%3 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
             elif i%4 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right()))
             else:
-                cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right(), buff=0.2))
+                cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right()))
 
             cur_node.set_next(next_node)
             cur_node = next_node
 
         cur_node.set_next(cycle_head)
-        cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right(), buff=0.2))
+        cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right()))
+
+
+    def create_large_list(self):
+        '''
+        Linked list with cycle
+        '''
+        self.num_nodes = 13
+        left_shift = 5
+        down_shift = 1
+
+        self.straight_size = 8
+        self.cycle_size = 5
+
+        cur_left_shift = 0
+
+        # Set up nodes
+        cur_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift) + DOWN*1))
+        cur_node.set_label(Text(str(1), font_size=24).next_to(cur_node.get_dot(), DOWN))
+
+        self.set_head(cur_node)
+
+        for i in range(1, self.straight_size):
+            next_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift-1*i) + DOWN*1))
+            next_node.set_label(Text(str(i+1), font_size=24).next_to(next_node.get_dot(), DOWN))
+
+            cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
+            cur_node.set_next(next_node)
+            cur_node = next_node
+
+            cur_left_shift = left_shift-1*i
+
+        cycle_head = cur_node
+
+        # 0 means we are moving leftwards
+        direction = 0
+        for i in range(0, self.cycle_size):
+            # Put the cycle in a circle
+            if cur_left_shift <= -1*left_shift:
+                direction = 1
+
+            if direction == 1:
+                cur_left_shift = cur_left_shift+1
+            else:
+                cur_left_shift = cur_left_shift-1
+
+            if i == math.floor(self.cycle_size/2):
+                down_shift = 1
+            elif i < self.cycle_size/2:
+                down_shift = 0
+            else:
+                down_shift = 2
+
+            next_node = ListNode(Dot(color=BLUE).shift(LEFT*cur_left_shift + DOWN*down_shift))
+            next_node.set_label(Text(str(i+self.straight_size+1), font_size=24).next_to(next_node.get_dot(), DOWN))
+
+            # Set arrows
+            # Super ugly but I just need to make a hexagon
+            if i%self.cycle_size == 0:
+                cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left()))
+            elif i%1 == 0:
+                cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
+            elif i%2 == 0:
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
+            elif i%3 == 0:
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
+            elif i%4 == 0:
+                cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right()))
+            else:
+                cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right()))
+
+            cur_node.set_next(next_node)
+            cur_node = next_node
+
+        cur_node.set_next(cycle_head)
+        cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right()))
 
 
     # Add all nodes, labels and arrows to the scene
@@ -448,9 +523,23 @@ class LinkedList:
                 hare.get_dot().animate.set_color(RED), run_time=2)
 
 
+    def get_meeting_point(self):
+        tortoise = self.head
+        hare = self.head
+
+        started = False
+        while started == False or tortoise != hare:
+            tortoise = tortoise.get_next()
+            hare = hare.get_next().get_next()
+            started = True
+
+        return tortoise
+
+
     # The proof
     def proof_animation(self, scene):
-        pass
+        meeting_point = self.get_meeting_point()
+        self.step_backwards(scene, meeting_point, meeting_point)
 
 
 
@@ -569,6 +658,6 @@ class CycleChase(Scene):
 class FloydCycleProof(Scene):  
     def construct(self):
         LL = LinkedList(True)
-        LL.set_nodes(9)
-        LL.add_linked_list(self)
+        LL.create_large_list()
+        LL.draw_linked_list(self, 0.05)
         LL.proof_animation(self)
