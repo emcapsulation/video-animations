@@ -2,6 +2,14 @@ from manim import *
 import math
 
 
+config.background_color = "#15131c"
+
+P_RAD = 0.125
+P1_COL = PINK
+P2_COL = GREEN
+NODE_COL = BLUE
+
+
 class ListNode:
     def __init__(self, dot):
         self.dot = dot
@@ -46,6 +54,17 @@ class ListNode:
     def get_bottom_right(self):
         return self.dot.get_center() + DOWN*self.dot.radius + RIGHT*self.dot.radius
 
+    def add_to_vgroup(self, group):
+        group.add(self.get_dot())
+
+        if (self.label != None):
+            group.add(self.get_label())
+
+        if (self.arrow != None):
+            group.add(self.get_arrow())
+
+        return group
+
 
 class LinkedList:
     def __init__(self, has_cycle):
@@ -55,7 +74,11 @@ class LinkedList:
         self.straight_size = 0
         self.cycle_size = 0
 
-        self.head = None            
+        self.head = None
+        self.meeting_point = None
+        self.entry_point = None
+
+        self.ll_group = VGroup()       
 
 
     def get_num_nodes(self):
@@ -88,17 +111,19 @@ class LinkedList:
         cur_left_shift = 0
 
         # Set up nodes
-        cur_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift) + DOWN*1))
+        cur_node = ListNode(Dot(color=NODE_COL).shift(LEFT*(left_shift) + DOWN*1))
         cur_node.set_label(Text(str(1), font_size=24).next_to(cur_node.get_dot(), DOWN))
 
-        self.set_head(cur_node)
+        self.set_head(cur_node)        
 
         for i in range(1, self.straight_size):
-            next_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift-2*i) + DOWN*1))
+            next_node = ListNode(Dot(color=NODE_COL).shift(LEFT*(left_shift-2*i) + DOWN*1))
             next_node.set_label(Text(str(i+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
             cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
             cur_node.set_next(next_node)
+            self.ll_group = cur_node.add_to_vgroup(self.ll_group)
+
             cur_node = next_node
 
             cur_left_shift = left_shift-2*i
@@ -124,29 +149,34 @@ class LinkedList:
             else:
                 down_shift = 3
 
-            next_node = ListNode(Dot(color=BLUE).shift(LEFT*cur_left_shift + DOWN*down_shift))
+            next_node = ListNode(Dot(color=NODE_COL).shift(LEFT*cur_left_shift + DOWN*down_shift))
             next_node.set_label(Text(str(i+self.straight_size+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
             # Set arrows
             # Super ugly but I just need to make a hexagon
-            if i%self.cycle_size == 0:
+            if i == 0:
                 cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left()))
-            elif i%1 == 0:
+            elif i == 1:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
-            elif i%2 == 0:
+            elif i == 2:
                 cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
-            elif i%3 == 0:
+            elif i == 3:
                 cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
-            elif i%4 == 0:
+            elif i == 4:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right()))
             else:
                 cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right()))
 
             cur_node.set_next(next_node)
+            self.ll_group = cur_node.add_to_vgroup(self.ll_group)
+
             cur_node = next_node
 
         cur_node.set_next(cycle_head)
         cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right()))
+        self.ll_group = cur_node.add_to_vgroup(self.ll_group)
+
+        self.ll_group.move_to(ORIGIN).shift(DOWN*1)
 
 
     def set_nodes(self, num_nodes):
@@ -160,7 +190,7 @@ class LinkedList:
             shift_multiplier = 12/self.get_num_nodes()
 
             # Set up nodes
-            cur_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift) + DOWN*1))
+            cur_node = ListNode(Dot(color=NODE_COL).shift(LEFT*(left_shift) + DOWN*1))
             cur_node.set_label(Text(str(1), font_size=24).next_to(cur_node.get_dot(), DOWN))
 
             # Set up the head
@@ -174,15 +204,20 @@ class LinkedList:
                     next_node = ListNode(Text("NULL", font_size=24).shift(LEFT*(left_shift-shift_multiplier*i) + DOWN*1))
 
                 else:
-                    next_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift-shift_multiplier*i) + DOWN*1))
+                    next_node = ListNode(Dot(color=NODE_COL).shift(LEFT*(left_shift-shift_multiplier*i) + DOWN*1))
                     next_node.set_label(Text(str(i+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
                 cur_node.set_next(next_node)
-                cur_node = next_node
+                self.ll_group = cur_node.add_to_vgroup(self.ll_group)
+
+                cur_node = next_node   
+            self.ll_group = next_node.add_to_vgroup(self.ll_group)         
 
         else:
             self.set_cycle_nodes()
+        
+        self.ll_group.move_to(ORIGIN).shift(DOWN*1)
 
 
 
@@ -200,7 +235,7 @@ class LinkedList:
         cur_left_shift = 0
 
         # Set up nodes
-        cur_node = ListNode(Dot(color=BLUE).shift(DOWN*1))
+        cur_node = ListNode(Dot(color=NODE_COL).shift(DOWN*1))
         cur_node.set_label(Text(str(1), font_size=24).next_to(cur_node.get_dot(), DOWN))
 
         self.set_head(cur_node)
@@ -225,56 +260,61 @@ class LinkedList:
             else:
                 down_shift = 3
 
-            next_node = ListNode(Dot(color=BLUE).shift(LEFT*cur_left_shift + DOWN*down_shift))
+            next_node = ListNode(Dot(color=NODE_COL).shift(LEFT*cur_left_shift + DOWN*down_shift))
             next_node.set_label(Text(str(i+self.straight_size+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
             # Set arrows
             # Super ugly but I just need to make a hexagon
-            if i%self.cycle_size == 0:
+            if i == 0:
                 cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left()))
-            elif i%1 == 0:
+            elif i == 1:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
-            elif i%2 == 0:
+            elif i == 2:
                 cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
-            elif i%3 == 0:
+            elif i == 3:
                 cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
-            elif i%4 == 0:
+            elif i == 4:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right()))
             else:
                 cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right()))
 
             cur_node.set_next(next_node)
+            self.ll_group = cur_node.add_to_vgroup(self.ll_group)
             cur_node = next_node
 
         cur_node.set_next(cycle_head)
         cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right()))
+        self.ll_group = cur_node.add_to_vgroup(self.ll_group)
+
+        self.ll_group.move_to(ORIGIN)
 
 
     def create_large_list(self):
         '''
         Linked list with cycle
         '''
-        self.num_nodes = 13
+        self.num_nodes = 16
         left_shift = 5
         down_shift = 1
 
-        self.straight_size = 8
-        self.cycle_size = 5
+        self.straight_size = 10
+        self.cycle_size = 6
 
         cur_left_shift = 0
 
         # Set up nodes
-        cur_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift) + DOWN*1))
+        cur_node = ListNode(Dot(color=NODE_COL).shift(LEFT*(left_shift) + DOWN*1))
         cur_node.set_label(Text(str(1), font_size=24).next_to(cur_node.get_dot(), DOWN))
 
         self.set_head(cur_node)
 
         for i in range(1, self.straight_size):
-            next_node = ListNode(Dot(color=BLUE).shift(LEFT*(left_shift-1*i) + DOWN*1))
+            next_node = ListNode(Dot(color=NODE_COL).shift(LEFT*(left_shift-1*i) + DOWN*1))
             next_node.set_label(Text(str(i+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
             cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
             cur_node.set_next(next_node)
+            self.ll_group = cur_node.add_to_vgroup(self.ll_group)
             cur_node = next_node
 
             cur_left_shift = left_shift-1*i
@@ -283,46 +323,49 @@ class LinkedList:
 
         # 0 means we are moving leftwards
         direction = 0
+        down_count = 0
         for i in range(0, self.cycle_size):
             # Put the cycle in a circle
-            if cur_left_shift <= -1*left_shift:
+            if cur_left_shift <= -7 and down_count == 0:
+                direction = 2
+                down_count = 1
+            elif down_count == 1:
                 direction = 1
 
             if direction == 1:
                 cur_left_shift = cur_left_shift+1
-            else:
+            elif direction == 0:
                 cur_left_shift = cur_left_shift-1
 
-            if i == math.floor(self.cycle_size/2):
-                down_shift = 1
-            elif i < self.cycle_size/2:
+            if down_count == 0:
                 down_shift = 0
             else:
                 down_shift = 2
 
-            next_node = ListNode(Dot(color=BLUE).shift(LEFT*cur_left_shift + DOWN*down_shift))
+            next_node = ListNode(Dot(color=NODE_COL).shift(LEFT*cur_left_shift + DOWN*down_shift))
             next_node.set_label(Text(str(i+self.straight_size+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
             # Set arrows
-            # Super ugly but I just need to make a hexagon
-            if i%self.cycle_size == 0:
+            if i == 0:
                 cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left()))
-            elif i%1 == 0:
+            elif i == 1 or i == 2:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
-            elif i%2 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
-            elif i%3 == 0:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
-            elif i%4 == 0:
+            elif i == 3:
+                cur_node.set_arrow(CurvedArrow(cur_node.get_dot().get_right(), next_node.get_dot().get_right(), angle=-PI/2).shift(RIGHT*0.2))
+            elif i == 4 or i == 5:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right()))
             else:
                 cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right()))
 
             cur_node.set_next(next_node)
+            self.ll_group = cur_node.add_to_vgroup(self.ll_group)
             cur_node = next_node
 
         cur_node.set_next(cycle_head)
         cur_node.set_arrow(Arrow(cur_node.get_top_left(), cycle_head.get_bottom_right()))
+        self.ll_group = cur_node.add_to_vgroup(self.ll_group)
+
+        self.ll_group.move_to(ORIGIN).shift(DOWN*2)
 
 
     # Add all nodes, labels and arrows to the scene
@@ -361,15 +404,15 @@ class LinkedList:
 
 
     # The traversal of a linked list with one pointer
-    def traversal_animation(self, scene):
+    def traversal_animation(self, scene, run_time_mult=1):
         # Create a pointer (represented by a larger dot)
-        pointer = Dot(color=PURPLE).move_to(self.get_head().get_dot().get_center())
+        pointer = Dot(color=P1_COL, radius=P_RAD).move_to(self.get_head().get_dot().get_center())
         scene.play(pointer.animate.move_to(self.get_head().get_dot().get_center()))
 
         if not self.has_cycle:   
             cur_node = self.get_head()
             while cur_node.get_next() != None:
-                scene.play(pointer.animate.move_to(cur_node.get_next().get_dot().get_center()), run_time=1)
+                scene.play(pointer.animate.move_to(cur_node.get_next().get_dot().get_center()), run_time=1*run_time_mult)
                 cur_node = cur_node.get_next()
             
             # Animate the dot changing color from yellow to red
@@ -379,13 +422,13 @@ class LinkedList:
             # It shows it going around the cycle a few times
             count = 0
             cur_node = self.get_head()
-            while count < self.get_num_nodes()+4:
-                scene.play(pointer.animate.move_to(cur_node.get_next().get_dot().get_center()), run_time=1)
+            while count < self.get_num_nodes()+8:
+                scene.play(pointer.animate.move_to(cur_node.get_next().get_dot().get_center()), run_time=1*run_time_mult)
                 cur_node = cur_node.get_next()
                 count += 1
 
 
-    def set_animation(self, scene, brackets, node, visited_nodes, run_time=1, font_size=72):
+    def set_animation(self, scene, brackets, node, visited_nodes, run_time=1, font_size=48):
         if node.get_label() != None:
             # Add the label of the first node to the visited nodes list
             visited_nodes.append(node.get_label().get_text())
@@ -402,17 +445,17 @@ class LinkedList:
     # The traversal of a linked list by marking nodes as visted
     def traversal_animation_set(self, scene):
         # Create a pointer (represented by a larger dot)
-        pointer = Dot(color=PURPLE).move_to(self.get_head().get_dot().get_center())
+        pointer = Dot(color=P1_COL, radius=P_RAD).move_to(self.get_head().get_dot().get_center())
 
         # Animation: move the pointer along the linked list
         visited_nodes = []
-        brackets = Text("[]", font_size=72).shift(UP * 2)
+        brackets = Text("[]", font_size=48).shift(UP * 2)
         scene.play(Write(brackets))
 
         cur_node = self.get_head()
         while cur_node.get_label().get_text() not in visited_nodes:
-            visited_nodes = self.set_animation(scene, brackets, cur_node, visited_nodes)
-            scene.play(pointer.animate.move_to(cur_node.get_next().get_dot().get_center()), run_time=1)            
+            visited_nodes = self.set_animation(scene, brackets, cur_node, visited_nodes, run_time=0.75)
+            scene.play(pointer.animate.move_to(cur_node.get_next().get_dot().get_center()), run_time=0.75)            
             cur_node = cur_node.get_next()            
 
         scene.play(
@@ -448,10 +491,10 @@ class LinkedList:
 
 
     # Stepping to the meeting point
-    def step_backwards(self, scene, hare, tortoise):
+    def step_backwards(self, scene, hare, tortoise, run_time_mult=1):
         # Create a pointer (represented by a larger dot)
-        pointer = Dot(color=PURPLE).move_to(tortoise.get_dot().get_center())
-        pointer2 = Dot(color=GREEN).move_to(hare.get_dot().get_center())
+        pointer = Dot(color=P1_COL, radius=P_RAD).move_to(tortoise.get_dot().get_center())
+        pointer2 = Dot(color=P2_COL, radius=P_RAD).move_to(hare.get_dot().get_center())
 
         scene.add(pointer, pointer2)
 
@@ -461,8 +504,9 @@ class LinkedList:
 
         while tortoise.get_dot() != hare.get_dot():
             scene.play(
-                pointer.animate.move_to(tortoise.get_next().get_dot().get_center()).set_run_time(1),
-                pointer2.animate.move_to(hare.get_next().get_dot().get_center()).set_run_time(1)
+                pointer.animate.move_to(tortoise.get_next().get_dot().get_center()),
+                pointer2.animate.move_to(hare.get_next().get_dot().get_center()),
+                run_time=1*run_time_mult
             )
 
             tortoise = tortoise.get_next()
@@ -473,12 +517,22 @@ class LinkedList:
             pointer2.animate.set_color(RED)
         )
 
+        scene.wait(1)
+        scene.remove(pointer, pointer2)
+
+        self.entry_point = tortoise
+
 
     # The Floyd cycle finding animation
-    def floyd_animation(self, scene, show_step=True):
+    def floyd_animation(self, scene, show_step=True, run_time_mult=1, show_pointer_only=0):
         # Create a pointer (represented by a larger dot)
-        pointer = Dot(color=PURPLE).move_to(self.get_head().get_dot().get_center())
-        pointer2 = Dot(color=GREEN).move_to(self.get_head().get_dot().get_center())
+        pointer = Dot(color=P1_COL, radius=P_RAD).move_to(self.get_head().get_dot().get_center())
+        pointer2 = Dot(color=P2_COL, radius=P_RAD).move_to(self.get_head().get_dot().get_center())
+
+        if show_pointer_only == 2:
+            pointer.set_opacity(0)
+        elif show_pointer_only == 1:
+            pointer2.set_opacity(0)
 
         # Animation: move the pointer along the linked list
         scene.play(
@@ -490,17 +544,29 @@ class LinkedList:
         hare = self.get_head()
         started = False
         while hare.get_next() != None and (started == False or tortoise.get_dot() != hare.get_dot()):
-            scene.play(   
-                pointer.animate.move_to(tortoise.get_next().get_dot().get_center()).set_run_time(2),        
-                pointer2.animate.move_to(hare.get_next().get_dot().get_center()).set_run_time(1)
-            )
+            if show_pointer_only != 2:
+                scene.play(   
+                    pointer.animate.move_to(tortoise.get_next().get_dot().get_center()),        
+                    pointer2.animate.move_to(hare.get_next().get_dot().get_center()),
+                    run_time=1*run_time_mult
+                )
+
             tortoise = tortoise.get_next()
             hare = hare.get_next()
 
             if hare.get_next() != None:
-                scene.play(
-                    pointer2.animate.move_to(hare.get_next().get_dot().get_center()).set_run_time(1)
-                )
+                if show_pointer_only != 2:
+                    scene.play(
+                        pointer2.animate.move_to(hare.get_next().get_dot().get_center()),
+                        run_time=1*run_time_mult
+                    )
+                else:
+                    scene.play(   
+                        pointer.animate.move_to(tortoise.get_next().get_dot().get_center()),        
+                        pointer2.animate.move_to(hare.get_next().get_dot().get_center()),
+                        run_time=1*run_time_mult
+                    )
+
                 hare = hare.get_next()
             else:
                 break
@@ -512,15 +578,17 @@ class LinkedList:
                 pointer.animate.set_color(RED),
                 pointer2.animate.set_color(RED)
             )
-            scene.wait(4)
+            scene.wait(6)
             scene.remove(pointer, pointer2)
-            self.step_backwards(scene, hare, tortoise)
+            scene.wait(1)
+            self.step_backwards(scene, hare, tortoise, run_time_mult)
 
         else:
             # Animate the dot changing color from yellow to red
-            scene.play(FadeOut(pointer), 
-                pointer2.animate.set_color(RED), 
-                hare.get_dot().animate.set_color(RED), run_time=2)
+            scene.play(
+                FadeOut(pointer2), 
+                pointer.animate.set_color(RED), 
+                run_time=2)
 
 
     def get_meeting_point(self):
@@ -533,13 +601,143 @@ class LinkedList:
             hare = hare.get_next().get_next()
             started = True
 
-        return tortoise
+        self.meeting_point = tortoise
+
+
+    def colour_xyz(self, scene):
+        cur_node = self.head
+
+        count = 0
+        while count < self.straight_size-1:
+            scene.play(cur_node.get_dot().animate.set_color(PURPLE_B), run_time=0.3)
+
+            count += 1
+            cur_node = cur_node.get_next()
+
+        x_label = Text("x").set_color(PURPLE_B)
+        x_label.next_to(self.head.get_dot(), UP)
+        scene.play(Write(x_label))
+
+        while cur_node != self.meeting_point:
+            scene.play(cur_node.get_dot().animate.set_color(YELLOW_B), run_time=0.3)
+            cur_node = cur_node.get_next()
+
+        y_label = Text("y").set_color(YELLOW_B)
+        y_label.next_to(self.meeting_point.get_dot(), RIGHT*8 + UP*1)
+        scene.play(Write(y_label))
+
+        while cur_node != self.entry_point:
+            scene.play(cur_node.get_dot().animate.set_color(RED_B), run_time=0.3)
+            cur_node = cur_node.get_next()
+
+        z_label = Text("z").set_color(RED_B)
+        z_label.next_to(self.meeting_point.get_dot(), DOWN*3 + LEFT*4)
+        scene.play(Write(z_label))
+
 
 
     # The proof
-    def proof_animation(self, scene):
-        meeting_point = self.get_meeting_point()
-        self.step_backwards(scene, meeting_point, meeting_point)
+    def proof_animation(self, scene, run_time_mult=1):
+        self.get_meeting_point()
+        self.step_backwards(scene, self.meeting_point, self.meeting_point, run_time_mult)
+        self.colour_xyz(scene)        
+
+
+    def proof_algebra(self, scene):
+        text = Text("We want to show: ", font_size=24).shift(UP*3)
+        scene.play(Write(text))
+        x_text = Tex("$x = cL + z$").shift(UP*2)
+        scene.play(Write(x_text))
+
+        scene.wait(3)
+        scene.remove(x_text, text)
+
+        down_shift = 0.3
+        num_shifts = 0
+
+        line_1 = MathTex("d_s = 2 \\cdot d_f", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Write(line_1))
+        scene.wait(2)
+
+        line_2 = MathTex("d_s = 2 \\cdot d_f", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_2.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        self.floyd_animation(scene, show_step=False, run_time_mult=0.3, show_pointer_only=1)
+
+        line_21 = MathTex("x + n_s L + y = 2 \\cdot d_f", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_2, line_21))
+        scene.wait(2)
+
+        self.floyd_animation(scene, show_step=False, run_time_mult=0.3, show_pointer_only=2)
+
+        line_22 = MathTex("x + n_s L + y = 2 \\cdot (x + n_f L + y)", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_2, line_22))
+        scene.wait(2)
+
+        line_3 = MathTex("x + n_s L + y = 2(x + n_f L + y)", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_3.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        line_31 = MathTex("x + n_s L + y = 2x + 2 n_f L + 2y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_3, line_31))
+        scene.wait(2)
+
+        line_32 = MathTex("x + n_s L + y = 2x + n L + 2y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_3, line_32))
+        scene.wait(2)
+
+        line_4 = MathTex("x + n_s L + y = 2x + n L + 2y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_4.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        line_41 = MathTex("-x = nL - n_sL + y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_4, line_41))
+        scene.wait(2)
+
+        line_42 = MathTex("x = n_sL - nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_4, line_42))
+        scene.wait(2)
+
+        line_421 = MathTex("x = n_sL - nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_421.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        line_422 = MathTex("x = nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_421, line_422))
+        scene.wait(2)
+
+        line_5 = MathTex("x = nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_5.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        line_51 = MathTex("x = (n-1)L + L - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_5, line_51))
+        scene.wait(2)
+
+        line_6 = MathTex("x = (n-1)L + L - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_6.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        line_61 = MathTex("x = (n-1)L + y+z - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_6, line_61))
+        scene.wait(2)
+
+        line_7 = MathTex("x = (n-1)L + y+z - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_7.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        line_71 = MathTex("x = (n-1)L + z", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_7, line_71))
+        scene.wait(2)
+
+        line_8 = MathTex("x = (n-1)L + z", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(line_8.animate.shift(DOWN*down_shift))
+        num_shifts += 1
+
+        line_81 = MathTex("x = cL + z", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_8, line_81))
+        scene.wait(2)
 
 
 
@@ -553,7 +751,7 @@ while (ptr != nullptr) {
         language="C++",
         font_size=16,
         background="window",
-    ).shift(UP*2 + LEFT*2)
+    ).shift(UP*2 + LEFT*3.5)
     
     # Add the code to the scene
     self.add(code)
@@ -563,78 +761,104 @@ while (ptr != nullptr) {
 
 class LLNoCycle(Scene):
     def construct(self):
+        Text.set_default(font="Consolas")
+
         LL = LinkedList(False)
         LL.set_nodes(6)
 
         LL.draw_linked_list(self, 1)
+        self.wait(5)
 
         code = get_code_animation(self)
         self.play(Write(code), run_time=2)
 
-        LL.traversal_animation(self)
+        LL.traversal_animation(self, run_time_mult=0.5)
+        self.wait(3)
 
 
 
 class LLCycle(Scene):   
     def construct(self):
-        code = get_code_animation(self)
+        Text.set_default(font="Consolas")
 
         LL = LinkedList(True)
         LL.set_nodes(9)
 
         LL.draw_linked_list(self, 0.2)
+        self.wait(3)
 
-        LL.traversal_animation(self)
+        code = get_code_animation(self)
+        self.play(Write(code), run_time=2)
+
+        LL.traversal_animation(self, run_time_mult=0.3)
+        self.wait(3)
 
 
 
 class LLCycleSet(Scene):
     def construct(self):
+        Text.set_default(font="Consolas")
+
         LL = LinkedList(True)
         LL.set_nodes(9)
         LL.add_linked_list(self)
         LL.traversal_animation_set(self)
+        self.wait(3)
 
 
 
 class SetComplexity(Scene):
     def construct(self):
+        Text.set_default(font="Consolas")
+
         time_complexity = Text("Time complexity: O(n)", font_size=24).shift(UP*0.5)       
         self.play(Write(time_complexity), run_time=2)
         self.play(time_complexity[15:].animate.set_color(GREEN))
 
-        self.wait(2)
+        self.wait(4)
 
         space_complexity = Text("Space complexity: O(n)", font_size=24)
-        self.play(Write(space_complexity), run_time=2)
+        self.play(Write(space_complexity), run_time=2)       
         self.play(space_complexity[16:].animate.set_color(RED))
+
+        self.wait(4)
 
         LL = LinkedList(False)
         LL.set_nodes(20)
 
         LL.draw_with_set(self)
+        self.wait(3)
 
 
 
 class FloydNoCycle(Scene):
     def construct(self):
-        pointer = Dot(color=PURPLE).shift(UP*2 + LEFT*3)
-        slow_text = Text("slow pointer (tortoise)", font_size=24).shift(UP*2)
+        Text.set_default(font="Consolas")
+
+        pointer = Dot(color=P1_COL, radius=P_RAD).shift(UP*2 + LEFT*3.5)
+        slow_text = Text("Slow pointer (tortoise) \n - Moves one node at a time", font_size=24).shift(UP*2)
         self.play(FadeIn(pointer), Write(slow_text))
 
-        pointer2 = Dot(color=GREEN).shift(UP*1 + LEFT*3)
-        fast_text = Text("fast pointer (hare)", font_size=24).shift(UP*1)
+        self.wait(3)
+
+        pointer2 = Dot(color=P2_COL, radius=P_RAD).shift(UP*1 + LEFT*3.5)
+        fast_text = Text("Fast pointer (hare) \n - Moves two nodes at a time", font_size=24).shift(UP*1)
         self.play(FadeIn(pointer2), Write(fast_text))
+
+        self.wait(3)
 
         LL = LinkedList(False)
         LL.set_nodes(7)
         LL.draw_linked_list(self, 0.05)
-        LL.floyd_animation(self)
+        LL.floyd_animation(self, show_step=False)
+        self.wait(3)
 
 
 
 class FloydCycle(Scene):  
     def construct(self):
+        Text.set_default(font="Consolas")
+
         LL = LinkedList(True)
         LL.set_nodes(9)
         LL.add_linked_list(self)
@@ -642,22 +866,28 @@ class FloydCycle(Scene):
 
         start_cycle = Text("Start of the cycle: 4", font_size=24).shift(UP*2)
         self.play(Write(start_cycle))
-        self.wait(4)
+        self.wait(3)
 
 
 
 class CycleChase(Scene):
     def construct(self):
+        Text.set_default(font="Consolas")
+
         LL = LinkedList(True)
         LL.create_big_loop(self)
         LL.add_linked_list(self)
-        LL.floyd_animation(self, show_step=False)
-
+        LL.floyd_animation(self, show_step=False, run_time_mult=0.5)
+        self.wait(3)
 
 
 class FloydCycleProof(Scene):  
     def construct(self):
+        Text.set_default(font="Consolas")
+
         LL = LinkedList(True)
         LL.create_large_list()
-        LL.draw_linked_list(self, 0.05)
-        LL.proof_animation(self)
+        LL.draw_linked_list(self, run_time=0.2)
+        LL.proof_animation(self, run_time_mult=0.4)
+        LL.proof_algebra(self)
+        self.wait(3)

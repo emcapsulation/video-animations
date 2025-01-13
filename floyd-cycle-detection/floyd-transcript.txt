@@ -11,7 +11,7 @@ Scene 4
 This approach's time complexity is O(n) because for each node we are only performing a constant time lookup in the set. Where we can do better is the space complexity, which is also O(n). See, the size of the set grows linearly with the size of the linked list. Is there a way to do this with constant space?
 
 Scene 5
-Floyd's Cycle Finding algorithm uses only two pointers: A slow pointer (tortoise) and a fast pointer (hare). The tortoise traverses the linked list one node at a time. The hare moves two nodes in the same time the tortoise moves one node, so it is moving twice as fast. If there is no cycle, the hare will simply reach the tail of the linked list. 
+Floyd's Cycle Finding algorithm uses only two pointers: A slow pointer (tortoise), which traverses the linked list one node at a time. And a fast pointer (hare), which moves two nodes at a time, so it is moving twice as fast as the tortoise. If there is no cycle, the hare will simply reach the tail of the linked list. So in that case you can stop and return that there is no cycle.
 
 Scene 6
 But if there is a cycle, the hare will race away from the tortoise, then catch up to it around the cycle part of the linked list. If the hare catches up to the tortoise, you can say there is a cycle in the linked list. 
@@ -24,4 +24,4 @@ I think it is quite intuitive as to why the hare, moving two nodes at a time, wi
 Scene 8
 But what is less intuitive is why taking one of the pointers back to the start, and stepping them through one node at a time, has them meet at the entry point of the cycle. Let's look at why now.
 
-Scene 9
+We want to show that when we take one pointer back to the start and step it through one at a time, that the distance to the start of the cycle (x), is equal to the distance covered by the other pointer, which is some number of loops of the cycle (nL) plus that little piece from the meeting point to the start of the cycle (z).
