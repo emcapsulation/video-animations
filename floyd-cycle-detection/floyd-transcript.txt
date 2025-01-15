@@ -5,23 +5,40 @@ Scene 2
 But a problem is encountered when your linked list has a cycle. There is no clear stopping point, because the next node is never null. Using the same code as for the previous case, your pointer will keep moving around and around the cycle in an infinite loop. So it can be beneficial to be able to detect a cycle first.
 
 Scene 3
-The standard way is to keep track of all visited nodes in a set. Each time you visit a node, you first check if it is in the set. If not, add it and move to the next node. If the next node is null then there is no cycle and we can exit. If we reach a node that is in the set, then we can also exit but we know there must be a cycle, so we can return that node as the start of the cycle.
+The standard way is to keep track of all visited nodes in a set. Each time you visit a node, you first check if it is in the set. If not, add it and move to the next node. If the next node is null then there is no cycle and we can exit. If we reach a node that is in the set, then we can also exit but we know there must be a cycle, so we can say that that node is the start of the cycle.
 
 Scene 4
 This approach's time complexity is O(n) because for each node we are only performing a constant time lookup in the set. Where we can do better is the space complexity, which is also O(n). See, the size of the set grows linearly with the size of the linked list. Is there a way to do this with constant space?
 
 Scene 5
-Floyd's Cycle Finding algorithm uses only two pointers: A slow pointer (tortoise), which traverses the linked list one node at a time. And a fast pointer (hare), which moves two nodes at a time, so it is moving twice as fast as the tortoise. If there is no cycle, the hare will simply reach the tail of the linked list. So in that case you can stop and return that there is no cycle.
+Floyd's Cycle Finding algorithm can detect a cycle in a linked list, and return the starting point of the cycle, in just constant space. It uses only two pointers: A slow pointer (tortoise), which traverses the linked list one node at a time. And a fast pointer (hare), which moves two nodes at a time, so it is traversing twice as fast as the tortoise. Let's look at what the algorithm does now. 
+
+Firstly, in the case that the linked list has no cycle, the hare will simply reach the tail of the linked list. So in that case you can stop and return that there is no cycle.
 
 Scene 6
-But if there is a cycle, the hare will race away from the tortoise, then catch up to it around the cycle part of the linked list. If the hare catches up to the tortoise, you can say there is a cycle in the linked list. 
+But in the case that there is a cycle, the hare will race away from the tortoise, then catch up to it around the cycle part of the linked list. If the hare catches up to the tortoise, i.e. the two pointers point to the same node, you can say there is a cycle in the linked list. 
 
-But this algorithm has one more trick: It can find where the cycle begins. Once the two pointers meet, bring the tortoise back to the head of the linked list. Then step both pointers through one at a time - They will meet at the start of the cycle!
+But how does the algorithm find where the cycle begins? Once the two pointers meet, bring the one of them back to the head of the linked list. Then step both pointers through one at a time - Amazingly, they will meet at the start of the cycle!
 
 Scene 7
-I think it is quite intuitive as to why the hare, moving two nodes at a time, will meet up with the tortoise which is moving only one node at a time, around a cycle. 
+Let's look at a larger example. We start both pointers at the head of the linked list. The green pointer (hare) moves two nodes for every one node that the tortoise moves. As they enter the cycle, the hare "catches up" to the tortoise and they meet at a shared node. We then bring one node back to the head of the linked list, then step both pointers one at a time until they meet again. Where they meet is the entry point of the cycle.
 
 Scene 8
-But what is less intuitive is why taking one of the pointers back to the start, and stepping them through one node at a time, has them meet at the entry point of the cycle. Let's look at why now.
+I think the first part of the algorithm, detecting a cycle, is quite intuitive because the hare is moving two nodes at a time. So it will meet up with the tortoise, which is moving only one node at a time, around a cycle. 
 
-We want to show that when we take one pointer back to the start and step it through one at a time, that the distance to the start of the cycle (x), is equal to the distance covered by the other pointer, which is some number of loops of the cycle (nL) plus that little piece from the meeting point to the start of the cycle (z).
+Scene 9
+But what is less intuitive is the second part of the algorithm: Why taking one of the pointers back to the start, and stepping them through one node at a time, has the two pointers meet at the entry point of the cycle. Let's look at why now.
+
+Let's label portions of this linked list. The meeting point where the two pointers meet after the first part of the algorithm, is 15. The distance from the head to the start of the cycle is x. The distance from the start of the cycle to the meeting point is y. And the distance from the meeting point back to the start of the cycle is z.
+
+We want to show that the distances travelled by the two pointers in the second part of the algorithm, when they meet at the start of the cycle, are equal.
+
+What are these distances? The first pointer moves from the head of the linked list to the start of the cycle, a distance of x. The second pointer moves some number of loops starting from the meeting point (c times L), plus the extra bit from the meeting point to the entry point of the cycle (z). 
+
+To go about proving this, let's start with what we know. In the first part of the algorithm, the distance travelled by the fast pointer (df) from the head to the meeting point, is equal to 2 times the distance travelled by the slow pointer (ds) to reach that same meeting point.
+
+We'll fill in these distances from the first part of the algorithm. The fast pointer will move from the head of the linked list to the entry point of the cycle (x), plus some number of loops around the cycle, plus the extra part from the start of the cycle to the meeting point (y).
+
+The slow pointer will also move in the same fashion to reach the meeting point, but it will complete a different number of loops around the cycle.
+
+Explain algebra.

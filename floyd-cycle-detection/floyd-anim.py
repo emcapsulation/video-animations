@@ -225,12 +225,12 @@ class LinkedList:
         '''
         Cycle only
         '''
-        self.num_nodes = 6
+        self.num_nodes = 8
         left_shift = 6
         down_shift = 1
 
         self.straight_size = 0
-        self.cycle_size = 5
+        self.cycle_size = 7
 
         cur_left_shift = 0
 
@@ -245,7 +245,7 @@ class LinkedList:
         direction = 0
         for i in range(0, self.cycle_size):
             # Put the cycle in a circle
-            if cur_left_shift <= -1*left_shift:
+            if cur_left_shift <= -7:
                 direction = 1
 
             if direction == 1:
@@ -264,16 +264,15 @@ class LinkedList:
             next_node.set_label(Text(str(i+self.straight_size+1), font_size=24).next_to(next_node.get_dot(), DOWN))
 
             # Set arrows
-            # Super ugly but I just need to make a hexagon
             if i == 0:
                 cur_node.set_arrow(Arrow(cur_node.get_top_right(), next_node.get_bottom_left()))
-            elif i == 1:
+            elif i == 1 or i == 2:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_right(), next_node.get_dot().get_left()))
-            elif i == 2:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
             elif i == 3:
-                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_right(), next_node.get_top_left()))
             elif i == 4:
+                cur_node.set_arrow(Arrow(cur_node.get_bottom_left(), next_node.get_top_right()))
+            elif i == 5 or i == 6:
                 cur_node.set_arrow(Arrow(cur_node.get_dot().get_left(), next_node.get_dot().get_right()))
             else:
                 cur_node.set_arrow(Arrow(cur_node.get_top_left(), next_node.get_bottom_right()))
@@ -491,10 +490,15 @@ class LinkedList:
 
 
     # Stepping to the meeting point
-    def step_backwards(self, scene, hare, tortoise, run_time_mult=1):
+    def step_backwards(self, scene, hare, tortoise, run_time_mult=1, show_pointer_only=0):
         # Create a pointer (represented by a larger dot)
         pointer = Dot(color=P1_COL, radius=P_RAD).move_to(tortoise.get_dot().get_center())
         pointer2 = Dot(color=P2_COL, radius=P_RAD).move_to(hare.get_dot().get_center())
+
+        if show_pointer_only == 2:
+            pointer.set_opacity(0)
+        elif show_pointer_only == 1:
+            pointer2.set_opacity(0)
 
         scene.add(pointer, pointer2)
 
@@ -517,8 +521,11 @@ class LinkedList:
             pointer2.animate.set_color(RED)
         )
 
-        scene.wait(1)
-        scene.remove(pointer, pointer2)
+        scene.wait(2)
+
+        scene.play(
+            FadeOut(pointer), FadeOut(pointer2)
+        )
 
         self.entry_point = tortoise
 
@@ -568,6 +575,7 @@ class LinkedList:
                     )
 
                 hare = hare.get_next()
+
             else:
                 break
 
@@ -580,14 +588,13 @@ class LinkedList:
             )
             scene.wait(6)
             scene.remove(pointer, pointer2)
-            scene.wait(1)
-            self.step_backwards(scene, hare, tortoise, run_time_mult)
+            self.step_backwards(scene, hare, tortoise, run_time_mult, show_pointer_only)
 
         else:
-            # Animate the dot changing color from yellow to red
-            scene.play(
-                FadeOut(pointer2), 
+            # Animate the dot changing color to red
+            scene.play( 
                 pointer.animate.set_color(RED), 
+                pointer2.animate.set_color(RED), 
                 run_time=2)
 
 
@@ -605,137 +612,160 @@ class LinkedList:
 
 
     def colour_xyz(self, scene):
+        # Pointer 1 distance
         cur_node = self.head
 
         count = 0
         while count < self.straight_size-1:
-            scene.play(cur_node.get_dot().animate.set_color(PURPLE_B), run_time=0.3)
+            scene.play(cur_node.get_dot().animate.set_color(PURPLE), run_time=0.3)
 
             count += 1
             cur_node = cur_node.get_next()
 
-        x_label = Text("x").set_color(PURPLE_B)
+        x_label = Text("x").set_color(PURPLE)
         x_label.next_to(self.head.get_dot(), UP)
-        scene.play(Write(x_label))
+        x_text = Text("x = Distance from head to start of cycle", font_size=18).shift(UP*3)
+        x_text[0:1].set_color(PURPLE)
+        scene.play(Write(x_label), Write(x_text))
 
+
+        # Pointer 2 distance
         while cur_node != self.meeting_point:
-            scene.play(cur_node.get_dot().animate.set_color(YELLOW_B), run_time=0.3)
+            scene.play(cur_node.get_dot().animate.set_color(YELLOW), run_time=0.3)
             cur_node = cur_node.get_next()
 
-        y_label = Text("y").set_color(YELLOW_B)
+        y_label = Text("y").set_color(YELLOW)
         y_label.next_to(self.meeting_point.get_dot(), RIGHT*8 + UP*1)
-        scene.play(Write(y_label))
+        y_text = Text("y = Distance from start of cycle to meeting point", font_size=18).shift(UP*2.5)
+        y_text[0:1].set_color(YELLOW)
+        scene.play(Write(y_label), Write(y_text))
 
         while cur_node != self.entry_point:
-            scene.play(cur_node.get_dot().animate.set_color(RED_B), run_time=0.3)
+            scene.play(cur_node.get_dot().animate.set_color(RED), run_time=0.3)
             cur_node = cur_node.get_next()
 
-        z_label = Text("z").set_color(RED_B)
+        z_label = Text("z").set_color(RED)
         z_label.next_to(self.meeting_point.get_dot(), DOWN*3 + LEFT*4)
-        scene.play(Write(z_label))
+        z_text = Text("z = Distance from meeting point to start of cycle", font_size=18).shift(UP*2)
+        z_text[0:1].set_color(RED)
+        scene.play(Write(z_label), Write(z_text))        
 
+        return x_text, y_text, z_text
 
 
     # The proof
     def proof_animation(self, scene, run_time_mult=1):
         self.get_meeting_point()
-        self.step_backwards(scene, self.meeting_point, self.meeting_point, run_time_mult)
-        self.colour_xyz(scene)        
+        self.step_backwards(scene, self.meeting_point, self.meeting_point, run_time_mult)  
+        
+        scene.wait(2)        
+        meet_pt_text = Text("Meeting point: 15", font_size=24).shift(UP*3.5)
+
+        scene.play(Write(meet_pt_text), self.meeting_point.get_dot().animate.set_color(RED))
+
+        x_text, y_text, z_text = self.colour_xyz(scene) 
+
+        text = Text("We want to show: ", font_size=24).shift(UP*1)
+        scene.play(Write(text))
+        show_text = Tex("$x = cL + z$").shift(UP*0.5)
+        scene.play(Write(show_text))        
+
+        self.step_backwards(scene, self.meeting_point, self.meeting_point, run_time_mult=0.3, show_pointer_only=1)
+        self.step_backwards(scene, self.meeting_point, self.meeting_point, run_time_mult=0.5, show_pointer_only=2)
+
+        scene.wait(3)
+        scene.remove(meet_pt_text, x_text, y_text, z_text, text, show_text)
 
 
     def proof_algebra(self, scene):
-        text = Text("We want to show: ", font_size=24).shift(UP*3)
-        scene.play(Write(text))
-        x_text = Tex("$x = cL + z$").shift(UP*2)
-        scene.play(Write(x_text))
-
-        scene.wait(3)
-        scene.remove(x_text, text)
-
-        down_shift = 0.3
+        down_shift = 0.5
         num_shifts = 0
 
-        line_1 = MathTex("d_s = 2 \\cdot d_f", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_1 = MathTex("d_f = 2 \\cdot d_s", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Write(line_1))
         scene.wait(2)
 
-        line_2 = MathTex("d_s = 2 \\cdot d_f", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_2 = MathTex("d_f = 2 \\cdot d_s", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_2.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        self.floyd_animation(scene, show_step=False, run_time_mult=0.3, show_pointer_only=1)
+        self.floyd_animation(scene, show_step=False, run_time_mult=0.5, show_pointer_only=2)
 
-        line_21 = MathTex("x + n_s L + y = 2 \\cdot d_f", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_21 = MathTex("x + n_f L + y = 2 \\cdot d_s", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_2, line_21))
         scene.wait(2)
 
-        self.floyd_animation(scene, show_step=False, run_time_mult=0.3, show_pointer_only=2)
+        self.floyd_animation(scene, show_step=False, run_time_mult=0.3, show_pointer_only=1)
 
-        line_22 = MathTex("x + n_s L + y = 2 \\cdot (x + n_f L + y)", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_22 = MathTex("x + n_f L + y = 2 \\cdot (x + n_s L + y)", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_2, line_22))
         scene.wait(2)
 
-        line_3 = MathTex("x + n_s L + y = 2(x + n_f L + y)", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_3 = MathTex("x + n_f L + y = 2 \\cdot (x + n_s L + y)", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_3.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        line_31 = MathTex("x + n_s L + y = 2x + 2 n_f L + 2y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_31 = MathTex("x + n_f L + y = 2x + 2 n_s L + 2y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_3, line_31))
         scene.wait(2)
 
-        line_32 = MathTex("x + n_s L + y = 2x + n L + 2y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_32 = MathTex("x + n_f L + y = 2x + n L + 2y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_3, line_32))
         scene.wait(2)
 
-        line_4 = MathTex("x + n_s L + y = 2x + n L + 2y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_4 = MathTex("x + n_f L + y = 2x + n L + 2y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_4.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        line_41 = MathTex("-x = nL - n_sL + y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_41 = MathTex("-x = nL - n_fL + y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_4, line_41))
         scene.wait(2)
 
-        line_42 = MathTex("x = n_sL - nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_42 = MathTex("x = n_fL - nL - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_4, line_42))
         scene.wait(2)
 
-        line_421 = MathTex("x = n_sL - nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_421 = MathTex("x = n_fL - nL - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_421.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        line_422 = MathTex("x = nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_4211 = MathTex("x = (n_f-n)L - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
+        scene.play(Transform(line_421, line_4211))
+        scene.wait(2)
+
+        line_422 = MathTex("x = mL - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_421, line_422))
         scene.wait(2)
 
-        line_5 = MathTex("x = nL - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_5 = MathTex("x = mL - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_5.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        line_51 = MathTex("x = (n-1)L + L - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_51 = MathTex("x = (m-1)L + L - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_5, line_51))
         scene.wait(2)
 
-        line_6 = MathTex("x = (n-1)L + L - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_6 = MathTex("x = (m-1)L + L - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_6.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        line_61 = MathTex("x = (n-1)L + y+z - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_61 = MathTex("x = (m-1)L + y+z - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_6, line_61))
         scene.wait(2)
 
-        line_7 = MathTex("x = (n-1)L + y+z - y", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_7 = MathTex("x = (m-1)L + y+z - y", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_7.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        line_71 = MathTex("x = (n-1)L + z", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_71 = MathTex("x = (m-1)L + z", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_7, line_71))
         scene.wait(2)
 
-        line_8 = MathTex("x = (n-1)L + z", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_8 = MathTex("x = (m-1)L + z", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(line_8.animate.shift(DOWN*down_shift))
         num_shifts += 1
 
-        line_81 = MathTex("x = cL + z", font_size=24).shift(UP*(3-down_shift*num_shifts))
+        line_81 = MathTex("x = cL + z", font_size=28).shift(UP*(3-down_shift*num_shifts))
         scene.play(Transform(line_8, line_81))
         scene.wait(2)
 
@@ -803,7 +833,10 @@ class LLCycleSet(Scene):
         LL.set_nodes(9)
         LL.add_linked_list(self)
         LL.traversal_animation_set(self)
-        self.wait(3)
+        self.wait(2)
+
+        self.play(Write(Text("Start of cycle: 4", font_size=24).shift(UP*3)))
+        self.wait(2)
 
 
 
@@ -835,17 +868,29 @@ class FloydNoCycle(Scene):
     def construct(self):
         Text.set_default(font="Consolas")
 
-        pointer = Dot(color=P1_COL, radius=P_RAD).shift(UP*2 + LEFT*3.5)
-        slow_text = Text("Slow pointer (tortoise) \n - Moves one node at a time", font_size=24).shift(UP*2)
+        title_text = Text("Floyd's Cycle Finding Algorithm").shift(UP*3)
+        self.play(Write(title_text))
+
+        time_complexity = Text("Time complexity: O(n), Space complexity: O(1)", font_size=24).shift(UP*2)       
+        self.play(Write(time_complexity), run_time=2)
+        self.play(time_complexity[15:19].animate.set_color(GREEN),
+            time_complexity[36:40].animate.set_color(GREEN))
+
+        pointer = Dot(color=P1_COL, radius=P_RAD).shift(UP*1 + LEFT*3.5)
+        slow_text = Text("Slow pointer (tortoise) \n - Moves one node at a time", font_size=24).shift(UP*1)
         self.play(FadeIn(pointer), Write(slow_text))
 
         self.wait(3)
 
-        pointer2 = Dot(color=P2_COL, radius=P_RAD).shift(UP*1 + LEFT*3.5)
-        fast_text = Text("Fast pointer (hare) \n - Moves two nodes at a time", font_size=24).shift(UP*1)
+        pointer2 = Dot(color=P2_COL, radius=P_RAD).shift(LEFT*3.5)
+        fast_text = Text("Fast pointer (hare) \n - Moves two nodes at a time", font_size=24)
         self.play(FadeIn(pointer2), Write(fast_text))
 
         self.wait(3)
+
+        p_group = VGroup(pointer, slow_text, pointer2, fast_text)
+        self.play(FadeOut(title_text, time_complexity),
+            p_group.animate.shift(UP*1))
 
         LL = LinkedList(False)
         LL.set_nodes(7)
@@ -861,13 +906,27 @@ class FloydCycle(Scene):
 
         LL = LinkedList(True)
         LL.set_nodes(9)
-        LL.add_linked_list(self)
+        LL.draw_linked_list(self, run_time=0.1)
         LL.floyd_animation(self)
 
         start_cycle = Text("Start of the cycle: 4", font_size=24).shift(UP*2)
         self.play(Write(start_cycle))
         self.wait(3)
 
+
+class LargerExample(Scene):  
+    def construct(self):
+        Text.set_default(font="Consolas")
+
+        LL = LinkedList(True)
+        LL.create_large_list()
+        LL.ll_group.move_to(ORIGIN)
+        LL.draw_linked_list(self, run_time=0.05)
+        LL.floyd_animation(self, run_time_mult=0.4)
+        
+        start_cycle = Text("Start of the cycle: 10", font_size=24).shift(UP*2)
+        self.play(Write(start_cycle))
+        self.wait(3)
 
 
 class CycleChase(Scene):
@@ -887,7 +946,7 @@ class FloydCycleProof(Scene):
 
         LL = LinkedList(True)
         LL.create_large_list()
-        LL.draw_linked_list(self, run_time=0.2)
+        LL.draw_linked_list(self, run_time=0.05)
         LL.proof_animation(self, run_time_mult=0.4)
         LL.proof_algebra(self)
         self.wait(3)
