@@ -2,16 +2,16 @@ Scene 1
 This is a linked list. The data is stored in nodes, and each node also contains a pointer to the next node. Unlike an array, the data is not stored in a contiguous memory block, so you cannot access say the nth node by its index. Instead, you have to traverse the linked list to search for the node you want, and stop traversing if the next node is null, indicating we've reached the tail.
 
 Scene 2
-But a problem is encountered when your linked list has a cycle. There is no clear stopping point, because the next node is never null. Using the same code as for the previous case, your pointer will keep moving around and around the cycle in an infinite loop. So it can be beneficial to be able to detect a cycle first.
+But a problem is encountered when your linked list has a cycle. There is no clear stopping point, because the next node is never null. If you were to use the same code as in the previous case, your pointer would keep moving around and around the cycle in an infinite loop. So it can be beneficial to be able to detect a cycle first.
 
 Scene 3
-The standard way is to keep track of all visited nodes in a set. Each time you visit a node, you first check if it is in the set. If not, add it and move to the next node. If the next node is null then there is no cycle and we can exit. If we reach a node that is in the set, then we can also exit but we know there must be a cycle, so we can say that that node is the start of the cycle.
+One standard way is to keep track of all visited nodes in a set. Each time you visit a node, you first check if it is in the set. If not, add it and move to the next node. If the next node is null then there is no cycle and we can exit. But, if we reach a node that is in the set already, then there must be a cycle because we have seen that node before. So we can return that that node is the start of the cycle.
 
 Scene 4
-This approach's time complexity is O(n) because for each node we are only performing a constant time lookup in the set. Where we can do better is the space complexity, which is also O(n). See, the size of the set grows linearly with the size of the linked list. Is there a way to do this with constant space?
+This approach's time complexity is O(n) because for each node we are only performing a constant time lookup in the set. Where we can do better is the space complexity, which is also O(n). See, the size of the set grows linearly with the size of the linked list. Is there a way to do this with only constant extra space?
 
 Scene 5
-Floyd's Cycle Finding algorithm can detect a cycle in a linked list, and return the starting point of the cycle, in just constant space. It uses only two pointers: A slow pointer (tortoise), which traverses the linked list one node at a time. And a fast pointer (hare), which moves two nodes at a time, so it is traversing twice as fast as the tortoise. Let's look at what the algorithm does now. 
+Floyd's Cycle Finding algorithm can detect a cycle in a linked list, and return the starting point of the cycle, in just O(1) space. It uses only two pointers: A slow pointer (tortoise), which traverses the linked list one node at a time. And a fast pointer (hare), which moves two nodes at a time, so it is traversing twice as fast as the tortoise. Let's look at what the algorithm does now. 
 
 Firstly, in the case that the linked list has no cycle, the hare will simply reach the tail of the linked list. So in that case you can stop and return that there is no cycle.
 
@@ -29,7 +29,7 @@ I think the first part of the algorithm, detecting a cycle, is quite intuitive b
 Scene 9
 But what is less intuitive is the second part of the algorithm: Why taking one of the pointers back to the start, and stepping them through one node at a time, has the two pointers meet at the entry point of the cycle. Let's look at why now.
 
-Let's label portions of this linked list. The meeting point where the two pointers meet after the first part of the algorithm, is 15. The distance from the head to the start of the cycle is x. The distance from the start of the cycle to the meeting point is y. And the distance from the meeting point back to the start of the cycle is z.
+Firstly, the meeting point where the two pointers meet after the first part of the algorithm, is 15. The distance from the head to the start of the cycle is x. The distance from the start of the cycle to the meeting point is y. And the distance from the meeting point back to the start of the cycle is z.
 
 We want to show that the distances travelled by the two pointers in the second part of the algorithm, when they meet at the start of the cycle, are equal.
 
@@ -41,4 +41,12 @@ We'll fill in these distances from the first part of the algorithm. The fast poi
 
 The slow pointer will also move in the same fashion to reach the meeting point, but it will complete a different number of loops around the cycle.
 
-Explain algebra.
+Next we can expand the brackets. And note 2ns is just another constant so we can call that n. 
+
+Then we can make x the subject. 
+
+Factor out the L. Again, nf-n is just another constant, so let's rename that m. 
+
+Let's take one L out of this mL group. Remember L is the length of the cycle, which is y+z. Those two y's cancel out.
+
+Finally, m-1 is just another constant again so we can rename it c. And that is what we set out to show, so we are done!
