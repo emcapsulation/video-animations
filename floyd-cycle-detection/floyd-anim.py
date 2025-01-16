@@ -261,7 +261,7 @@ class LinkedList:
                 down_shift = 3
 
             next_node = ListNode(Dot(color=NODE_COL).shift(LEFT*cur_left_shift + DOWN*down_shift))
-            next_node.set_label(Text(str(i+self.straight_size+1), font_size=24).next_to(next_node.get_dot(), DOWN))
+            next_node.set_label(Text(str(i+self.straight_size+2), font_size=24).next_to(next_node.get_dot(), DOWN))
 
             # Set arrows
             if i == 0:
@@ -949,4 +949,74 @@ class FloydCycleProof(Scene):
         LL.draw_linked_list(self, run_time=0.05)
         LL.proof_animation(self, run_time_mult=0.4)
         LL.proof_algebra(self)
+        self.wait(3)
+
+
+class SourceCode(Scene):  
+    def construct(self):
+        Text.set_default(font="Consolas")
+
+        code = Code(
+            code="""// Floyd's cycle finding algorithm written in C++
+// Returns NULL if there is no cycle, otherwise returns a pointer to the start of the cycle
+Node *floydCycleFinder(Node *head) {
+    // Check the head
+    if (head == NULL || head->next == NULL) {
+        return NULL;
+    }
+
+    Node *tortoise = head->next;
+    Node *hare = head->next->next;
+
+    // Part 1: Move the tortoise and hare until they meet again
+    while (tortoise != hare) {
+        // Hare has reached the end, indicating there is no cycle
+        if (hare == NULL || hare->next == NULL) {
+            return NULL;
+        }
+
+        // Move the tortoise one node
+        tortoise = tortoise->next;
+
+        // Move the hare two nodes
+        hare = hare->next->next;
+    }
+
+    // Part 2: Move the tortoise back to the head of the LL
+    tortoise = head;
+
+    while (tortoise != hare) {
+        // Step the tortoise and hare one node at a time until they meet at the entry point
+        tortoise = tortoise->next;
+        hare = hare->next;
+    }
+
+    // Return the entry point of the cycle
+    return tortoise;
+}""",
+            language="C++",
+            font_size=12,
+            background="window"
+        )
+        
+        # Add the code to the scene
+        self.play(Write(code), run_time=5)
+        self.wait(10)
+        self.play(FadeOut(code))
+
+
+class DrawAndGlowLetter(Scene):
+    def construct(self):
+        Text.set_default(font="Consolas")
+
+        self.play(Write(Text("Thank you for watching!").shift(UP*2)))
+
+        letter_e = Text("e", font_size=200, color=TEAL)
+        self.play(Write(letter_e))
+
+        letter_e_stroke = letter_e.copy().set_color(TEAL).set_opacity(1).set_stroke(width=3)        
+        glow_effect = letter_e_stroke.copy().set_stroke(width=3, color=WHITE).set_opacity(0.6)
+        self.play(FadeIn(letter_e_stroke), Transform(letter_e_stroke, glow_effect))
+        self.play(FadeOut(letter_e_stroke, glow_effect))
+
         self.wait(3)
