@@ -1,3 +1,5 @@
+YOUTUBE
+
 Scene 1
 This is a linked list. The data is stored in nodes, and each node also contains a pointer to the next node. Unlike an array, the data is not stored in a contiguous memory block, so you cannot access say the nth node by its index. Instead, you have to traverse the linked list to search for the node you want, and stop traversing if the next node is null, indicating we've reached the tail.
 
@@ -39,7 +41,7 @@ To go about proving this, let's start with what we know. In the first part of th
 
 We'll fill in these distances from the first part of the algorithm. The fast pointer will move from the head of the linked list to the entry point of the cycle (x), plus some number of loops around the cycle, plus the extra part from the start of the cycle to the meeting point (y).
 
-The slow pointer will also move in the same fashion to reach the meeting point, but it will complete a different number of loops around the cycle.
+The slow pointer will also move in the same fashion to reach the meeting point, but it will complete a different number of loops around the cycle. 
 
 Next we can expand the brackets. And note 2ns is just another constant so we can call that n. 
 
@@ -50,3 +52,14 @@ Factor out the L. Again, nf-n is just another constant, so let's rename that m.
 Let's take one L out of this mL group. Remember L is the length of the cycle, which is y+z. Those two y's cancel out.
 
 Finally, m-1 is just another constant again so we can rename it c. And that is what we set out to show, so we are done!
+
+
+SHORT
+
+Can you detect a cycle in a linked list in O(n) time and using only constant extra space? Floyd's cycle finding algorithm can do just that. Rather than wasting additional space on a set, it uses just two pointers: A slow pointer, the tortoise, which traverses one node at a time, and a fast pointer, the hare, which traverses two nodes at a time (so twice as fast as the tortoise).
+
+If the linked list has no cycle, the hare will simply reach the tail, so we can return that there is no cycle.
+
+But if the linked list has a cycle, the hare will race away from the tortoise, then catch up to it around the cycle part of the linked list. If the two pointers meet, there is a cycle in the linked list. 
+
+This algorithm can even find where the cycle begins. Once the two pointers meet, take one back to the head of the linked list. Then step both pointers one node at a time. Amazingly, they will meet at the start of the cycle.
