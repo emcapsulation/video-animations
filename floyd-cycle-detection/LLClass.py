@@ -592,8 +592,13 @@ class LinkedList:
         else:
             # Animate the dot changing color to red
             scene.play( 
-                pointer.animate.set_color(RED), 
+                # pointer.animate.set_color(RED), 
                 pointer2.animate.set_color(RED), 
+                run_time=2)
+
+            scene.play( 
+                FadeOut(pointer), 
+                FadeOut(pointer2), 
                 run_time=2)
 
 

@@ -1,0 +1,21 @@
+YOUTUBE
+
+Scene 1
+An election is coming up in your town of population 10, and there are three candidates. A candidate wins if they are able to obtain the majority of the votes. By majority, we mean more than half of the total number of votes. 
+
+Diligently, everyone turns up to the voting booths and puts forward their votes. Now it is time to count and find out the winner. In other words, we need to find the majority element of this array.
+
+Scene 2
+One way to do this is to store a hashmap which will map each candidate to the number of votes they've received. We then loop through this array. 
+
+If this candidate has not been seen before, add them to the hashmap with a vote of 1. If they have been seen before, increment the number of votes for this candidate by 1. Then check the number of votes, and if it is greater than half of the population, that candidate has reached the majority, so we can exit and return the winner. 
+
+If we reach the end of the array and no candidates have reached a majority, we can return there were no winners.
+
+Scene 3
+The time complexity of this approach is big O of n, because for each element in the votes array, we are only performing a constant time lookup and/or insertion into the hashmap.
+
+Where we can do better is the space complexity, which is also big O of n in the worst case. Let's say now, every person in your town has decided to run as a candidate. Suddenly, the size of the hashmap will grow linearly with the size of the town population!
+
+Scene 4
+The Boyer-Moore majority voting algorithm can find the majority element in this array with only constant O(1) extra space.
