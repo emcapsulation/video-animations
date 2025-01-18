@@ -39,9 +39,8 @@ class Votes:
 
 			cur_dot.move_to(self.votes[i].get_right() + RIGHT*cur_dot.get_width())	
 			self.votes[-1].shift(RIGHT*1.5*cur_dot.get_width())
-			self.votes.move_to(ORIGIN + DOWN*2)
-
-		scene.add(self.votes)
+			self.votes.move_to(ORIGIN + DOWN*2)	
+		scene.add(self.votes)	
 
 	# Order is the order of votes
 	def animate_votes(self, scene, order):
@@ -72,12 +71,15 @@ class Votes:
 		scene.wait(3)
 
 
-	def animate_map(self, scene, order):
+	def animate_map(self, scene, order, run_time):
 		self.show_votes(scene, order)
 		self.get_votes().scale(1.4).shift(UP)
 
 		hashmap = VGroup(Text("Candidates\n     Votes"))
 		hashmap.scale(0.7).shift(UP*2)
+
+		scene.play(FadeIn(self.get_votes()))
+		scene.wait(1)
 
 		scene.play(Create(hashmap))
 		scene.wait(1)
@@ -86,16 +88,24 @@ class Votes:
 		# Maps colour to position in VGroup and number of votes
 		vote_map = {}
 		arrow = Arrow(start=DOWN, end=ORIGIN, color=WHITE, stroke_width=8).next_to(self.get_votes()[1], DOWN, buff=0.2)
+		scene.add(arrow)
 
 		winner = None
 		seen = 1
 		for i in range(0, self.get_population()):
 			# Move the arrow along
-			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2))
 			cand_key = str(self.get_votes()[i+1].get_color())
 
 			this_dot = Dot(color=self.get_votes()[i+1].get_color(), radius=0.2).scale(1.4)
 			this_dot.move_to(self.get_votes()[i+1].get_center())
+
+			# Arrow animation
+			arrow_animate = None
+			if i < self.get_population()-1:
+				arrow_animate = arrow.animate.next_to(self.get_votes()[i+2], DOWN, buff=0.2)
+			else:
+				arrow_animate = arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2)
+
 
 			if cand_key not in vote_map:
 				vote_map[cand_key] = [seen, 1]
@@ -108,16 +118,19 @@ class Votes:
 				    candidate_dot,
 				    Text("1")
 				)
-				new_column.scale(0.7).arrange(DOWN).next_to(hashmap, RIGHT, buff=1)
+				new_column.scale(0.7).arrange(DOWN).next_to(hashmap, RIGHT, buff=0.7)
 				hashmap.add(new_column)
 
 				scene.play(
 					FadeIn(new_column), 
-					this_dot.animate.move_to(hashmap[-1][0].get_center()).scale(0.5)					
+					this_dot.animate.move_to(hashmap[-1][0].get_center()).scale(0.5),
+					run_time=run_time					
 				)
 				scene.remove(this_dot)
 				scene.play(
-					hashmap.animate.move_to(ORIGIN + UP*2)
+					hashmap.animate.move_to(ORIGIN + UP*2),
+					arrow_animate,
+					run_time=run_time
 				)
 
 			else:
@@ -127,9 +140,16 @@ class Votes:
 				scene.play(
 					this_dot.animate.scale(0.5).move_to(hashmap[index][0].get_center()),
 					Transform(hashmap[index][1], 
-					Text(str(vote_map[cand_key][1])).scale(0.7).move_to(hashmap[index][1]))
+					Text(str(vote_map[cand_key][1])).scale(0.7).move_to(hashmap[index][1])),
+					run_time=run_time
 				)
 				scene.remove(this_dot)
+
+				if vote_map[cand_key][1] <= self.get_population()/2:
+					scene.play(
+						arrow_animate,
+						run_time=run_time
+					)
 
 
 			if vote_map[cand_key][1] > self.get_population()/2:
@@ -285,7 +305,7 @@ class HashmapExample(Scene):
 
 		v = Votes(10)
 		order = [PINK, GREEN, PINK, PINK, PINK, BLUE, GREEN, PINK, PINK, BLUE]	
-		v.animate_map(self, order)
+		v.animate_map(self, order, 1)
 
 
 
@@ -295,4 +315,26 @@ class HashmapNoMaj(Scene):
 
 		v = Votes(10)
 		order = [BLUE, GREEN, PINK, PINK, BLUE, BLUE, GREEN, PINK, GREEN, BLUE]	
-		v.animate_map(self, order)
+		v.animate_map(self, order, 0.5)
+
+
+
+class TimeComplexity(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		time_complexity = Text("Time complexity: O(n)", font_size=24).shift(UP*0.5)       
+		self.play(Write(time_complexity), run_time=2)
+		self.play(time_complexity[15:].animate.set_color(GREEN))
+
+		self.wait(4)
+
+		space_complexity = Text("Space complexity: O(n)", font_size=24)
+		self.play(Write(space_complexity), run_time=2)       
+		self.play(space_complexity[16:].animate.set_color(RED))
+
+		self.wait(4)
+
+		v = Votes(10)
+		order = [BLUE, YELLOW, GREEN, PINK, RED, PURPLE, ORANGE, TEAL, GOLD, MAROON]	
+		v.animate_map(self, order, 0.5)
