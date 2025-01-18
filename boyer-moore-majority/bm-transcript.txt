@@ -3,6 +3,8 @@ YOUTUBE
 Scene 1
 An election is coming up in your town of population 10, and there are three candidates. A candidate wins if they are able to obtain the majority of the votes. By majority, we mean more than half of the total number of votes. 
 
+In this case, that is more than half of our population (10), so more than 5 votes.
+
 Diligently, everyone turns up to the voting booths and puts forward their votes. Now it is time to count and find out the winner. In other words, we need to find the majority element of this array.
 
 Scene 2
