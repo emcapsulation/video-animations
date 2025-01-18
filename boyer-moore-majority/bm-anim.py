@@ -154,7 +154,7 @@ class Votes:
 
 			if vote_map[cand_key][1] > self.get_population()/2:
 				scene.play(
-					hashmap[index][1].animate.set_color(RED)
+					hashmap[index][1].animate.set_color(GREEN)
 				)
 
 				winner = Dot(color=hashmap[index][0].get_color(), radius=0.2)
@@ -166,13 +166,140 @@ class Votes:
 			winner.next_to(win_text, RIGHT, buff=1)
 			outcome.add(win_text, winner)
 		else:
-			win_text = Text("No one received a majority", font_size=24)
+			win_text = Text("There is no majority element", font_size=24)
 			outcome.add(win_text)
 
 		outcome.move_to(ORIGIN).shift(DOWN*3)
 		scene.play(Write(outcome))
 		scene.wait(3)
 
+
+	def pass_through(self, scene, outcome):
+		winner = outcome[1]
+
+		count_text = Text("Count: ")
+		count_num = Text("0").next_to(count_text, RIGHT, buff=1)
+		top_text = VGroup(count_text, count_num)
+		top_text.move_to(ORIGIN + UP*2)
+
+		scene.play(FadeIn(top_text))
+
+		arrow = Arrow(start=DOWN, end=ORIGIN, color=WHITE, stroke_width=8).next_to(self.get_votes()[1], DOWN, buff=0.2)
+		scene.add(arrow)
+
+		cur_count = 0
+		for i in range(1, self.get_population()+1):
+			if winner.get_color() == self.get_votes()[i].get_color():
+				scene.play(
+					Transform(count_num, Text(str(cur_count+1)).next_to(count_text, RIGHT)),
+					run_time=0.3
+				)
+				cur_count += 1
+
+			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=0.3)
+
+		if cur_count > self.get_population()/2:
+			scene.play(
+				count_num.animate.set_color(GREEN)
+			)
+			scene.play(
+				Transform(outcome[0], Text("Actual winner: ", font_size=24).move_to(ORIGIN).shift(DOWN*3.5))
+			)
+			scene.play(
+				outcome.animate.move_to(ORIGIN)
+			)
+		else:
+			scene.play(
+				count_num.animate.set_color(RED)
+			)
+			scene.play(
+				FadeOut(winner),
+				Transform(outcome[0], Text("There is no majority element", font_size=24))
+			)
+		scene.wait(2)
+
+
+
+	def animate_bm(self, scene, order, run_time):
+		self.show_votes(scene, order)
+
+		if self.get_population() < 20:
+			self.get_votes().scale(1.4)
+
+		scene.play(Create(self.get_votes()))
+		scene.wait(1)
+
+		# Candidate and count rectangles
+		candidate_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+		count_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+
+		count_rect.next_to(candidate_rect, RIGHT, buff=2)
+
+		cand_text = Text("Candidate", font_size=24).move_to(candidate_rect.get_center()).shift(UP*0.25)
+		cand_dot = Dot(color=WHITE, radius=0.2).move_to(candidate_rect.get_center()).shift(DOWN*0.25).set_opacity(0)
+		count_text = Text("Count", font_size=24).move_to(count_rect.get_center()).shift(UP*0.25)
+		count_num = Text("0", font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)
+
+		rects = VGroup(candidate_rect, count_rect, cand_text, cand_dot, count_text, count_num).move_to(ORIGIN + UP)
+
+		scene.play(Create(candidate_rect), Create(count_rect), Write(cand_text), Write(count_text), Write(count_num))
+		scene.wait(1)
+
+
+		arrow = Arrow(start=DOWN, end=ORIGIN, color=WHITE, stroke_width=8).next_to(self.get_votes()[1], DOWN, buff=0.2)
+		scene.add(arrow)
+
+		cur_count = 0
+		for i in range(1, self.get_population()+1):
+			
+			if i > 1:
+				if cand_dot.get_color() != self.get_votes()[i].get_color():
+					scene.play(
+						Transform(count_num, Text(str(cur_count-1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)),
+						run_time=run_time
+					)
+					cur_count -= 1
+				else:
+					scene.play(
+						Transform(count_num, Text(str(cur_count+1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)),
+						run_time=run_time
+					)
+					cur_count += 1
+
+			if cur_count == 0:
+				scene.play(
+					cand_dot.animate.set_color(self.get_votes()[i].get_color()).set_opacity(1),
+					Transform(count_num, Text("1", font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)),
+					run_time=run_time
+				)
+				cur_count = 1
+
+			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
+
+
+		outcome = VGroup()
+		winner = Dot(color=cand_dot.get_color(), radius=0.2)		
+		win_text = Text("Potential winner: ", font_size=24)
+		winner.next_to(win_text, RIGHT, buff=1)
+		outcome.add(win_text, winner)
+	
+		outcome.move_to(ORIGIN).shift(DOWN*3.5)
+		scene.play(Write(outcome))
+		scene.wait(3)
+
+
+		scene.play(FadeOut(rects), FadeOut(arrow))
+		self.pass_through(scene, outcome)
 
 
 
@@ -217,6 +344,7 @@ class VotingScenario(Scene):
 		population_sign = VGroup(vertical_rect, rounded_rect, pop_text, pop_text2)
 
 		self.play(Create(rounded_rect), Create(vertical_rect), Write(pop_text), Write(pop_text2))
+		self.wait(1)
 		self.play(population_sign.animate.scale(0.7).shift(UP*3 + RIGHT*5))
 		self.wait(1)
 
@@ -338,3 +466,147 @@ class TimeComplexity(Scene):
 		v = Votes(10)
 		order = [BLUE, YELLOW, GREEN, PINK, RED, PURPLE, ORANGE, TEAL, GOLD, MAROON]	
 		v.animate_map(self, order, 0.5)
+
+
+
+class BoyerMoore(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		title_text = Text("Boyer Moore Majority Vote Algorithm").shift(UP*3)
+		self.play(Write(title_text))
+
+		time_complexity = Text("Time complexity: O(n), Space complexity: O(1)", font_size=24).shift(UP*2)       
+		self.play(Write(time_complexity), run_time=2)
+		self.play(time_complexity[15:19].animate.set_color(GREEN),
+		    time_complexity[36:40].animate.set_color(GREEN))
+
+		# Candidate and count rectangles
+		candidate_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+		count_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+
+		count_rect.next_to(candidate_rect, RIGHT, buff=2)
+
+		cand_text = Text("Candidate", font_size=24).move_to(candidate_rect.get_center()).shift(UP*0.25)
+		count_text = Text("Count", font_size=24).move_to(count_rect.get_center()).shift(UP*0.25)
+
+		rects = VGroup(candidate_rect, count_rect, cand_text, count_text).move_to(ORIGIN)
+
+
+		# Candidate
+		self.play(Create(candidate_rect), Write(cand_text))
+
+		cand_dot = Dot(color=PINK, radius=0.2).move_to(candidate_rect.get_center()).shift(DOWN*0.25)
+		self.play(FadeIn(cand_dot))
+		self.play(cand_dot.animate.set_color(GREEN))
+		self.play(cand_dot.animate.set_color(BLUE))
+		rects.add(cand_dot)
+
+
+		# Count
+		self.play(Create(count_rect), Write(count_text))
+		count_num = Text("1", font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)
+		self.play(FadeIn(count_num))
+
+		for i in range(0, 10):
+			self.play(Transform(count_num, Text(str(i), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)), run_time=0.2)
+		rects.add(count_num)
+
+		self.wait(1)
+
+
+		self.play(
+			FadeOut(title_text), 
+			FadeOut(time_complexity),
+			rects.animate.shift(UP*2)
+		)
+
+
+		# Algorithm
+		step_1 = Text("\n1. Start the count at 0.", font_size=20)     
+		self.play(Write(step_1), run_time=2)
+		self.play(Transform(count_num, Text(str(0), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)))
+
+		step_2 = Text("\n2. For each element:", font_size=20).next_to(step_1, DOWN)       
+		self.play(Write(step_2), run_time=2)		
+
+		step_2a = Text("\na. If the current element is equal to the candidate,\nincrement the count.", font_size=20).shift(UP*2).next_to(step_2, DOWN)             
+		self.play(Write(step_2a), run_time=2)
+		self.play(
+			Transform(count_num, Text(str(2), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25))
+		)
+
+		step_2b = Text("\nb. If the current element is not equal to the candidate,\ndecrement the count.", font_size=20).shift(UP*2).next_to(step_2a, DOWN)         
+		self.play(Write(step_2b), run_time=2)
+		self.play(
+			Transform(count_num, Text(str(1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25))
+		)
+
+		step_2c = Text("\nc. If the count is 0, assign the candidate to be the\ncurrent element and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
+		self.play(Write(step_2c), run_time=2)
+		self.play(
+			cand_dot.animate.set_color(GREEN),
+			Transform(count_num, Text(str(1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25))
+		)
+
+		step_3 = Text("\n3. Check the number of votes of the reported candidate is\na majority. If so, return that candidate.", font_size=20).next_to(step_2c, DOWN)            
+		self.play(Write(step_3), run_time=2)
+		self.wait(3)
+
+
+
+class BMAnim(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		v = Votes(10)
+		order = [PINK, GREEN, PINK, PINK, PINK, BLUE, GREEN, PINK, PINK, BLUE]	
+		v.animate_bm(self, order, 1)
+
+
+
+class BMNoMaj(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		# Algorithm
+		step_1 = Text("\n1. Start the count at 0.", font_size=20)     	
+		step_2 = Text("\n2. For each element:", font_size=20).next_to(step_1, DOWN)       
+		step_2a = Text("\na. If the current element is equal to the candidate,\nincrement the count.", font_size=20).shift(UP*2).next_to(step_2, DOWN)             
+		step_2b = Text("\nb. If the current element is not equal to the candidate,\ndecrement the count.", font_size=20).shift(UP*2).next_to(step_2a, DOWN)         
+		step_2c = Text("\nc. If the count is 0, assign the candidate to be the\ncurrent element and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
+		step_3 = Text("\n3. Check the number of votes of the reported candidate is\na majority. If so, return that candidate.", font_size=20).next_to(step_2c, DOWN)
+
+		algorithm = VGroup(step_1, step_2, step_2a, step_2b, step_2c, step_3).move_to(ORIGIN)
+		self.play(FadeIn(algorithm))     
+		self.wait(2)
+		self.play(step_3.animate.set_color(TEAL))       
+		self.wait(5)
+		self.play(FadeOut(algorithm))
+
+		v = Votes(10)
+		order = [BLUE, GREEN, PINK, PINK, BLUE, BLUE, GREEN, PINK, GREEN, BLUE]
+		v.animate_bm(self, order, 1)
+
+
+
+class BMLargerExample(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		v = Votes(20)
+		order = [TEAL, TEAL, GOLD, MAROON, GOLD, TEAL, TEAL, PURPLE, MAROON, GOLD, GOLD, TEAL, TEAL, TEAL, TEAL, TEAL, GOLD, TEAL, TEAL, PURPLE]	
+		v.animate_bm(self, order, 0.4)
+		
+
+		
