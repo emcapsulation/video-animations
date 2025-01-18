@@ -12,7 +12,7 @@ One way to do this is to store a hashmap which will map each candidate to the nu
 
 If this candidate has not been seen before, add them to the hashmap with a vote of 1. If they have been seen before, increment the number of votes for this candidate by 1. Then check the number of votes, and if it is greater than half of the population, that candidate has reached the majority, so we can exit and return the winner. 
 
-If we reach the end of the array and no candidates have reached a majority, we can return there were no winners.
+It is also worth noting that if we reach the end of the array and no candidates have reached a majority, we can return there were no winners.
 
 Scene 3
 The time complexity of this approach is big O of n, because for each element in the votes array, we are only performing a constant time lookup and/or insertion into the hashmap.
