@@ -3,9 +3,10 @@ YOUTUBE
 Scene 1
 An election is coming up in your town of population 10, and there are three candidates. A candidate wins if they are able to obtain the majority of the votes. By majority, we mean more than half of the total number of votes. 
 
-In this case, that is more than half of our population (10), so more than 5 votes.
+In our town of population 10, that's more than 5 votes.
 
 Diligently, everyone turns up to the voting booths and puts forward their votes. Now it is time to count and find out the winner. In other words, we need to find the majority element of this array.
+
 
 Scene 2
 One way to do this is to store a hashmap which will map each candidate to the number of votes they've received. We then loop through this array. 
@@ -14,10 +15,61 @@ If this candidate has not been seen before, add them to the hashmap with a vote 
 
 It is also worth noting that if we reach the end of the array and no candidates have reached a majority, we can return there were no winners.
 
+
 Scene 3
 The time complexity of this approach is big O of n, because for each element in the votes array, we are only performing a constant time lookup and/or insertion into the hashmap.
 
 Where we can do better is the space complexity, which is also big O of n in the worst case. Let's say now, every person in your town has decided to run as a candidate. Suddenly, the size of the hashmap will grow linearly with the size of the town population!
 
+
 Scene 4
-The Boyer-Moore majority voting algorithm can find the majority element in this array with only constant O(1) extra space.
+The Boyer-Moore majority vote algorithm can find the majority element in this array with only constant O(1) extra space. It keeps track of just two values: The candidate and the count. Here is how the algorithm goes.
+
+1. Start the count at 0.
+2. For each element:
+a. If the current element is equal to the candidate, increment the count.
+b. If the current element is not equal to the candidate, decrement the count.
+3. If the count is 0, assign the candidate to be the current element and set the count to 1.
+4. Check the number of votes of the reported candidate is a majority. If so, return that candidate.
+
+
+Scene 5
+We will do a run through to count the votes from our town's election. We initialise the count to 0.
+
+In the first element, the count is 0. So we assign the candidate to be the current element and set the count to 1.
+
+We move to the next element. This element is not equal to the candidate, so we decrement the count. Now the count is 0, so we set the candidate to be the current element and set the count to 1.
+
+We move to the next element. Again, this element is not equal to the candidate, so we decrement the count. Now the count is 0 again, so we set the candidate to be the current element and set the count to 1.
+
+We move to the next element. This time, the element is equal to the candidate, so we increment the count.
+
+We increment the count each time the current element matches the current candidate.
+
+This element is not equal to the candidate, so we decrement the count. But note we don't change the candidate here, because we only change the candidate if the count is 0.
+
+Again, decrement the count, because this element is different to the candidate.
+
+Now we have reached the end, our potential majority vote is pink.
+
+But remember, we need to do one more pass to count the number of pink votes to make sure it has a majority. In our case, that is more than 5 votes.
+
+It does, so we return pink as the winner.
+
+
+Scene 6
+A few of you might be wondering why we have to do that last pass through the array to make sure the reported candidate actually has a majority. 
+
+This is because, if there is a majority, Boyer Moore's algorithm will always return the correct answer - the majority element. But in the case there is no majority element, the algorithm will simply return whoever happens to be the candidate at the end of the array.
+
+Let's look at an example. In this array, no one has a majority. But if we run through the algorithm, when we reach the end of the array, there will be SOMEONE in the candidate variable (blue in this case). So we need to count their votes and double check that they really do have the majority.
+
+Since they do not have the majority, then we can return that there is no majority element.
+
+
+Scene 7
+Before proving how it works, let's look at a larger example of this beautiful algorithm.
+
+And remember the steps: If the current element matches the candidate, increment the count. If the current element does not match the candidate, decrement the count. And if the count is zero, set the candidate to be the current element, and set the count as 1.
+
+Then we do our pass through to make sure the reported winner actually has a majority. And teal is the actual winner!
