@@ -11,18 +11,20 @@ Diligently, everyone turns up to the voting booths and puts forward their votes.
 Scene 2
 One way to do this is to store a hashmap which will map each candidate to the number of votes they've received. We then loop through this array. 
 
-If this candidate has not been seen before, add them to the hashmap with a vote of 1. If they have been seen before, increment the number of votes for this candidate by 1. Then check the number of votes, and if it is greater than half of the population, that candidate has reached the majority, so we can exit and return the winner. 
-
-It is also worth noting that if we reach the end of the array and no candidates have reached a majority, we can return there were no winners.
+If this candidate has not been seen before, add them to the hashmap with a vote of 1. If they have been seen before, increment the number of votes for this candidate by 1. Each time, check this number of votes, and if it is greater than half of the population, that candidate has reached the majority, so we can exit and return the winner. 
 
 
 Scene 3
-The time complexity of this approach is big O of n, because for each element in the votes array, we are only performing a constant time lookup and/or insertion into the hashmap.
-
-Where we can do better is the space complexity, which is also big O of n in the worst case. Let's say now, every person in your town has decided to run as a candidate. Suddenly, the size of the hashmap will grow linearly with the size of the town population!
+It is also worth noting that if we reach the end of the array and no candidates have reached a majority, we can return there were no winners.
 
 
 Scene 4
+The time complexity of this approach is big O of n, because for each element in the votes array, we are only performing a constant time lookup and/or insertion into the hashmap.
+
+Where we can do better is the space complexity, which is also big O of n in the worst case. Let's say now, every person in your town has decided to run as a candidate. Suddenly, the size of the hashmap will grow linearly with the size of the array!
+
+
+Scene 5
 The Boyer-Moore majority vote algorithm can find the majority element in this array with only constant O(1) extra space. It keeps track of just two values: The candidate and the count. Here is how the algorithm goes.
 
 1. Start the count at 0.
@@ -30,17 +32,17 @@ The Boyer-Moore majority vote algorithm can find the majority element in this ar
 a. If the current element is equal to the candidate, increment the count.
 b. If the current element is not equal to the candidate, decrement the count.
 3. If the count is 0, assign the candidate to be the current element and set the count to 1.
-4. Check the number of votes of the reported candidate is a majority. If so, return that candidate.
+4. When we reach the end of the array, check the number of votes of the reported candidate is a majority. If so, return that candidate.
 
 
-Scene 5
+Scene 6
 We will do a run through to count the votes from our town's election. We initialise the count to 0.
 
 In the first element, the count is 0. So we assign the candidate to be the current element and set the count to 1.
 
-We move to the next element. This element is not equal to the candidate, so we decrement the count. Now the count is 0, so we set the candidate to be the current element and set the count to 1.
+We move to the next element. This element is not equal to the candidate, so we decrement the count. Now the count is 0, so the current element becomes the candidate and set the count to 1.
 
-We move to the next element. Again, this element is not equal to the candidate, so we decrement the count. Now the count is 0 again, so we set the candidate to be the current element and set the count to 1.
+We move to the next element. Again, this element is not equal to the candidate, so we decrement the count. Now the count is 0 again, so the current element becomes the candidate, and set the count to 1.
 
 We move to the next element. This time, the element is equal to the candidate, so we increment the count.
 
@@ -57,7 +59,7 @@ But remember, we need to do one more pass to count the number of pink votes to m
 It does, so we return pink as the winner.
 
 
-Scene 6
+Scene 7
 A few of you might be wondering why we have to do that last pass through the array to make sure the reported candidate actually has a majority. 
 
 This is because, if there is a majority, Boyer Moore's algorithm will always return the correct answer - the majority element. But in the case there is no majority element, the algorithm will simply return whoever happens to be the candidate at the end of the array.
@@ -67,9 +69,43 @@ Let's look at an example. In this array, no one has a majority. But if we run th
 Since they do not have the majority, then we can return that there is no majority element.
 
 
-Scene 7
-Before proving how it works, let's look at a larger example of this beautiful algorithm.
+Scene 8
+Before we get to the nitty gritty of why it works, let's look at a larger example of this beautiful algorithm.
 
-And remember the steps: If the current element matches the candidate, increment the count. If the current element does not match the candidate, decrement the count. And if the count is zero, set the candidate to be the current element, and set the count as 1.
+And remember the steps: If the current element matches the candidate, increment the count. If the current element does not match the candidate, decrement the count. And if the count is zero, the current element becomes the candidate, and set the count as 1.
 
 Then we do our pass through to make sure the reported winner actually has a majority. And teal is the actual winner!
+
+
+Scene 9
+The space complexity is only constant extra space, because in the first part of the algorithm we have just two variables, the candidate and count. And in the second part of the algorithm, the confirmation, we only keep track of the count of one element, stored in a single variable.
+
+This algorithm's time complexity is big O of n because we do one linear time loop to get the candidate and counts. And then we do a second linear time loop through to count the number of occurrences of this reported candidate, to confirm the candidate actually has a majority of the votes.
+
+
+Scene 10
+I know that some of you still may not be convinced that this will work every time there is a majority element. I don't blame you - I think upon first glance, this algorithm feels a little bit magical. So let's give some intuition about why it works.
+
+When an element is encountered, its count is incremented by 1. But if the next element is different to the current one, the count is decremented by 1. Therefore, you can consider unequal elements as "cancelling" each other out.
+
+
+Scene 11
+Take this case where teal is the majority. The teal element starts the count off with 1. Then the orange element decrements it back to 0, cancelling out the increment from the teal element. Then we finish with teal. In fact, it's as if the first two elements were never there at all. 
+
+
+Scene 12
+On a larger scale, this means we can remove unequal pairs, and it won't affect the final result since the unequal pairs operate to cancel each other's counts.
+
+Example: MMGMG
+We have maroon, which takes the count to 1. The second maroon takes the count to 2. Then the green element takes the count back down to 1. So you can see those two cancel each other - we can remove them and get the same result. Now we have another maroon +1, and another green -1, cancelling it out.  
+
+This shows that we can remove all unequal pairs from the array and get the same result.
+
+
+Scene 13
+So now the question is, who remains when we remove all unequal pairs? If a majority element exists, that means that element occurs at least one more time than all other elements combined. That is because it occurs more than half the time, so the other elements must appear strictly less than half the time.
+
+But there are n/2 pairs which can be formed. Since there are more than n/2 elements in the majority, there will be at least one left over when pairing unequal elements.
+
+This means that it will always be the last candidate standing after the Boyer Moore algorithm is complete.
+
