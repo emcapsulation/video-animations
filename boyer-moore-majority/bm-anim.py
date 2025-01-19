@@ -1,4 +1,5 @@
 from manim import *
+import random
 
 config.background_color = "#15131c"
 
@@ -348,18 +349,19 @@ class Votes:
 					while j in removed:
 						j -= 1
 
-					line1 = Line(start=self.get_votes()[i].get_center()+LEFT*0.5+DOWN*0.5, end=self.get_votes()[i].get_center()+RIGHT*0.5+UP*0.5, color=RED, stroke_width=8)
-					line2 = Line(start=self.get_votes()[j].get_center()+LEFT*0.5+DOWN*0.5, end=self.get_votes()[j].get_center()+RIGHT*0.5+UP*0.5, color=RED, stroke_width=8)
-					lines.add(line1, line2)
+					if j != 0:
+						line1 = Line(start=self.get_votes()[i].get_center()+LEFT*0.5+DOWN*0.5, end=self.get_votes()[i].get_center()+RIGHT*0.5+UP*0.5, color=RED, stroke_width=8)
+						line2 = Line(start=self.get_votes()[j].get_center()+LEFT*0.5+DOWN*0.5, end=self.get_votes()[j].get_center()+RIGHT*0.5+UP*0.5, color=RED, stroke_width=8)
+						lines.add(line1, line2)
 
-					scene.play(
-						FadeIn(line1),
-						FadeIn(line2)
-					)
-					scene.wait(3)
+						scene.play(
+							FadeIn(line1),
+							FadeIn(line2)
+						)
+						scene.wait(3)
 
-					removed.append(i)
-					removed.append(j)
+						removed.append(i)
+						removed.append(j)
 
 					cur_count -= 1
 				else:
@@ -403,6 +405,49 @@ class Votes:
 		scene.play(Transform(self.votes, new_votes))
 		self.votes = new_votes
 		scene.wait(1)
+
+
+	def animate_majority(self, scene, order):
+		self.create_votes(scene, order)
+
+		line = Line(start=UP*3, end=DOWN*0.5, stroke_width=4, color=WHITE)
+		scene.play(Create(line))
+
+		for i in range(0, self.get_population()):
+			side = random.uniform(0.5, 4)
+			up = random.uniform(-0.5, 3)
+
+			if order[i] == TEAL:
+				scene.play(self.get_votes()[i+1].animate.move_to(LEFT*side + UP*up), run_time=0.3)
+
+			else:
+				scene.play(self.get_votes()[i+1].animate.move_to(RIGHT*side + UP*up), run_time=0.3)
+
+		scene.play(FadeOut(self.get_votes()[0]), FadeOut(self.get_votes()[-1]))
+
+		greater = MathTex("> \\frac{n}{2}").shift(DOWN*2 + LEFT*2)
+		less = MathTex("< \\frac{n}{2}").shift(DOWN*2 + RIGHT*2)
+		scene.play(Write(greater))
+		scene.wait(2)
+		scene.play(Write(less))
+
+		p1, p2 = 0, 1
+		removed = []
+		while p1 < self.get_population() and p2 < self.get_population():
+			if p1 not in removed:
+				while p2 < self.get_population() and (order[p1] == order[p2] or p2 in removed):
+					p2 += 1
+
+				if p2 < self.get_population():
+					removed.append(p1)
+					removed.append(p2)
+					scene.play(FadeOut(self.get_votes()[p1+1]), FadeOut(self.get_votes()[p2+1]))
+
+			p1 += 1
+			p2 = p1+1
+
+		scene.wait(2)
+		scene.play(Write(Text("Majority Element", font_size=24).shift(UP*3 + LEFT*3)))
 
 
 
@@ -554,13 +599,13 @@ class TimeComplexity(Scene):
 	def construct(self):
 		Text.set_default(font="Consolas")
 
-		time_complexity = Text("Time complexity: O(n)", font_size=24).shift(UP*0.5)       
+		time_complexity = Text("Time complexity: O(n)", font_size=24).shift(UP)       
 		self.play(Write(time_complexity), run_time=2)
 		self.play(time_complexity[15:].animate.set_color(GREEN))
 
 		self.wait(4)
 
-		space_complexity = Text("Space complexity: O(n)", font_size=24)
+		space_complexity = Text("Space complexity: O(n)", font_size=24).shift(UP*0.5)
 		self.play(Write(space_complexity), run_time=2)       
 		self.play(space_complexity[16:].animate.set_color(RED))
 
@@ -655,7 +700,7 @@ class BoyerMoore(Scene):
 			Transform(count_num, Text(str(1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25))
 		)
 
-		step_2c = Text("\nc. If the count is 0, assign the candidate to be the\ncurrent element and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
+		step_2c = Text("\nc. If the count is 0, the current element becomes the\ncandidate and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
 		self.play(Write(step_2c), run_time=2)
 		self.play(
 			cand_dot.animate.set_color(GREEN),
@@ -687,7 +732,7 @@ class BMNoMaj(Scene):
 		step_2 = Text("\n2. For each element:", font_size=20).next_to(step_1, DOWN)       
 		step_2a = Text("\na. If the current element is equal to the candidate,\nincrement the count.", font_size=20).shift(UP*2).next_to(step_2, DOWN)             
 		step_2b = Text("\nb. If the current element is not equal to the candidate,\ndecrement the count.", font_size=20).shift(UP*2).next_to(step_2a, DOWN)         
-		step_2c = Text("\nc. If the count is 0, assign the candidate to be the\ncurrent element and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
+		step_2c = Text("\nc. If the count is 0, the current element becomes the\ncandidate and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
 		step_3 = Text("\n3. Check the number of votes of the reported candidate is\na majority. If so, return that candidate.", font_size=20).next_to(step_2c, DOWN)
 
 		algorithm = VGroup(step_1, step_2, step_2a, step_2b, step_2c, step_3).move_to(ORIGIN)
@@ -832,14 +877,72 @@ class BMProof4(Scene):
 	def construct(self):
 		Text.set_default(font="Consolas")
 
-		v = Votes(13)
+		v = Votes(11)
 		order = [TEAL, TEAL, LIGHT_PINK, TEAL, LIGHT_PINK, TEAL, TEAL, LIGHT_PINK, TEAL, LIGHT_PINK, LIGHT_PINK]
-		v.animate_majority(self, order, 1)
+		v.animate_majority(self, order)
 
 		self.wait(3)
 
 
 
+class SourceCode(Scene):  
+    def construct(self):
+        Text.set_default(font="Consolas")
+
+        code = Code(
+            code="""// Boyer Moore's Majority Vote algorithm written in C++
+// Returns the majority element if there is one, or -1
+int boyerMoore(vector<int>& nums) {
+    int n = nums.size(), target = nums.size()/2+1, count = 1, candidate = nums[0];
+
+    for (int i = 1; i < n; i++) {           
+        if (nums[i] == candidate) {
+            count += 1;
+        } else {
+            count -= 1;
+        }
+        if (count == 0) {
+            candidate = nums[i];
+            count = 1;
+        }
+    }
+
+    int cur = 0;
+    for (int i = 0; i < n; i++) {
+    	if (nums[i] == candidate) {
+    		cur += 1;
+    	}
+    	if (cur == target) {
+    		return candidate;
+    	}
+    }
+
+    return -1;
+}""",
+            language="C++",
+            font_size=14,
+            background="window"
+        )
+        
+        # Add the code to the scene
+        self.play(Write(code), run_time=5)
+        self.wait(10)
+        self.play(FadeOut(code))
 
 
-		
+
+class DrawAndGlowLetter(Scene):
+    def construct(self):
+        Text.set_default(font="Consolas")
+
+        self.play(Write(Text("Thank you for watching!").shift(UP*2)))
+
+        letter_e = Text("e", font_size=200, color=TEAL)
+        self.play(Write(letter_e))
+
+        letter_e_stroke = letter_e.copy().set_color(TEAL).set_opacity(1).set_stroke(width=3)        
+        glow_effect = letter_e_stroke.copy().set_stroke(width=3, color=WHITE).set_opacity(0.6)
+        self.play(FadeIn(letter_e_stroke), Transform(letter_e_stroke, glow_effect))
+        self.play(FadeOut(letter_e_stroke, glow_effect))
+
+        self.wait(3)

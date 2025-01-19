@@ -23,6 +23,8 @@ The time complexity of this approach is big O of n, because for each element in 
 
 Where we can do better is the space complexity, which is also big O of n in the worst case. Let's say now, every person in your town has decided to run as a candidate. Suddenly, the size of the hashmap will grow linearly with the size of the array!
 
+It begs the question: Can we find the majority element with only constant extra space?
+
 
 Scene 5
 The Boyer-Moore majority vote algorithm can find the majority element in this array with only constant O(1) extra space. It keeps track of just two values: The candidate and the count. Here is how the algorithm goes.
@@ -62,7 +64,7 @@ It does, so we return pink as the winner.
 Scene 7
 A few of you might be wondering why we have to do that last pass through the array to make sure the reported candidate actually has a majority. 
 
-This is because, if there is a majority, Boyer Moore's algorithm will always return the correct answer - the majority element. But in the case there is no majority element, the algorithm will simply return whoever happens to be the candidate at the end of the array.
+This is because, if there is a majority element, Boyer Moore's algorithm will always return the correct answer - the majority element. But in the case there is no majority element, the algorithm will simply return whoever happens to be the candidate at the end of the array.
 
 Let's look at an example. In this array, no one has a majority. But if we run through the algorithm, when we reach the end of the array, there will be SOMEONE in the candidate variable (blue in this case). So we need to count their votes and double check that they really do have the majority.
 
@@ -96,16 +98,21 @@ Take this case where teal is the majority. The teal element starts the count off
 Scene 12
 On a larger scale, this means we can remove unequal pairs, and it won't affect the final result since the unequal pairs operate to cancel each other's counts.
 
-Example: MMGMG
 We have maroon, which takes the count to 1. The second maroon takes the count to 2. Then the green element takes the count back down to 1. So you can see those two cancel each other - we can remove them and get the same result. Now we have another maroon +1, and another green -1, cancelling it out.  
 
 This shows that we can remove all unequal pairs from the array and get the same result.
 
+Let's shuffle the elements and show this again.
+
+We know that we can remove all unequal pairs from the array and make no difference to the outcome.
+
 
 Scene 13
-So now the question is, who remains when we remove all unequal pairs? If a majority element exists, that means that element occurs at least one more time than all other elements combined. That is because it occurs more than half the time, so the other elements must appear strictly less than half the time.
+So now the question is, who remains when we remove all unequal pairs? Well, the majority element remains.
+
+If a majority element exists, that means it occurs more than half the time. So the other elements must appear strictly less than half the time.
 
 But there are n/2 pairs which can be formed. Since there are more than n/2 elements in the majority, there will be at least one left over when pairing unequal elements.
 
-This means that it will always be the last candidate standing after the Boyer Moore algorithm is complete.
+This means that the majority element will always be the last candidate standing after the Boyer Moore algorithm is complete.
 
