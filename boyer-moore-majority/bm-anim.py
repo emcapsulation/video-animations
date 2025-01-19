@@ -39,7 +39,7 @@ class Votes:
 
 			cur_dot.move_to(self.votes[i].get_right() + RIGHT*cur_dot.get_width())	
 			self.votes[-1].shift(RIGHT*1.5*cur_dot.get_width())
-			self.votes.move_to(ORIGIN + DOWN*2)	
+			self.votes.move_to(ORIGIN + DOWN*1.5)	
 		scene.add(self.votes)	
 
 	# Order is the order of votes
@@ -174,7 +174,7 @@ class Votes:
 		scene.wait(3)
 
 
-	def pass_through(self, scene, outcome):
+	def pass_through(self, scene, outcome, run_time):
 		winner = outcome[1]
 
 		count_text = Text("Count: ")
@@ -191,12 +191,12 @@ class Votes:
 		for i in range(1, self.get_population()+1):
 			if winner.get_color() == self.get_votes()[i].get_color():
 				scene.play(
-					Transform(count_num, Text(str(cur_count+1)).next_to(count_text, RIGHT)),
-					run_time=0.3
+					Transform(count_num, Text(str(cur_count+1)).next_to(count_text, RIGHT, buff=1)),
+					run_time=run_time
 				)
 				cur_count += 1
 
-			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=0.3)
+			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
 
 		if cur_count > self.get_population()/2:
 			scene.play(
@@ -219,16 +219,7 @@ class Votes:
 		scene.wait(2)
 
 
-
-	def animate_bm(self, scene, order, run_time):
-		self.show_votes(scene, order)
-
-		if self.get_population() < 20:
-			self.get_votes().scale(1.4)
-
-		scene.play(Create(self.get_votes()))
-		scene.wait(1)
-
+	def create_rects(self, scene):
 		# Candidate and count rectangles
 		candidate_rect = RoundedRectangle(
 			width=4, height=2,
@@ -255,6 +246,13 @@ class Votes:
 		scene.play(Create(candidate_rect), Create(count_rect), Write(cand_text), Write(count_text), Write(count_num))
 		scene.wait(1)
 
+		return rects, candidate_rect, count_rect, cand_text, cand_dot, count_text, count_num
+
+
+	def animate_bm(self, scene, order, run_time):
+		self.create_votes(scene, order)
+
+		rects, candidate_rect, count_rect, cand_text, cand_dot, count_text, count_num = self.create_rects(scene)
 
 		arrow = Arrow(start=DOWN, end=ORIGIN, color=WHITE, stroke_width=8).next_to(self.get_votes()[1], DOWN, buff=0.2)
 		scene.add(arrow)
@@ -284,7 +282,8 @@ class Votes:
 				)
 				cur_count = 1
 
-			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
+			if i < self.get_population(): 
+				scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
 
 
 		outcome = VGroup()
@@ -297,9 +296,113 @@ class Votes:
 		scene.play(Write(outcome))
 		scene.wait(3)
 
-
 		scene.play(FadeOut(rects), FadeOut(arrow))
-		self.pass_through(scene, outcome)
+		self.pass_through(scene, outcome, run_time)
+
+
+	def animate_pass(self, scene, order, run_time):
+		self.create_votes(scene, order)
+
+		arrow = Arrow(start=DOWN, end=ORIGIN, color=WHITE, stroke_width=8).next_to(self.get_votes()[1], DOWN, buff=0.2)
+		scene.add(arrow)
+
+		for i in range(1, self.get_population()+1):
+			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
+
+		scene.wait(2)
+		scene.play(FadeOut(self.get_votes(), arrow))
+
+
+	def create_votes(self, scene, order, scale=1.4):
+		self.show_votes(scene, order)
+
+		if self.get_population() < 20:
+			self.get_votes().scale(scale)
+
+		scene.play(Create(self.get_votes()))
+		scene.wait(1)
+
+
+	def animate_bm_proof(self, scene, order, run_time, draw_votes=True):
+		if draw_votes:
+			self.create_votes(scene, order, scale=1.8)
+
+		rects, candidate_rect, count_rect, cand_text, cand_dot, count_text, count_num = self.create_rects(scene)
+
+		arrow = Arrow(start=DOWN, end=ORIGIN, color=WHITE, stroke_width=8).next_to(self.get_votes()[1], DOWN, buff=0.2)
+		scene.add(arrow)
+
+		cur_count = 0
+		removed = []
+		lines = VGroup()
+		for i in range(1, self.get_population()+1):
+			
+			if i > 1:
+				if cand_dot.get_color() != self.get_votes()[i].get_color():
+					scene.play(
+						Transform(count_num, Text(str(cur_count-1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)),
+						run_time=run_time
+					)
+
+					j = i-1
+					while j in removed:
+						j -= 1
+
+					line1 = Line(start=self.get_votes()[i].get_center()+LEFT*0.5+DOWN*0.5, end=self.get_votes()[i].get_center()+RIGHT*0.5+UP*0.5, color=RED, stroke_width=8)
+					line2 = Line(start=self.get_votes()[j].get_center()+LEFT*0.5+DOWN*0.5, end=self.get_votes()[j].get_center()+RIGHT*0.5+UP*0.5, color=RED, stroke_width=8)
+					lines.add(line1, line2)
+
+					scene.play(
+						FadeIn(line1),
+						FadeIn(line2)
+					)
+					scene.wait(3)
+
+					removed.append(i)
+					removed.append(j)
+
+					cur_count -= 1
+				else:
+					scene.play(
+						Transform(count_num, Text(str(cur_count+1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)),
+						run_time=run_time
+					)
+					cur_count += 1		
+
+
+			if cur_count == 0:
+				scene.play(
+					cand_dot.animate.set_color(self.get_votes()[i].get_color()).set_opacity(1),
+					Transform(count_num, Text("1", font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)),
+					run_time=run_time
+				)
+				cur_count = 1
+
+			if i < self.get_population(): 
+				scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
+
+		scene.play(FadeOut(rects), FadeOut(arrow), FadeOut(lines))
+
+
+	def shuffle(self, scene, new_order):
+		new_votes = VGroup()
+
+		open_bracket = Text("[");
+		close_bracket = Text("]").move_to(open_bracket.get_right() + RIGHT*0.2);
+		new_votes.add(open_bracket, close_bracket)
+
+		for i in range(0, len(new_order)):
+			cur_dot = Dot(color=new_order[i], radius=0.2)				
+			new_votes.insert(i+1, cur_dot)		
+
+			cur_dot.move_to(new_votes[i].get_right() + RIGHT*cur_dot.get_width())	
+			new_votes[-1].shift(RIGHT*1.5*cur_dot.get_width())
+			new_votes.move_to(ORIGIN + DOWN*1.5)
+
+		new_votes.scale(1.8)	
+		scene.play(Transform(self.votes, new_votes))
+		self.votes = new_votes
+		scene.wait(1)
 
 
 
@@ -443,7 +546,7 @@ class HashmapNoMaj(Scene):
 
 		v = Votes(10)
 		order = [BLUE, GREEN, PINK, PINK, BLUE, BLUE, GREEN, PINK, GREEN, BLUE]	
-		v.animate_map(self, order, 0.5)
+		v.animate_map(self, order, 0.3)
 
 
 
@@ -596,7 +699,7 @@ class BMNoMaj(Scene):
 
 		v = Votes(10)
 		order = [BLUE, GREEN, PINK, PINK, BLUE, BLUE, GREEN, PINK, GREEN, BLUE]
-		v.animate_bm(self, order, 1)
+		v.animate_bm(self, order, 0.5)
 
 
 
@@ -606,7 +709,137 @@ class BMLargerExample(Scene):
 
 		v = Votes(20)
 		order = [TEAL, TEAL, GOLD, MAROON, GOLD, TEAL, TEAL, PURPLE, MAROON, GOLD, GOLD, TEAL, TEAL, TEAL, TEAL, TEAL, GOLD, TEAL, TEAL, PURPLE]	
-		v.animate_bm(self, order, 0.4)
+		v.animate_bm(self, order, 0.8)
+
+
+
+class BMComplexity(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		time_complexity = Text("Space complexity: O(1)", font_size=24).shift(UP*2)       
+		self.play(Write(time_complexity), run_time=2)
+
+		# Candidate and count rectangles
+		candidate_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+		count_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+
+		count_rect.next_to(candidate_rect, RIGHT, buff=2)
+
+		cand_text = Text("Candidate", font_size=24).move_to(candidate_rect.get_center()).shift(UP*0.25)
+		count_text = Text("Count", font_size=24).move_to(count_rect.get_center()).shift(UP*0.25)
+
+		rects = VGroup(candidate_rect, count_rect, cand_text, count_text).move_to(ORIGIN)
+		self.play(Create(candidate_rect), Write(cand_text), Create(count_rect), Write(count_text))
+
+		cand_dot = Dot(color=PINK, radius=0.2).move_to(candidate_rect.get_center()).shift(DOWN*0.25)
+		count_num = Text("1", font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)
+
+		self.play(FadeIn(cand_dot), run_time=0.2)
+		self.play(cand_dot.animate.set_color(GREEN), run_time=0.2)
+		self.play(cand_dot.animate.set_color(BLUE), run_time=0.2)
+		rects.add(cand_dot)
+
+		self.play(FadeIn(count_num), run_time=0.2)
+		for i in range(0, 10):
+			self.play(Transform(count_num, Text(str(i), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)), run_time=0.1)
+		rects.add(count_num)
+
+		self.wait(1)
+		self.play(
+			FadeOut(rects)
+		)
 		
+
+		# Counter
+		count_text = Text("Count: ")
+		count_num = Text("0").next_to(count_text, RIGHT, buff=1)
+		top_text = VGroup(count_text, count_num)
+		top_text.move_to(ORIGIN)
+
+		self.play(FadeIn(top_text))
+		for i in range(0, 10):
+			self.play(
+				Transform(count_num, Text(str(i+1)).next_to(count_text, RIGHT, buff=1)),
+				run_time=0.1
+			)
+
+		self.wait(1)
+		self.play(
+			FadeOut(top_text)
+		)
+
+
+		# Time complexity
+		self.play(Transform(time_complexity, Text("Time complexity: O(n)", font_size=24).shift(UP*3)))
+
+		v = Votes(20)
+		order = [MAROON, ORANGE, LIGHT_PINK, TEAL, ORANGE, GREEN, ORANGE, ORANGE, MAROON, ORANGE, ORANGE, TEAL, ORANGE, ORANGE, MAROON, ORANGE, ORANGE, GREEN, ORANGE, LIGHT_PINK]	
+		v.animate_bm(self, order, 0.05)
+
+
+
+class BMProof(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		v = Votes(2)
+		order = [TEAL, ORANGE]
+		v.animate_bm_proof(self, order, 1)
+
+
+
+class BMProof2(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		v = Votes(3)
+		order = [TEAL, ORANGE, TEAL]
+		v.animate_bm_proof(self, order, 1)
+
+		self.wait(3)
+
+
+
+class BMProof3(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		v = Votes(5)
+		order = [MAROON, MAROON, GREEN, MAROON, GREEN]
+		v.animate_bm_proof(self, order, 1)
+
+		self.wait(3)
+
+		new_order = [GREEN, GREEN, MAROON, MAROON, MAROON]
+		v.shuffle(self, new_order)
+
+		v.animate_bm_proof(self, new_order, 1, draw_votes=False)		
+
+
+
+class BMProof4(Scene):
+	def construct(self):
+		Text.set_default(font="Consolas")
+
+		v = Votes(13)
+		order = [TEAL, TEAL, LIGHT_PINK, TEAL, LIGHT_PINK, TEAL, TEAL, LIGHT_PINK, TEAL, LIGHT_PINK, LIGHT_PINK]
+		v.animate_majority(self, order, 1)
+
+		self.wait(3)
+
+
+
+
 
 		
