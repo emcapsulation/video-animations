@@ -60,7 +60,6 @@ class Votes:
 
 			# Shifting everyone over
 			scene.play(
-				self.voters.animate.shift(LEFT*1.5*cur_dot.get_width()),
 				self.votes.animate.move_to(ORIGIN + DOWN*2),
 				run_time=0.5
 			)
@@ -197,7 +196,8 @@ class Votes:
 				)
 				cur_count += 1
 
-			scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
+			if i < self.get_population():
+				scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
 
 		if cur_count > self.get_population()/2:
 			scene.play(
@@ -284,6 +284,7 @@ class Votes:
 				cur_count = 1
 
 			if i < self.get_population(): 
+				scene.wait(1*run_time)
 				scene.play(arrow.animate.next_to(self.get_votes()[i+1], DOWN, buff=0.2), run_time=run_time)
 
 
@@ -681,33 +682,29 @@ class BoyerMoore(Scene):
 
 
 		# Algorithm
-		step_1 = Text("\n1. Start the count at 0.", font_size=20)     
+		step_1 = Text("\n1. Initialise candidate = votes[0], count = 1", font_size=20)     	
+		step_2 = Text("\n2. For each element i:", font_size=20).next_to(step_1, DOWN)       
+		step_2a = Text("\na. If votes[i] == candidate: count = count+1", font_size=20).shift(UP*2).next_to(step_2, DOWN)             
+		step_2b = Text("\nb. If votes[i] != candidate: count = count-1", font_size=20).shift(UP*2).next_to(step_2a, DOWN)         
+		step_2c = Text("\nc. If count == 0: candidate = votes[i], count = 1", font_size=20).next_to(step_2b, DOWN)            
+		step_3 = Text("\n3. Check the number of votes of the reported candidate is a majority.\nIf so, return that candidate.", font_size=20).next_to(step_2c, DOWN)
+
 		self.play(Write(step_1), run_time=2)
-		self.play(Transform(count_num, Text(str(0), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)))
-
-		step_2 = Text("\n2. For each element:", font_size=20).next_to(step_1, DOWN)       
-		self.play(Write(step_2), run_time=2)		
-
-		step_2a = Text("\na. If the current element is equal to the candidate,\nincrement the count.", font_size=20).shift(UP*2).next_to(step_2, DOWN)             
+		self.play(Transform(count_num, Text(str(1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)))
+		self.play(Write(step_2), run_time=2)
 		self.play(Write(step_2a), run_time=2)
 		self.play(
 			Transform(count_num, Text(str(2), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25))
 		)
-
-		step_2b = Text("\nb. If the current element is not equal to the candidate,\ndecrement the count.", font_size=20).shift(UP*2).next_to(step_2a, DOWN)         
 		self.play(Write(step_2b), run_time=2)
 		self.play(
 			Transform(count_num, Text(str(1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25))
 		)
-
-		step_2c = Text("\nc. If the count is 0, the current element becomes the\ncandidate and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
 		self.play(Write(step_2c), run_time=2)
 		self.play(
 			cand_dot.animate.set_color(GREEN),
 			Transform(count_num, Text(str(1), font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25))
 		)
-
-		step_3 = Text("\n3. Check the number of votes of the reported candidate is\na majority. If so, return that candidate.", font_size=20).next_to(step_2c, DOWN)            
 		self.play(Write(step_3), run_time=2)
 		self.wait(3)
 
@@ -728,12 +725,12 @@ class BMNoMaj(Scene):
 		Text.set_default(font="Consolas")
 
 		# Algorithm
-		step_1 = Text("\n1. Start the count at 0.", font_size=20)     	
-		step_2 = Text("\n2. For each element:", font_size=20).next_to(step_1, DOWN)       
-		step_2a = Text("\na. If the current element is equal to the candidate,\nincrement the count.", font_size=20).shift(UP*2).next_to(step_2, DOWN)             
-		step_2b = Text("\nb. If the current element is not equal to the candidate,\ndecrement the count.", font_size=20).shift(UP*2).next_to(step_2a, DOWN)         
-		step_2c = Text("\nc. If the count is 0, the current element becomes the\ncandidate and set the count to 1.", font_size=20).next_to(step_2b, DOWN)            
-		step_3 = Text("\n3. Check the number of votes of the reported candidate is\na majority. If so, return that candidate.", font_size=20).next_to(step_2c, DOWN)
+		step_1 = Text("\n1. Initialise candidate = votes[0], count = 1", font_size=20)     	
+		step_2 = Text("\n2. For each element i:", font_size=20).next_to(step_1, DOWN)       
+		step_2a = Text("\na. If votes[i] == candidate: count = count+1", font_size=20).shift(UP*2).next_to(step_2, DOWN)             
+		step_2b = Text("\nb. If votes[i] != candidate: count = count-1", font_size=20).shift(UP*2).next_to(step_2a, DOWN)         
+		step_2c = Text("\nc. If count == 0: candidate = votes[i], count = 1", font_size=20).next_to(step_2b, DOWN)            
+		step_3 = Text("\n3. Check the number of votes of the reported candidate is a majority.\nIf so, return that candidate.", font_size=20).next_to(step_2c, DOWN)
 
 		algorithm = VGroup(step_1, step_2, step_2a, step_2b, step_2c, step_3).move_to(ORIGIN)
 		self.play(FadeIn(algorithm))     
@@ -869,7 +866,12 @@ class BMProof3(Scene):
 		new_order = [GREEN, GREEN, MAROON, MAROON, MAROON]
 		v.shuffle(self, new_order)
 
-		v.animate_bm_proof(self, new_order, 1, draw_votes=False)		
+		v.animate_bm_proof(self, new_order, 1, draw_votes=False)
+
+		new_order = [MAROON, GREEN, GREEN, MAROON, MAROON]
+		v.shuffle(self, new_order)
+
+		v.animate_bm_proof(self, new_order, 1, draw_votes=False)				
 
 
 
@@ -890,10 +892,11 @@ class SourceCode(Scene):
         Text.set_default(font="Consolas")
 
         code = Code(
-            code="""// Boyer Moore's Majority Vote algorithm written in C++
-// Returns the majority element if there is one, or -1
+            code="""// Boyer Moore Majority Vote algorithm written in C++
+// Returns the majority element if there is one
 int boyerMoore(vector<int>& nums) {
-    int n = nums.size(), target = nums.size()/2+1, count = 1, candidate = nums[0];
+    int n = nums.size(), target = n/2+1;
+    int count = 1, candidate = nums[0];
 
     for (int i = 1; i < n; i++) {           
         if (nums[i] == candidate) {
@@ -909,18 +912,18 @@ int boyerMoore(vector<int>& nums) {
 
     int cur = 0;
     for (int i = 0; i < n; i++) {
-    	if (nums[i] == candidate) {
-    		cur += 1;
-    	}
-    	if (cur == target) {
-    		return candidate;
-    	}
+        if (nums[i] == candidate) {
+            cur += 1;
+        }
+        if (cur == target) {
+            return candidate;
+        }
     }
 
     return -1;
 }""",
             language="C++",
-            font_size=14,
+            font_size=16,
             background="window"
         )
         

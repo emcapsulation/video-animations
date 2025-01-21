@@ -29,7 +29,7 @@ It begs the question: Can we find the majority element with only constant extra 
 Scene 5
 The Boyer-Moore majority vote algorithm can find the majority element in this array with only constant O(1) extra space. It keeps track of just two values: The candidate and the count. Here is how the algorithm goes.
 
-1. Start the count at 0.
+1. Initialise the candidate to be the first element of the votes array, and start the count at 1.
 2. For each element:
 a. If the current element is equal to the candidate, increment the count.
 b. If the current element is not equal to the candidate, decrement the count.
@@ -38,9 +38,9 @@ b. If the current element is not equal to the candidate, decrement the count.
 
 
 Scene 6
-We will do a run through to count the votes from our town's election. We initialise the count to 0.
+We will do a run through to count the votes from our town's election. 
 
-In the first element, the count is 0. So we assign the candidate to be the current element and set the count to 1.
+We initialise the count to 1 and the candidate to be the first element.
 
 We move to the next element. This element is not equal to the candidate, so we decrement the count. Now the count is 0, so the current element becomes the candidate and set the count to 1.
 
@@ -116,3 +116,18 @@ But there are n/2 pairs which can be formed. Since there are more than n/2 eleme
 
 This means that the majority element will always be the last candidate standing after the Boyer Moore algorithm is complete.
 
+
+Scene 14
+This would not be a useful coding video without some source code, so let's write this algorithm in C++. Start with defining some useful variables: n is the size of our input list of votes, and target is the majority, n/2+1.
+
+We then initialise the count as 1 and the candidate as the first element of the input list of votes.
+
+Looping through the array, if the current element equals the candidate, increment the count. Otherwise, decrement the count. 
+
+If the count hits 0, set the candidate equal to the current element, and reset the count to 1. 
+
+When the loop is finished, we check whoever is left in the candidate variable is the real majority element by counting their occurrences, stored in cur. 
+
+If the number of occurrences (cur) is equal to the target (the majority), the candidate reported in the first part of the algorithm is the true majority element and we can return it.
+
+If we have reached the end of the loop, the candidate didn't reach the target, so we can return NULL to say there is no majority element.
