@@ -131,3 +131,25 @@ When the loop is finished, we check whoever is left in the candidate variable is
 If the number of occurrences (cur) is equal to the target (the majority), the candidate reported in the first part of the algorithm is the true majority element and we can return it.
 
 If we have reached the end of the loop, the candidate didn't reach the target, so we can return NULL to say there is no majority element.
+
+
+
+SHORT
+
+Can you detect the majority element in this array in O(n) time, but using only O(1) extra space? The Boyer Moore majority vote algorithm does just that. 
+
+Rather than wasting additional space on a hashmap, it uses just two variables: The candidate and the count.
+
+Initialise the candidate to be the first element of the array and initialise the count as 1. 
+
+For each element after the first one. If the current element matches the candidate, increment the count. 
+
+If the current element does not match the candidate, decrement the count.
+
+If the count hits 0, make the current element the new candidate and reset the count to 1.
+
+This element matches the candidate, so we increment the count. This element does not match so we decrement the count. 
+
+Decrement again - now the count has hit 0 so the current element becomes the new candidate and we reset the count to 1, and so on.
+
+Now let's count up the votes of the reported candidate to check it really does have a majority (more than half the number of votes) - and it does, so we can return it as the majority element.
