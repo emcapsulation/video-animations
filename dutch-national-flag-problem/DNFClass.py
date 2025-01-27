@@ -2,7 +2,7 @@ from manim import *
 import colorsys
 
 class Sorter:
-	def __init__(self, elements, position, num_colors, colours=[], balls=False):
+	def __init__(self, elements, position, num_colors, colours=[], type="nums"):
 		self.elements = elements
 		self.sorted_elements = sorted(self.elements)
 		self.position = position
@@ -16,7 +16,7 @@ class Sorter:
 		else:
 			self.colours = colours
 
-		self.init_elems(balls=balls)
+		self.init_elems(type=type)
 		
 
 	def get_elements(self):
@@ -55,7 +55,16 @@ class Sorter:
 		self.scene_sorted_elems.add(e)
 
 
-	def init_elems(self, balls=False):
+	def get_grade(self, i): 
+		if i == 1:
+			return "F"
+		elif i == 2:
+			return "P"
+		else:
+			return "H"
+
+
+	def init_elems(self, type=type):
 		self.scene_elems = VGroup()
 		self.scene_sorted_elems = VGroup()
 
@@ -63,17 +72,27 @@ class Sorter:
 		self.add_sorted_element(Text("["))
 
 		for i in range(0, self.get_num_elements()):
-			if balls == True:
+			if type == "balls":
 				new_elem = Dot(radius=0.3)
 				s_elem = Dot(radius=0.3)
+
+			elif type == "students":
+				sid = Text(str(i+1))
+				grade = Text(self.get_grade(self.get_element(i))).next_to(sid, DOWN)
+				new_elem = VGroup(sid, grade)
+
+				sid2 = Text(str(i+1))
+				grade2 = Text(self.get_grade(self.get_sorted_element(i))).next_to(sid, DOWN)
+				s_elem = VGroup(sid2, grade2)
+
 			else:
 				new_elem = Text(str(self.get_element(i)))
 				s_elem = Text(str(self.get_sorted_element(i)))
 
-			new_elem = new_elem.set_color(self.colours[self.get_element(i)-1]).next_to(self.scene_elems[i])
+			new_elem = new_elem.set_color(self.colours[self.get_element(i)-1]).next_to(self.scene_elems[i], buff=0.5)
 			self.add_element(new_elem)
 
-			s_elem = s_elem.set_color(self.colours[self.get_sorted_element(i)-1]).next_to(self.scene_sorted_elems[i])
+			s_elem = s_elem.set_color(self.colours[self.get_sorted_element(i)-1]).next_to(self.scene_sorted_elems[i], buff=0.5)
 			self.add_sorted_element(s_elem)
 
 		self.add_element(Text("]").next_to(self.scene_elems[-1]))
@@ -148,11 +167,14 @@ class Sorter:
 		h = len(self.get_elements())-1
 
 		low = Arrow(start=DOWN, end=ORIGIN, color=RED, stroke_width=8).next_to(self.get_scene_elements()[l+1], DOWN+LEFT*0.05, buff=0.2)
-		mid = Arrow(start=DOWN, end=ORIGIN, color=GREEN, stroke_width=8).next_to(self.get_scene_elements()[m+1], DOWN+RIGHT*0.05, buff=0.2)
+		mid = Arrow(start=DOWN, end=ORIGIN, color=GREEN, stroke_width=8).next_to(self.get_scene_elements()[m+1], DOWN, buff=0.2)
 		high = Arrow(start=DOWN, end=ORIGIN, color=BLUE, stroke_width=8).next_to(self.get_scene_elements()[h+1], DOWN, buff=0.2)
 
 		if show_arrow:
-			scene.add(low, mid, high)
+			scene.play(FadeIn(low))
+			scene.play(FadeIn(mid))
+			scene.play(FadeIn(high))
+			scene.wait(2)
 
 		middle = 2
 
@@ -180,12 +202,25 @@ class Sorter:
 				m += 1
 
 			if show_arrow and m <= h:
-				scene.play(
-					low.animate.next_to(self.get_scene_element(l+1), DOWN, buff=0.2),
-					mid.animate.next_to(self.get_scene_element(m+1), DOWN, buff=0.2),
-					high.animate.next_to(self.get_scene_element(h+1), DOWN, buff=0.2),
-					run_time=run_time
-				)
+				if l == m:
+					scene.play(
+						mid.animate.next_to(self.get_scene_element(m+1), DOWN, buff=0.2),
+						run_time=run_time
+					)
+					scene.play(
+						low.animate.next_to(mid.get_center(), LEFT*0.4, buff=0.2),
+						high.animate.next_to(self.get_scene_element(h+1), DOWN, buff=0.2),
+						run_time=run_time
+					)
+				else:
+					scene.play(
+						low.animate.next_to(self.get_scene_element(l+1), DOWN, buff=0.2),
+						mid.animate.next_to(self.get_scene_element(m+1), DOWN, buff=0.2),
+						high.animate.next_to(self.get_scene_element(h+1), DOWN, buff=0.2),
+						run_time=run_time
+					)
+
+				scene.wait(2)
 
 
 	def fade_out(self, scene):

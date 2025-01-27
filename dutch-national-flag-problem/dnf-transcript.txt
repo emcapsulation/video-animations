@@ -26,7 +26,7 @@ While the mid pointer is less than or equal to the high pointer:
 3. If the value at mid is less than the value of the middle element, we swap the elements at low and mid. Then we increment both.
 
 Scene 3
-Let's look at a larger example. These are students and their test scores. Say below 50 is a fail, between 50 and 85 is a pass, and 85 and above is a pass with honours. Now we want to rank the students purely based on these groupings.
+Let's look at a larger example. These are students and their test scores: Fail F, Pass P or Pass with Honours H. Now we want to rank the students purely based on these groupings.
 
 You could be thinking "we could create three separate lists for each grade and add the students to these lists". But part of the appeal of the aforementioned three-pointer approach is that we can actually sort the list of these students in place. Meaning we don't need to waste any time or memory creating new lists and moving elements between lists.
 
@@ -35,9 +35,13 @@ So let's run through Dijkstra's three pointer algorithm on this list of students
 Scene 4
 You've seen a few examples now, so you can probably start to see why it works. Essentially, the low pointer keeps track of the end of the first group. The middle pointer tracks the end of the middle group. And the high pointer keeps track of the start of the high group. 
 
-That is also why the swapping works. Because if the value pointed to by the mid pointer is less than the middle element, you put it in the low category. If the value is greater than the middle element, you put it in the high category.
+That is also why the swapping works. Because if the value at the mid pointer is less than the middle element, you swap it into the low category, and increment the pointer to nudge the end of the low group.
 
-Therefore, the algorithm ends when the middle and high pointers meet, because the end of the middle group lines up with the start of the high group.
+If the value at the mid pointer is greater than the middle element, you swap it into the high category. Then you decrement the high pointer to expand the size of the high group inwards.
+
+And if the value at the mid pointer is the middle element, you increment the mid pointer to nudge the end of the mid group.
+
+Therefore, the algorithm ends when the middle and high pointers meet, because that is when the end of the middle group lines up with the start of the high group.
 
 Scene 5
 Coding
