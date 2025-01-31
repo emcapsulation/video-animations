@@ -3,25 +3,27 @@ from DNFClass import Sorter
 
 config.background_color = "#15131c"
 
+VERM_RED = "#AE1C28"
+COB_BLUE = "#21468B"
+
 
 def create_psuedocode(scene):
-	code_rect = Rectangle(width=7, height=4, fill_color="#272333", fill_opacity=1, stroke_width=0)
-	code = Text(
-"""low = 0
-mid = 0
-high = length of nums - 1
+	code_rect = RoundedRectangle(width=7, height=4.5, fill_color=BLACK, fill_opacity=1, stroke_width=0, corner_radius=0.3)
+	code = MarkupText(f"""<span fgcolor="{RED}">low</span> = 0
+<span fgcolor="{GREEN}">mid</span> = 0
+<span fgcolor="{BLUE}">high</span> = length of nums - 1
 
-while mid <= high:
-	if nums[mid] == middle element:
-		increment mid
+while <span fgcolor="{GREEN}">mid</span> &lt;= <span fgcolor="{BLUE}">high</span>:
+	if nums[<span fgcolor="{GREEN}">mid</span>] == middle element:
+		increment <span fgcolor="{GREEN}">mid</span>
 
-	else if nums[mid] > middle element:
-		swap values at mid and high
-		decrement high
+	else if nums[<span fgcolor="{GREEN}">mid</span>] &gt; middle element:
+		swap values at <span fgcolor="{GREEN}">mid</span> and <span fgcolor="{BLUE}">high</span>
+		decrement <span fgcolor="{BLUE}">high</span>
 
-	else if nums[mid] < middle element:
-		swap values at low and mid
-		increment low, increment mid""", font_size=16).move_to(code_rect.get_center())		
+	else if nums[<span fgcolor="{GREEN}">mid</span>] &lt; middle element:
+		swap values at <span fgcolor="{RED}">low</span> and <span fgcolor="{GREEN}">mid</span>
+		increment <span fgcolor="{RED}">low</span>, increment <span fgcolor="{GREEN}">mid</span>""", font_size=16, font="Consolas").move_to(code_rect.get_center())	
 
 	pseudocode = VGroup(code_rect, code).scale(0.8).move_to(LEFT*4 + DOWN)
 	scene.play(Create(pseudocode), run_time=2)
@@ -78,16 +80,16 @@ class Introduction(Scene):
 		self.play(FadeOut(dots))
 
 		dnf = VGroup()
-		red = Rectangle(width=3, height=2/3, stroke_width=0, fill_color="#AD1D25", fill_opacity=1)
+		red = Rectangle(width=3, height=2/3, stroke_width=0, fill_color=VERM_RED, fill_opacity=1)
 		white = Rectangle(width=3, height=2/3, stroke_width=0, fill_color=WHITE, fill_opacity=1).next_to(red.get_center(), DOWN*4/3)
-		blue = Rectangle(width=3, height=2/3, stroke_width=0, fill_color="#1E4785", fill_opacity=1).next_to(white.get_center(), DOWN*4/3)
+		blue = Rectangle(width=3, height=2/3, stroke_width=0, fill_color=COB_BLUE, fill_opacity=1).next_to(white.get_center(), DOWN*4/3)
 
 		dnf.add(red, white, blue)
 		dnf.move_to(DOWN*2)
 		self.play(FadeIn(dnf))
 		self.wait(3)
 
-		s = Sorter([3, 1, 2, 2, 1, 3, 2, 1, 1, 3, 3, 2], UP*0.5, 3, colours=["#AD1D25", WHITE, "#1E4785"], type="balls")
+		s = Sorter([3, 1, 2, 2, 1, 3, 2, 1, 1, 3, 3, 2], UP*0.5, 3, colours=[VERM_RED, WHITE, COB_BLUE], type="balls")
 		s.get_scene_elements().scale(0.9)
 		s.create_list(self)
 		self.wait(3)
@@ -138,7 +140,7 @@ class Walkthrough(Scene):
 
 		pseudocode = create_psuedocode(self)
 
-		s = Sorter([2, 3, 1, 2, 3, 3, 2, 1, 1, 3, 2, 1], RIGHT*3 + DOWN, 3, colours=["#AD1D25", WHITE, "#1E4785"])
+		s = Sorter([2, 3, 1, 2, 3, 3, 2, 1, 1, 3, 2, 1], RIGHT*3 + DOWN, 3, colours=[VERM_RED, WHITE, COB_BLUE])
 		s.get_scene_elements().scale(0.7)
 		s.create_list(self)
 
@@ -216,12 +218,26 @@ class LargerExample(Scene):
 
 class Explanation(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")		
+		Text.set_default(font="Consolas")	
+
+		low_arrow = Arrow(start=DOWN, end=ORIGIN, color=RED, stroke_width=8).shift(UP*3 + LEFT*5)
+		low_text = Text("- End of the low group", font_size=24).next_to(low_arrow, RIGHT, buff=1)
+		mid_arrow = Arrow(start=DOWN, end=ORIGIN, color=GREEN, stroke_width=8).shift(UP*2 + LEFT*5)
+		mid_text = Text("- End of the middle group", font_size=24).next_to(mid_arrow, RIGHT, buff=1)
+		high_arrow = Arrow(start=DOWN, end=ORIGIN, color=BLUE, stroke_width=8).shift(UP + LEFT*5)
+		high_text = Text("- Start of the high group", font_size=24).next_to(high_arrow, RIGHT, buff=1)
+
+		arrow_text = VGroup(low_arrow, low_text, mid_arrow, mid_text, high_arrow, high_text).scale(0.8).move_to(ORIGIN + UP*2)
+
+		self.play(Create(low_arrow), Write(low_text))
+		self.wait(1)
+		self.play(Create(mid_arrow), Write(mid_text))
+		self.wait(1)
+		self.play(Create(high_arrow), Write(high_text))
 
 		balls = [1, 2, 3, 3, 1, 2, 3, 1, 3, 1, 3, 2, 2, 1, 2]
-
-		s = Sorter(balls, ORIGIN, 3, colours=["#AD1D25", WHITE, "#1E4785"])
-		s.get_scene_elements().scale(0.7)
+		s = Sorter(balls, DOWN, 3, colours=[VERM_RED, WHITE, COB_BLUE])
+		s.get_scene_elements()
 		s.create_list(self)
 
 		s.perform_algorithm(self, show_arrow=True, run_time=2)		
