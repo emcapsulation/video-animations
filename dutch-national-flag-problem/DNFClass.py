@@ -28,7 +28,7 @@ class Sorter:
 
 
 	def get_scene_sorted_elements(self):
-		return self.scene_elems
+		return self.scene_sorted_elems
 
 
 	def get_element(self, i):
@@ -102,8 +102,8 @@ class Sorter:
 		self.scene_sorted_elems.move_to(self.position)
 
 
-	def create_list(self, scene):
-		scene.play(Create(self.scene_elems))
+	def create_list(self, scene, scale=1):
+		scene.play(Create(self.scene_elems.scale(scale)))
 
 
 	def create_sorted_list(self, scene):

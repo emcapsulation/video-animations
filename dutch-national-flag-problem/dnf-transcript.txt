@@ -102,3 +102,22 @@ While the mid pointer is less than or equal to the high pointer:
 - If the element at the mid pointer is equal to the middle element, increment the mid pointer.
 - If the element at the mid pointer is greater than the middle element, swap with the element at the high pointer and decrement the high pointer.
 - And lastly, if the element at the mid pointer is less than the middle element, swap with the element at the low pointer and increment both mid and low pointers.
+
+
+MOBILE
+If you have a list of elements and you need to sort it, it is well known you can do it in O(nlogn) time with an algorithm like merge sort for example.
+
+But what if you knew the elements were constrained to being one of only three values? Actually, this can now be sorted in linear O(n) time. 
+
+This is known as the Dutch National Flag problem and it was originally proposed by Dijkstra as arranging balls of the three colours of the stripes on the Dutch National Flag.
+
+It operates in O(n) time and using only constant extra space because it has three pointers: Low keeps track of the end of the low group, mid tracks the end of the middle group, and high tracks the start of the high group.
+
+Initialise low and mid to point to the first element of the array, and high points to the last element of the array. While mid is less than or equal to high:
+- If the element at the mid pointer is equal to the middle element (2 in this case), increment the mid pointer.
+- If the element at mid is greater than the middle element, swap with the element at the high pointer and decrement the high pointer.
+- If the element at mid is less than the middle element, swap with the element at the low pointer and increment both pointers.
+
+This effectively swaps each element into the correct group, and nudging the pointer expands the edge of that group outwards.
+
+The algorithm ends after the mid pointer meets the high pointer because that is when the end of the mid group lines up with the start of the high group.
