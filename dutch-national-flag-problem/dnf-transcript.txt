@@ -104,7 +104,9 @@ While the mid pointer is less than or equal to the high pointer:
 - And lastly, if the element at the mid pointer is less than the middle element, swap with the element at the low pointer and increment both mid and low pointers.
 
 
-MOBILE
+
+SHORT
+
 If you have a list of elements and you need to sort it, it is well known you can do it in O(nlogn) time with an algorithm like merge sort for example.
 
 But what if you knew the elements were constrained to being one of only three values? Actually, this can now be sorted in linear O(n) time. 
