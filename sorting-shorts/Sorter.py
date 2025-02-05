@@ -247,6 +247,118 @@ class Sorter:
 		self.animate_last_pass(scene, p1_arrow, p2_arrow, run_time)
 
 
+	def bubble_sort(self, scene, run_time=1):
+		p1_col = MAROON_B
+		p2_col = TEAL_B
+
+		p1 = 0
+		p2 = 1
+
+		p1_arrow = Arrow(start=DOWN, end=ORIGIN, color=p1_col, stroke_width=8).next_to(self.get_scene_elements()[p1+1], DOWN, buff=0.2)
+		p2_arrow = Arrow(start=DOWN, end=ORIGIN, color=p2_col, stroke_width=8).next_to(self.get_scene_elements()[p2+1], DOWN, buff=0.2)	
+
+
+		rect_shape = RoundedRectangle(
+			width=2.5, height=1.5,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+
+		rect_text_p1 = MarkupText(f"""<span fgcolor="{p1_col}">p1</span>: """, font_size=24, font="Consolas")
+		rect_p1 = MarkupText(f"""0""", font_size=24, font="Consolas").set_color("#15131c").next_to(rect_text_p1, RIGHT, buff=0.2)
+		p1_text = VGroup(rect_text_p1, rect_p1).move_to(rect_shape.get_center()).shift(UP*0.25)
+
+		rect_text_p2 = MarkupText(f"""<span fgcolor="{p2_col}">p2</span>: """, font_size=24, font="Consolas")
+		rect_p2 = MarkupText(f"""0""", font_size=24, font="Consolas").set_color("#15131c").next_to(rect_text_p2, RIGHT, buff=0.2)
+		p2_text = VGroup(rect_text_p2, rect_p2).move_to(rect_shape.get_center()).shift(DOWN*0.25)
+
+		rect = VGroup(rect_shape, p1_text, p2_text).move_to(DOWN*0.5).scale(0.9)
+		rect_drawn = False	
+
+
+		tutorial_text = MarkupText(f"""""", font_size=24, font="Consolas").shift(UP)
+
+
+		while True:
+			swapped = False	
+
+			for p2 in range(1, self.get_num_elements()):
+				p1 = p2-1		
+
+				new_p1 = Text(str(self.get_element(p1)), 
+					font_size=24).set_color(self.colours[self.get_element(p1)-1]).next_to(rect_text_p1, RIGHT, buff=0.2)
+				new_p2 = Text(str(self.get_element(p2)), 
+					font_size=24).set_color(self.colours[self.get_element(p2)-1]).next_to(rect_text_p2, RIGHT, buff=0.2)
+
+
+				if not rect_drawn:			
+					scene.play(Transform(tutorial_text, 
+						MarkupText(f"""set <span fgcolor="{p1_col}">p1</span> = 0, <span fgcolor="{p2_col}">p2</span> = 1""",
+							font_size=24, font="Consolas").shift(UP)),
+						p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
+						p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
+						Create(rect_shape), 
+						Write(rect_text_p1), Transform(rect_p1, new_p1), 
+						Write(rect_text_p2), Transform(rect_p2, new_p2), 
+						run_time=run_time*2)
+
+					self.mf.write_int(self.get_element(p1), run_time*2)
+					rect_drawn = True	
+
+				else:
+					if p1 == 0:
+						scene.play(Transform(tutorial_text, 
+							MarkupText(f"""reset <span fgcolor="{p1_col}">p1</span> = 0, <span fgcolor="{p2_col}">p2</span> = 1""",
+								font_size=24, font="Consolas").shift(UP)),
+							p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
+							p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
+							Transform(rect_p1, new_p1), 
+							Transform(rect_p2, new_p2), 						
+							run_time=run_time)
+
+						self.mf.write_int(self.get_element(p1), run_time)
+
+					else:
+						scene.play(Transform(tutorial_text, 
+							MarkupText(f"""swap when <span fgcolor="{p1_col}">p1</span> &gt; <span fgcolor="{p2_col}">p2</span>""",
+								font_size=24, font="Consolas").shift(UP)),
+							p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
+							p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
+							Transform(rect_p1, new_p1), 
+							Transform(rect_p2, new_p2), 						
+							run_time=run_time*0.2)
+
+						self.mf.write_int(self.get_element(p1), run_time*0.2)
+
+
+				if self.get_element(p1) > self.get_element(p2):
+					swapped = True
+
+					tmp = self.elements[p1]
+					self.elements[p1] = self.elements[p2]
+					self.elements[p2] = tmp
+
+					self.animate_swap(scene, p1, p2, run_time=run_time)
+
+
+			if not swapped:
+				scene.play(Transform(tutorial_text, 
+					MarkupText(f"""no more swaps detected""",
+						font_size=24, font="Consolas").shift(UP)), run_time=run_time)
+
+				self.mf.write_pause(run_time)	
+				break
+
+
+		self.animate_last_pass(scene, p1_arrow, p2_arrow, run_time)
+
+		scene.play(Transform(tutorial_text, 
+			MarkupText(f"""sorted :)""", 
+				font_size=24, font="Consolas").shift(UP)), run_time=run_time)
+		self.mf.write_pause(run_time)
+
+
 	def fade_out(self, scene):
 		scene.play(FadeOut(self.get_scene_elements()))
 
