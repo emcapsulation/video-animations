@@ -248,6 +248,8 @@ class Sorter:
 
 
 	def bubble_sort(self, scene, run_time=1):
+		self.mf.write_pause(run_time*0.2)
+
 		p1_col = MAROON_B
 		p2_col = TEAL_B
 
@@ -317,11 +319,13 @@ class Sorter:
 							Transform(rect_p2, new_p2), 						
 							run_time=run_time)
 
-						self.mf.write_int(self.get_element(p1), run_time)
+						# Delay because the arrow has a long way to go
+						self.mf.write_pause(run_time*0.8)
+						self.mf.write_int(self.get_element(p1), run_time*0.2)
 
 					else:
 						scene.play(Transform(tutorial_text, 
-							MarkupText(f"""swap when <span fgcolor="{p1_col}">p1</span> &gt; <span fgcolor="{p2_col}">p2</span>""",
+							MarkupText(f"""swap if <span fgcolor="{p1_col}">p1</span> &gt; <span fgcolor="{p2_col}">p2</span>""",
 								font_size=24, font="Consolas").shift(UP)),
 							p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
 							p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
