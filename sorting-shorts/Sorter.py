@@ -100,7 +100,7 @@ class Sorter:
 			p += 1
 
 
-	def animate_swap(self, scene, i, j, run_time):
+	def animate_swap(self, scene, i, j, run_time, write="chord"):
 		i_pos = self.get_scene_element(i+1).get_center()
 		j_pos = self.get_scene_element(j+1).get_center()
 
@@ -115,10 +115,12 @@ class Sorter:
 			MoveAlongPath(self.get_scene_element(j+1), path2),
 			run_time=run_time
 		)
-		self.mf.write_chord(
-			[int(self.get_scene_element(i+1).get_text()), int(self.get_scene_element(j+1).get_text())], 
-			run_time
-		)
+
+		if write == "chord":
+			self.mf.write_chord(
+				[int(self.get_scene_element(i+1).get_text()), int(self.get_scene_element(j+1).get_text())], 
+				run_time
+			)
 
 		tmp = self.scene_elems[i+1]
 		self.scene_elems[i+1] = self.scene_elems[j+1]
@@ -136,7 +138,7 @@ class Sorter:
 		p2_arrow = Arrow(start=DOWN, end=ORIGIN, color=p2_col, stroke_width=8).next_to(self.get_scene_elements()[p2+1], DOWN, buff=0.2)
 
 		tutorial_text = MarkupText(f"""initialise <span fgcolor="{p1_col}">p1</span> = 0""", 
-			font_size=24, font="Consolas").shift(UP)
+			font_size=24, font="Monospace").shift(UP)
 		scene.play(Write(tutorial_text), run_time=run_time)
 		self.mf.write_pause(run_time)
 
@@ -166,7 +168,7 @@ class Sorter:
 				p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
 				Transform(tutorial_text, 
 					MarkupText(f"""set <span fgcolor="{p2_col}">p2</span> = <span fgcolor="{p1_col}">p1</span>""", 
-						font_size=24, font="Consolas").shift(UP)),
+						font_size=24, font="Monospace").shift(UP)),
 				run_time=run_time
 			)
 			self.mf.write_int(self.get_element(p2), run_time)
@@ -180,7 +182,7 @@ class Sorter:
 			if not rect_drawn:			
 				scene.play(Transform(tutorial_text, 
 					MarkupText(f"""<span fgcolor="{p2_col}">p2</span> finds min""",
-						font_size=24, font="Consolas").shift(UP)),
+						font_size=24, font="Monospace").shift(UP)),
 					Create(rect_shape), Write(rect_text), Transform(rect_num, new_rect_num), run_time=run_time)
 
 				self.mf.write_pause(run_time)	
@@ -189,7 +191,7 @@ class Sorter:
 			else:
 				scene.play(Transform(tutorial_text, 
 					MarkupText(f"""<span fgcolor="{p2_col}">p2</span> finds min""",
-						font_size=24, font="Consolas").shift(UP)), 
+						font_size=24, font="Monospace").shift(UP)), 
 					Transform(rect_num, new_rect_num), run_time=run_time)
 
 				self.mf.write_pause(run_time)	
@@ -220,7 +222,7 @@ class Sorter:
 
 			scene.play(Transform(tutorial_text, 
 				MarkupText(f"""swap min with <span fgcolor="{p1_col}">p1</span>""", 
-					font_size=24, font="Consolas").shift(UP)), run_time=run_time)
+					font_size=24, font="Monospace").shift(UP)), run_time=run_time)
 			self.mf.write_pause(run_time)	
 
 			tmp = self.elements[p1]
@@ -232,14 +234,14 @@ class Sorter:
 			if p1 < self.get_num_elements()-1:
 				scene.play(Transform(tutorial_text, 
 					MarkupText(f"""increment <span fgcolor="{p1_col}">p1</span>""", 
-						font_size=24, font="Consolas").shift(UP)), run_time=run_time)
+						font_size=24, font="Monospace").shift(UP)), run_time=run_time)
 
 				self.mf.write_pause(run_time)
 
 			else:
 				scene.play(Transform(tutorial_text, 
 					MarkupText(f"""sorted :)""", 
-						font_size=24, font="Consolas").shift(UP)), run_time=run_time)
+						font_size=24, font="Monospace").shift(UP)), run_time=run_time)
 
 				self.mf.write_pause(run_time)
 
@@ -267,19 +269,19 @@ class Sorter:
 			stroke_color=WHITE
 		)
 
-		rect_text_p1 = MarkupText(f"""<span fgcolor="{p1_col}">p1</span>: """, font_size=24, font="Consolas")
-		rect_p1 = MarkupText(f"""0""", font_size=24, font="Consolas").set_color("#15131c").next_to(rect_text_p1, RIGHT, buff=0.2)
+		rect_text_p1 = MarkupText(f"""<span fgcolor="{p1_col}">p1</span>: """, font_size=24, font="Monospace")
+		rect_p1 = MarkupText(f"""0""", font_size=24, font="Monospace").set_color("#15131c").next_to(rect_text_p1, RIGHT, buff=0.2)
 		p1_text = VGroup(rect_text_p1, rect_p1).move_to(rect_shape.get_center()).shift(UP*0.25)
 
-		rect_text_p2 = MarkupText(f"""<span fgcolor="{p2_col}">p2</span>: """, font_size=24, font="Consolas")
-		rect_p2 = MarkupText(f"""0""", font_size=24, font="Consolas").set_color("#15131c").next_to(rect_text_p2, RIGHT, buff=0.2)
+		rect_text_p2 = MarkupText(f"""<span fgcolor="{p2_col}">p2</span>: """, font_size=24, font="Monospace")
+		rect_p2 = MarkupText(f"""0""", font_size=24, font="Monospace").set_color("#15131c").next_to(rect_text_p2, RIGHT, buff=0.2)
 		p2_text = VGroup(rect_text_p2, rect_p2).move_to(rect_shape.get_center()).shift(DOWN*0.25)
 
 		rect = VGroup(rect_shape, p1_text, p2_text).move_to(DOWN*0.5).scale(0.9)
 		rect_drawn = False	
 
 
-		tutorial_text = MarkupText(f"""""", font_size=24, font="Consolas").shift(UP)
+		tutorial_text = MarkupText(f"""""", font_size=24, font="Monospace").shift(UP)
 
 
 		while True:
@@ -297,7 +299,7 @@ class Sorter:
 				if not rect_drawn:			
 					scene.play(Transform(tutorial_text, 
 						MarkupText(f"""set <span fgcolor="{p1_col}">p1</span> = 0, <span fgcolor="{p2_col}">p2</span> = 1""",
-							font_size=24, font="Consolas").shift(UP)),
+							font_size=24, font="Monospace").shift(UP)),
 						p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
 						p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
 						Create(rect_shape), 
@@ -312,7 +314,7 @@ class Sorter:
 					if p1 == 0:
 						scene.play(Transform(tutorial_text, 
 							MarkupText(f"""reset <span fgcolor="{p1_col}">p1</span> = 0, <span fgcolor="{p2_col}">p2</span> = 1""",
-								font_size=24, font="Consolas").shift(UP)),
+								font_size=24, font="Monospace").shift(UP)),
 							p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
 							p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
 							Transform(rect_p1, new_p1), 
@@ -326,7 +328,7 @@ class Sorter:
 					else:
 						scene.play(Transform(tutorial_text, 
 							MarkupText(f"""swap if <span fgcolor="{p1_col}">p1</span> &gt; <span fgcolor="{p2_col}">p2</span>""",
-								font_size=24, font="Consolas").shift(UP)),
+								font_size=24, font="Monospace").shift(UP)),
 							p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
 							p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
 							Transform(rect_p1, new_p1), 
@@ -349,7 +351,7 @@ class Sorter:
 			if not swapped:
 				scene.play(Transform(tutorial_text, 
 					MarkupText(f"""no more swaps detected""",
-						font_size=24, font="Consolas").shift(UP)), run_time=run_time)
+						font_size=24, font="Monospace").shift(UP)), run_time=run_time)
 
 				self.mf.write_pause(run_time)	
 				break
@@ -359,7 +361,140 @@ class Sorter:
 
 		scene.play(Transform(tutorial_text, 
 			MarkupText(f"""sorted :)""", 
-				font_size=24, font="Consolas").shift(UP)), run_time=run_time)
+				font_size=24, font="Monospace").shift(UP)), run_time=run_time)
+		self.mf.write_pause(run_time)
+
+
+	def insertion_sort(self, scene, run_time=1):
+		self.mf.write_pause(run_time*0.2)
+
+		p1_col = MAROON_B
+		p2_col = TEAL_B
+
+		p1 = 1
+		p2 = 1
+
+		p1_arrow = Arrow(start=DOWN, end=ORIGIN, color=p1_col, stroke_width=8).next_to(self.get_scene_elements()[p1+1], DOWN, buff=0.2)
+		p2_arrow = Arrow(start=DOWN, end=ORIGIN, color=p2_col, stroke_width=8).next_to(self.get_scene_elements()[p2+1], DOWN, buff=0.2)	
+
+
+		rect_shape = RoundedRectangle(
+			width=2.5, height=1.5,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+
+		rect_text_p1 = MarkupText(f"""<span fgcolor="{p2_col}">p2</span>: """, font_size=24, font="Monospace")
+		rect_p1 = MarkupText(f"""0""", font_size=24, font="Monospace").set_color("#15131c").next_to(rect_text_p1, RIGHT, buff=0.2)
+		p1_text = VGroup(rect_text_p1, rect_p1).move_to(rect_shape.get_center()).shift(UP*0.25)
+
+		rect_text_p2 = MarkupText(f"""<span fgcolor="{p2_col}">p2</span>-1: """, font_size=24, font="Monospace")
+		rect_p2 = MarkupText(f"""0""", font_size=24, font="Monospace").set_color("#15131c").next_to(rect_text_p2, RIGHT, buff=0.2)
+		p2_text = VGroup(rect_text_p2, rect_p2).move_to(rect_shape.get_center()).shift(DOWN*0.25)
+
+		rect = VGroup(rect_shape, p1_text, p2_text).move_to(DOWN*0.5).scale(0.9)
+		rect_drawn = False	
+
+
+		tutorial_text = MarkupText(f"""""", font_size=24, font="Monospace").shift(UP)
+
+
+		while p1 < self.get_num_elements():
+			p2 = p1
+
+
+			new_p1 = Text(str(self.get_element(p2)), 
+				font_size=24).set_color(self.colours[self.get_element(p2)-1]).next_to(rect_text_p1, RIGHT, buff=0.2)
+			new_p2 = Text(str(self.get_element(p2-1)), 
+				font_size=24).set_color(self.colours[self.get_element(p2-1)-1]).next_to(rect_text_p2, RIGHT, buff=0.2)
+
+			if not rect_drawn:			
+				scene.play(Transform(tutorial_text, 
+					MarkupText(f"""set <span fgcolor="{p1_col}">p1</span> = 1, <span fgcolor="{p2_col}">p2</span> = <span fgcolor="{p1_col}">p1</span>""",
+						font_size=24, font="Monospace").shift(UP)),
+					p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
+					p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
+					Create(rect_shape), 
+					Write(rect_text_p1), Transform(rect_p1, new_p1), 
+					Write(rect_text_p2), Transform(rect_p2, new_p2), 
+					run_time=run_time*2)
+
+				self.mf.write_int(self.get_element(p1), run_time*2)
+				rect_drawn = True	
+
+			else:
+				scene.play(Transform(tutorial_text, 
+					MarkupText(f"""increment <span fgcolor="{p1_col}">p1</span>, set <span fgcolor="{p2_col}">p2</span> = <span fgcolor="{p1_col}">p1</span>""",
+						font_size=24, font="Monospace").shift(UP)),
+					p1_arrow.animate.next_to(self.get_scene_element(p1+1), DOWN, buff=0.2),
+					p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
+					Transform(rect_p1, new_p1), 
+					Transform(rect_p2, new_p2), 
+					run_time=run_time)
+
+				self.mf.write_pause(run_time*0.5)
+				self.mf.write_int(self.get_element(p1), run_time*0.5)
+
+
+			while p2 > 0 and self.get_element(p2) < self.get_element(p2-1):
+				new_p1 = Text(str(self.get_element(p2)), 
+				font_size=24).set_color(self.colours[self.get_element(p2)-1]).next_to(rect_text_p1, RIGHT, buff=0.2)
+				new_p2 = Text(str(self.get_element(p2-1)), 
+					font_size=24).set_color(self.colours[self.get_element(p2-1)-1]).next_to(rect_text_p2, RIGHT, buff=0.2)
+
+
+				i_pos = self.get_scene_element(p2+1).get_center()
+				j_pos = self.get_scene_element(p2-1+1).get_center()
+
+				path = Line(i_pos, j_pos)
+				path.points[1:3] += UP*1
+
+				path2 = Line(j_pos, i_pos)
+				path2.points[1:3] += DOWN*1			
+
+				scene.play(Transform(tutorial_text, 
+					MarkupText(f"""move <span fgcolor="{p2_col}">p2</span> while <span fgcolor="{p2_col}">p2</span> &lt; <span fgcolor="{p2_col}">p2</span>-1""",
+						font_size=24, font="Monospace").shift(UP)),
+					p2_arrow.animate.next_to(self.get_scene_element(p2), DOWN, buff=0.2),
+					Transform(rect_p2, new_p2), 
+					MoveAlongPath(self.get_scene_element(p2+1), path),
+					MoveAlongPath(self.get_scene_element(p2-1+1), path2),						
+					run_time=run_time*0.8)
+
+				self.mf.write_chord(
+					[int(self.get_scene_element(p2+1).get_text()), int(self.get_scene_element(p2-1+1).get_text())], 
+					run_time*0.8
+				)
+
+				tmp = self.scene_elems[p2+1]
+				self.scene_elems[p2+1] = self.scene_elems[p2-1+1]
+				self.scene_elems[p2-1+1] = tmp
+
+				tmp = self.elements[p2]
+				self.elements[p2] = self.elements[p2-1]
+				self.elements[p2-1] = tmp
+
+				p2 -= 1;	
+
+			p1 += 1
+
+
+		scene.play(
+			p1_arrow.animate.next_to(self.get_scene_element(1), DOWN, buff=0.2),
+			p2_arrow.animate.next_to(self.get_scene_element(1), DOWN, buff=0.2),
+			run_time=run_time)
+
+		p1 = 0
+		p2 = 0
+		self.mf.write_pause(run_time*0.7)
+		self.mf.write_int(self.get_element(p1), run_time*0.5)
+
+		self.animate_last_pass(scene, p1_arrow, p2_arrow, run_time)
+
+		scene.play(Transform(tutorial_text, 
+			MarkupText(f"""sorted :)""", 
+				font_size=24, font="Monospace").shift(UP)), run_time=run_time)
 		self.mf.write_pause(run_time)
 
 
