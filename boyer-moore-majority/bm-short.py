@@ -9,7 +9,7 @@ config.frame_width = 8
 
 class BMMobile(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         title_text = Text("Boyer Moore").shift(UP*2) 
         title_text2 = Text("Majority Vote").shift(UP*1.5) 

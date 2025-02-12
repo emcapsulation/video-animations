@@ -23,7 +23,7 @@ while <span fgcolor="{GREEN}">mid</span> &lt;= <span fgcolor="{BLUE}">high</span
 
 	else if nums[<span fgcolor="{GREEN}">mid</span>] &lt; middle element:
 		swap values at <span fgcolor="{RED}">low</span> and <span fgcolor="{GREEN}">mid</span>
-		increment <span fgcolor="{RED}">low</span>, increment <span fgcolor="{GREEN}">mid</span>""", font_size=16, font="Consolas").move_to(code_rect.get_center())	
+		increment <span fgcolor="{RED}">low</span>, increment <span fgcolor="{GREEN}">mid</span>""", font_size=16, font="Monospace").move_to(code_rect.get_center())	
 
 	pseudocode = VGroup(code_rect, code).scale(0.8).move_to(LEFT*4 + DOWN)
 	scene.play(Create(pseudocode), run_time=2)
@@ -35,7 +35,7 @@ while <span fgcolor="{GREEN}">mid</span> &lt;= <span fgcolor="{BLUE}">high</span
 
 class Introduction(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		l = [5, 2, 12, 7, 11, 4, 1, 3, 9, 6, 10, 8]
 		s = Sorter(l, ORIGIN, len(l))
@@ -102,7 +102,7 @@ class Introduction(Scene):
 
 class Walkthrough(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		# Pointer rectangles
 		low_rect = RoundedRectangle(
@@ -156,7 +156,7 @@ class Walkthrough(Scene):
 
 class LargerExample(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")		
+		Text.set_default(font="Monospace")		
 
 		students = [1, 3, 1, 2, 1, 3, 1, 1, 2, 3, 2, 2, 1, 2]
 		PURPLE = LIGHT_PINK
@@ -218,7 +218,7 @@ class LargerExample(Scene):
 
 class Explanation(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")	
+		Text.set_default(font="Monospace")	
 
 		low_arrow = Arrow(start=DOWN, end=ORIGIN, color=RED, stroke_width=8).shift(UP*3 + LEFT*5)
 		low_text = Text("- End of the low group", font_size=24).next_to(low_arrow, RIGHT, buff=1)

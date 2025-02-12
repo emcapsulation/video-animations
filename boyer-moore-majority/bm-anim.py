@@ -17,7 +17,7 @@ def getZigZag():
 
 class VotingScenario(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 
 		# Population sign
@@ -131,7 +131,7 @@ class VotingScenario(Scene):
 
 class HashmapExample(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(10)
 		order = [PINK, GREEN, PINK, PINK, PINK, BLUE, GREEN, PINK, PINK, BLUE]	
@@ -141,7 +141,7 @@ class HashmapExample(Scene):
 
 class HashmapNoMaj(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(10)
 		order = [BLUE, GREEN, PINK, PINK, BLUE, BLUE, GREEN, PINK, GREEN, BLUE]	
@@ -151,7 +151,7 @@ class HashmapNoMaj(Scene):
 
 class TimeComplexity(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		time_complexity = Text("Time complexity: O(n)", font_size=24).shift(UP)       
 		self.play(Write(time_complexity), run_time=2)
@@ -173,7 +173,7 @@ class TimeComplexity(Scene):
 
 class BoyerMoore(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		title_text = Text("Boyer Moore Majority Vote Algorithm").shift(UP*3)
 		self.play(Write(title_text))
@@ -265,7 +265,7 @@ class BoyerMoore(Scene):
 
 class BMAnim(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(10)
 		order = [PINK, GREEN, PINK, PINK, PINK, BLUE, GREEN, PINK, PINK, BLUE]	
@@ -275,7 +275,7 @@ class BMAnim(Scene):
 
 class BMNoMaj(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		# Algorithm
 		step_1 = Text("\n1. Initialise candidate = votes[0], count = 1", font_size=20)     	
@@ -300,7 +300,7 @@ class BMNoMaj(Scene):
 
 class BMLargerExample(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(20)
 		order = [TEAL, TEAL, GOLD, MAROON, GOLD, TEAL, TEAL, PURPLE, MAROON, GOLD, GOLD, TEAL, TEAL, TEAL, TEAL, TEAL, GOLD, TEAL, TEAL, PURPLE]	
@@ -310,7 +310,7 @@ class BMLargerExample(Scene):
 
 class BMComplexity(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		time_complexity = Text("Space complexity: O(1)", font_size=24).shift(UP*2)       
 		self.play(Write(time_complexity), run_time=2)
@@ -386,7 +386,7 @@ class BMComplexity(Scene):
 
 class BMProof(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(2)
 		order = [TEAL, ORANGE]
@@ -396,7 +396,7 @@ class BMProof(Scene):
 
 class BMProof2(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(3)
 		order = [TEAL, ORANGE, TEAL]
@@ -408,7 +408,7 @@ class BMProof2(Scene):
 
 class BMProof3(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(5)
 		order = [MAROON, MAROON, GREEN, MAROON, GREEN]
@@ -430,7 +430,7 @@ class BMProof3(Scene):
 
 class BMProof4(Scene):
 	def construct(self):
-		Text.set_default(font="Consolas")
+		Text.set_default(font="Monospace")
 
 		v = Votes(11)
 		order = [TEAL, TEAL, LIGHT_PINK, TEAL, LIGHT_PINK, TEAL, TEAL, LIGHT_PINK, TEAL, LIGHT_PINK, LIGHT_PINK]
@@ -442,7 +442,7 @@ class BMProof4(Scene):
 
 class SourceCode(Scene):  
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         code = Code(
             code="""// Boyer Moore Majority Vote algorithm written in C++
@@ -489,7 +489,7 @@ int boyerMoore(vector<int>& nums) {
 
 class DrawAndGlowLetter(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         self.play(Write(Text("Thank you for watching!").shift(UP*2)))
 

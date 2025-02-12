@@ -17,7 +17,7 @@ NODE_COL = BLUE
 
 class FloydMobile(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         title_text = Text("Floyd's Cycle").shift(UP*2) 
         title_text2 = Text("Finding Algorithm").shift(UP*1.5) 

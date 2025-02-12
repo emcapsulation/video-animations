@@ -31,7 +31,7 @@ while (ptr != nullptr) {
 
 class LLNoCycle(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         LL = LinkedList(False)
         LL.set_nodes(6)
@@ -49,7 +49,7 @@ class LLNoCycle(Scene):
 
 class LLCycle(Scene):   
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         LL = LinkedList(True)
         LL.set_nodes(9)
@@ -67,7 +67,7 @@ class LLCycle(Scene):
 
 class LLCycleSet(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         LL = LinkedList(True)
         LL.set_nodes(9)
@@ -82,7 +82,7 @@ class LLCycleSet(Scene):
 
 class SetComplexity(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         time_complexity = Text("Time complexity: O(n)", font_size=24).shift(UP*0.5)       
         self.play(Write(time_complexity), run_time=2)
@@ -106,7 +106,7 @@ class SetComplexity(Scene):
 
 class FloydNoCycle(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         title_text = Text("Floyd's Cycle Finding Algorithm").shift(UP*3)
         self.play(Write(title_text))
@@ -142,7 +142,7 @@ class FloydNoCycle(Scene):
 
 class FloydCycle(Scene):  
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         LL = LinkedList(True)
         LL.set_nodes(9)
@@ -157,7 +157,7 @@ class FloydCycle(Scene):
 
 class LargerExample(Scene):  
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         LL = LinkedList(True)
         LL.create_large_list()
@@ -173,7 +173,7 @@ class LargerExample(Scene):
 
 class CycleChase(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         LL = LinkedList(True)
         LL.create_big_loop(self)
@@ -185,7 +185,7 @@ class CycleChase(Scene):
 
 class FloydCycleProof(Scene):  
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         LL = LinkedList(True)
         LL.create_large_list()
@@ -198,7 +198,7 @@ class FloydCycleProof(Scene):
 
 class SourceCode(Scene):  
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         code = Code(
             code="""// Floyd's cycle finding algorithm written in C++
@@ -252,7 +252,7 @@ Node *floydCycleFinder(Node *head) {
 
 class DrawAndGlowLetter(Scene):
     def construct(self):
-        Text.set_default(font="Consolas")
+        Text.set_default(font="Monospace")
 
         self.play(Write(Text("Thank you for watching!").shift(UP*2)))
 
