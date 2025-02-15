@@ -1,0 +1,16 @@
+YOUTUBE
+
+Scene 1
+Here's a problem for you. This is the leaderboard of a sports league. 
+
+Column w shows the number of wins each team has received, and l, the number of losses. Column r shows the number of remaning games each team has. And the four columns after this shows who the the teams' remaining games are to be played against.
+
+The winner of the season is whichever team wins the most games.
+
+The question for you is: Which teams have no chance of winning the season?
+
+To start, let's consider the team currently in last place. They have two wins, and two games remaining. Do they have a chance of taking home the trophy?
+
+No, because even if they win both their remaining games, they still end up with only four wins, which is not enough to ever take the lead.
+
+As a result, this team is "trivially eliminated".
