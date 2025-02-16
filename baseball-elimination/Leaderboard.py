@@ -115,7 +115,7 @@ class Board:
 		for i in range(1, num_wins-int(row[1].get_text())+1):
 			scene.play(
 				Transform(row[1], Text(str(int(row[1].get_text())+i), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(0.8)),
-				Transform(row[3], Text(str(int(row[3].get_text())-i), font_size=36, color=RED).move_to(row[3].get_center()).scale(0.8))
+				Transform(row[3], Text(str(int(row[3].get_text())-i), font_size=36).move_to(row[3].get_center()).scale(0.8))
 			)
 
 		scene.play(
@@ -153,7 +153,7 @@ class Board:
 			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(0.8)) for dc in dec_cells]
 
 			incs.append(ReplacementTransform(row[1], Text(str(int(row[1].get_text())+1), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(0.8)))
-			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36, color=RED).move_to(row[3].get_center()).scale(0.8)))
+			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36).move_to(row[3].get_center()).scale(0.8)))
 
 			scene.play(
 				*incs, *decs
@@ -169,6 +169,7 @@ class Board:
 	# Increments number of losses for a team and decrements remaining games too
 	def increment_losses_2(self, scene, team, num_losses):
 		row = self.grid[team]
+		row_num = 0
 
 		for i in range(1, num_losses-int(row[2].get_text())+1):
 			dec_cells = []
@@ -190,14 +191,11 @@ class Board:
 						inc_cells.append(self.grid[row_num][1])
 					break
 
-			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36).move_to(ic.get_center()).scale(0.8)) for ic in inc_cells]
+			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36, color=GREEN).move_to(ic.get_center()).scale(0.8)) for ic in inc_cells]
 			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(0.8)) for dc in dec_cells]
 
 			incs.append(ReplacementTransform(row[2], Text(str(int(row[2].get_text())+1), font_size=36, color=RED).move_to(row[2].get_center()).scale(0.8)))
-			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36, color=RED).move_to(row[3].get_center()).scale(0.8)))
-
-			print(dec_cells)
-			print(inc_cells)
+			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36).move_to(row[3].get_center()).scale(0.8)))
 
 			scene.play(
 				*incs, *decs
@@ -206,7 +204,8 @@ class Board:
 
 		scene.play(
 			row[2].animate.set_color(WHITE),
-			row[3].animate.set_color(WHITE)
+			row[3].animate.set_color(WHITE),
+			self.grid[row_num][1].animate.set_color(WHITE)
 		)
 
 
@@ -227,3 +226,30 @@ class Board:
 			run_time=1
 		)
 		self.grid -= self.grid[i]
+
+
+	# Put a rectangle around a row
+	def put_rectangle_around(self, scene, i):
+		surround = SurroundingRectangle(
+			self.grid[i],
+			buff=0.4,
+			color=WHITE
+		)
+
+		scene.play(Create(surround))
+		return surround
+
+
+	# Put a rectangle around multiple rows
+	def put_rectangle_around_2(self, scene, a):
+		rect_group = VGroup()
+		for k in a:
+			rect_group.add(self.grid[k])
+
+		surround = SurroundingRectangle(
+			rect_group,
+			buff=0.4,
+			color=WHITE
+		)
+
+		return surround
