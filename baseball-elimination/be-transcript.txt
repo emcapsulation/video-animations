@@ -14,3 +14,15 @@ To start, let's consider the team currently in last place. They have two wins, a
 No, because even if they win both their remaining games, they still end up with only four wins, which is not enough to ever take the lead.
 
 As a result, this team is "trivially eliminated".
+
+But what about the third team?
+
+You might think they have a chance of winning, since they have two games remaining.
+
+If they win both of these games, as long as the team currently in first place loses all of their remaining games, they can both finish off the season with 6 wins and tie for the trophy right?
+
+Well, not quite.
+
+Circle has three games left to play against Triangle. So for Circle to lose all their remaining games, Triangle must win those three games. This would actually put Triangle into first place.
+
+As a result, Pentagon cannot win the season. 
