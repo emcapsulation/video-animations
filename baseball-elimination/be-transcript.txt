@@ -23,6 +23,20 @@ If they win both of these games, as long as the team currently in first place lo
 
 Well, not quite.
 
-Circle has three games left to play against Triangle. So for Circle to lose all their remaining games, Triangle must win those three games. This would actually put Triangle into first place.
+We need to consider who Circle's remaining games are against.
 
-As a result, Pentagon cannot win the season. 
+Circle has three games left to play against Triangle. Remember, Circle needs to lose all three of these remaining games to not overtake Pentagon, if Pentagon wants to tie for the trophy. 
+
+This means Triangle must win those three games. But, this would actually put Triangle into first place instead.
+
+As a result, Pentagon cannot win the season. They are eliminated too, but not trivially.
+
+
+Scene 2
+And to see how complicated this can get, here is a much larger example. Can you show that <shape> has no chance of winning the season?
+
+What if I told you this could be turned into a max flow problem?
+
+
+Scene 3
+This is known as the baseball elimination algorithm. But before I show you the algorithm, what is a max flow problem?

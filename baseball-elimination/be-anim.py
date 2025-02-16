@@ -45,8 +45,10 @@ class Leaderboard(Scene):
 
 
 		# Show the last place team cannot win
+		surround = lb.put_rectangle_around(self, 4)
 		lb.increment_wins(self, 4, 4)
-		self.wait(2)
+		self.play(Uncreate(surround))
+		self.wait(2)		
 
 		lb.swap_rows(self, 4, 2)
 		self.wait(2)
@@ -66,16 +68,46 @@ class Leaderboard(Scene):
 		self.wait(2)
 
 
+		what_about_team = lb.teams[2].copy()
+		what_about_text = Text("What about", font_size=24)
+		question_mark = Text("?", font_size=24)
+		what_about_group = VGroup(what_about_text, what_about_team, question_mark).arrange().move_to(UP*3).scale(0.8)
+		self.play(
+			Transform(question_group, what_about_group)
+		)
+		self.wait(2)
+
+
 		# Show the third place team cannot win
+		surround = lb.put_rectangle_around(self, 3)
 		lb.increment_wins_2(self, 3, 6)
+		self.play(Uncreate(surround))
 		self.wait(2)
 
 		lb.swap_rows(self, 3, 1)
+		self.wait(2)
+
+		surround = lb.put_rectangle_around(self, 2)
+		self.play(lb.grid[2][5].animate.set_color(lb.teams[1].get_color()))
+		self.wait(2)
+
+		rect2 = lb.put_rectangle_around_2(self, [2, 3])
+		self.play(Transform(surround, rect2))
 		self.wait(2)
 
 		lb.increment_losses_2(self, 2, 4)
+		self.play(Uncreate(surround))
 		self.wait(2)
 
 		lb.swap_rows(self, 3, 1)
+		self.wait(2)
+
+
+		no_win_team = lb.teams[2].copy()
+		no_win_text = Text("cannot win", font_size=24)
+		no_win_group = VGroup(no_win_team, no_win_text).arrange().move_to(UP*3).scale(0.8)
+		self.play(
+			Transform(question_group, no_win_group)
+		)
 		self.wait(2)
 
