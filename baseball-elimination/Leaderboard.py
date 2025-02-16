@@ -88,22 +88,142 @@ class Board:
 			background_rect.animate.move_to(self.grid[j].get_center()),
 			run_time=1
 		)
-
 		scene.play(FadeOut(background_rect))
 
+		# Swap the rows in the grid
+		tmp = self.grid[i]
+		for k in range(i, j, -1):
+			self.grid[k] = self.grid[k-1]	
+		self.grid[j] = tmp	
+
+
+	# Gets the row number of the team in this column
+	def get_team_row(self, j):
+		team_color = self.grid[0][j].get_color()
+
+		for i in range(1, len(self.grid)):
+			if self.grid[i][0].get_color() == team_color:
+				return i
+
+		return -1
 
 
 	# Increments number of wins for team
 	def increment_wins(self, scene, team, num_wins):
 		row = self.grid[team]
 
-		row[1].set_color(GREEN)
-		row[3].set_color(GREEN)
-
 		for i in range(1, num_wins-int(row[1].get_text())+1):
 			scene.play(
 				Transform(row[1], Text(str(int(row[1].get_text())+i), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(0.8)),
-				Transform(row[3], Text(str(int(row[3].get_text())-i), font_size=36, color=GREEN).move_to(row[3].get_center()).scale(0.8))
+				Transform(row[3], Text(str(int(row[3].get_text())-i), font_size=36, color=RED).move_to(row[3].get_center()).scale(0.8))
 			)
 
-		print("HI")
+		scene.play(
+			row[1].animate.set_color(WHITE),
+			row[3].animate.set_color(WHITE)
+		)
+
+
+	# Increments number of wins for a team and decrements remaining games too
+	def increment_wins_2(self, scene, team, num_wins):
+		row = self.grid[team]
+
+		for i in range(1, num_wins-int(row[1].get_text())+1):
+			dec_cells = []
+			inc_cells = []
+
+			for j in range(4, len(row)):
+				if row[j].get_text() != "0":
+					dec_cells.append(row[j])
+					row_num = self.get_team_row(j)
+
+					if row_num != -1:
+						# Team remain column
+						dec_cells.append(self.grid[row_num][4+team-1])
+
+						# Remain column
+						dec_cells.append(self.grid[row_num][3])
+
+						# Loss column
+						inc_cells.append(self.grid[row_num][2])
+					break
+
+
+			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36).move_to(ic.get_center()).scale(0.8)) for ic in inc_cells]
+			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(0.8)) for dc in dec_cells]
+
+			incs.append(ReplacementTransform(row[1], Text(str(int(row[1].get_text())+1), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(0.8)))
+			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36, color=RED).move_to(row[3].get_center()).scale(0.8)))
+
+			scene.play(
+				*incs, *decs
+			)
+
+
+		scene.play(
+			row[1].animate.set_color(WHITE),
+			row[3].animate.set_color(WHITE)
+		)
+
+
+	# Increments number of losses for a team and decrements remaining games too
+	def increment_losses_2(self, scene, team, num_losses):
+		row = self.grid[team]
+
+		for i in range(1, num_losses-int(row[2].get_text())+1):
+			dec_cells = []
+			inc_cells = []
+
+			for j in range(4, len(row)):
+				if row[j].get_text() != "0":
+					dec_cells.append(row[j])
+					row_num = self.get_team_row(j)
+
+					if row_num != -1:
+						# Team remain column
+						dec_cells.append(self.grid[row_num][4+team-2])
+
+						# Remain column
+						dec_cells.append(self.grid[row_num][3])
+
+						# Win column
+						inc_cells.append(self.grid[row_num][1])
+					break
+
+			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36).move_to(ic.get_center()).scale(0.8)) for ic in inc_cells]
+			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(0.8)) for dc in dec_cells]
+
+			incs.append(ReplacementTransform(row[2], Text(str(int(row[2].get_text())+1), font_size=36, color=RED).move_to(row[2].get_center()).scale(0.8)))
+			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36, color=RED).move_to(row[3].get_center()).scale(0.8)))
+
+			print(dec_cells)
+			print(inc_cells)
+
+			scene.play(
+				*incs, *decs
+			)
+
+
+		scene.play(
+			row[2].animate.set_color(WHITE),
+			row[3].animate.set_color(WHITE)
+		)
+
+
+	# Sets the row colour except the shape
+	def set_row_color(self, scene, i, color):
+		set_colours = [self.grid[i][k].animate.set_color(color) for k in range(1, len(self.grid[i]))]
+		scene.play(*set_colours)
+
+
+	# Fades out row i and shifts everyone else up
+	def fade_out_row(self, scene, i):
+		# Shuffle everyone else after it up
+		shuffle = [self.grid[k].animate.move_to(self.grid[k-1].get_center()) for k in range(i+1, len(self.grid))]
+
+		scene.play(FadeOut(self.grid[i]))
+		scene.play(
+			LaggedStart(*shuffle, lag_ratio=1/(len(self.grid)-i)),
+			run_time=1
+		)
+		self.grid -= self.grid[i]

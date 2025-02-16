@@ -9,10 +9,10 @@ class Leaderboard(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
-		w = [5, 4, 4, 2]
-		l = [1, 4, 2, 6]
-		r = [4, 2, 4, 2]
-		g = [[0, 1, 3, 0], [1, 0, 0, 1], [3, 0, 0, 1], [0, 1, 1, 0]]
+		w = [6, 4, 4, 2]
+		l = [0, 2, 4, 6]
+		r = [4, 4, 2, 2]
+		g = [[0, 3, 1, 0], [3, 0, 0, 1], [1, 0, 0, 1], [0, 1, 1, 0]]
 
 		
 		lb = Board(w, l, r, g)
@@ -40,6 +40,7 @@ class Leaderboard(Scene):
 			question.animate.set_color(WHITE),
 			FadeOut(surround)
 		)
+		question_group -= surround
 		self.wait(2)
 
 
@@ -48,4 +49,33 @@ class Leaderboard(Scene):
 		self.wait(2)
 
 		lb.swap_rows(self, 4, 2)
+		self.wait(2)
+
+		# Eliminate the team
+		lb.set_row_color(self, 2, RED)
+
+		eliminated_team = lb.teams[3].copy()
+		eliminated_text = Text("is trivially eliminated", font_size=24)
+		eliminated_group = VGroup(eliminated_team, eliminated_text).arrange().move_to(UP*3).scale(0.8)
+		self.play(
+			Transform(question_group, eliminated_group)
+		)
+		self.wait(2)
+
+		lb.fade_out_row(self, 2)
+		self.wait(2)
+
+
+		# Show the third place team cannot win
+		lb.increment_wins_2(self, 3, 6)
+		self.wait(2)
+
+		lb.swap_rows(self, 3, 1)
+		self.wait(2)
+
+		lb.increment_losses_2(self, 2, 4)
+		self.wait(2)
+
+		lb.swap_rows(self, 3, 1)
+		self.wait(2)
 
