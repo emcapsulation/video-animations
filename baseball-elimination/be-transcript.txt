@@ -39,4 +39,82 @@ What if I told you this could be turned into a max flow problem?
 
 
 Scene 3
-This is known as the baseball elimination algorithm. But before I show you the algorithm, what is a max flow problem?
+This is known as the Baseball Elimination Problem. You can determine whether a team is eliminated by turning this into a max flow problem. But what is a max flow problem?
+
+Imagine you have a graph which has a source node where flow is emanating from, and a sink node where the flow will reach. Nodes are joined with weighted directed edges, where each edge weight defines the maximum flow (or capacity) which can be sent through this edge.
+
+Then the goal of the max flow problem is to determine what is the maximum flow that can reach the sink given the capacity of edges in the graph.
+
+
+Scene 4
+Let's look at a small example.
+
+To find the max flow, let's look at the paths.
+
+Starting with the top path, 5 units of flow can travel through the first edge. But the second edge only has a capacity of 3, restricting the flow. This means only 3 units of flow will reach the sink in this path.
+
+Now let's analyse the bottom path. 2 units of flow can travel through the first edge. Now, even though the next edge has the ability to carry 4 units of flow, only 2 units of flow entered the edge. So this edge will simply carry these 2 units to the sink.
+
+The max flow of this flow network is 3 (from the top path) + 2 (from the bottom path) = 5. 
+
+
+Scene 5
+In fact the maximum flow is equal to the minimum cut. A cut is a set of edges where if you removed them, you would disconnect the source from the sink. And we want the minimum cut - the cut with the smallest total of edge weights.
+
+This makes sense because the minimum cut essentially represents your bottlenecks in all the paths from the source to the sink. So this caps your maximum flow.
+
+Going back to our previous example, these are all cuts because the source is disconnected from the sink. But to find the max flow, we want the min cut, which is this one because removing these edges disconnects the source and sink, and 3 + 2 is the minimum total edge weights for any cut in this network.
+
+Bringing back our larger network, can you find the max flow?
+
+
+Scene 6
+Ok so how do we turn the baseball elimination problem into a max flow problem?
+
+Let's use this scoresheet as an example - we want to check if blah is eliminated.
+
+Step 1: Create a game vertex for each combination of two teams in the table (not including the team we are checking). These game vertices represent the remaining games those two teams have to play against one another. 
+
+Step 2: Set the capacity of the edges from the source to these game vertices as the number of remaining games those two teams have to play against each other.
+
+Step 3: Create a team vertex for each team, not including the team we are checking. These represent the winners of the games in the game vertices.
+
+Step 4: Join each game vertex to the two teams playing in that game. The flow of an edge here represents the number of wins for the team which the edge is pointing to. So we set the capacity of these edges to be infinity, because we don't wish to restrict the flow here. We are going to determine the flow, or number of wins, later.
+
+Step 5: Connect each of these team vertices to the sink. Now, we do want to restrict the flow here. We want to set the capacity to be the maximum number of wins this team can get such that it cannot overtake the team we are checking.
+
+This is equal to the total number of wins possible for the team we are checking (w + r), minus the number of wins which this team vertex has already achieved.
+
+For example (give example based on table).
+
+Amazingly, the team is eliminated if and only if the maximum flow is equal to the number of remaining games between all other teams. I.e. the sum of all these edge weights from the source to the game vertices.
+
+Remember the max flow is equal to the min cut - in this case the min cut is blah, so our team is eliminated.
+
+
+Scene 7
+Let's explain why with two examples - first where our team is not eliminated, and then where our team is eliminated.
+
+In this example we wish to see if blah is eliminated.
+
+In the edges to the sink, we restrict the flow representing the wins of the other teams. This restriction ensures the number of wins of all other teams is enought to, at best, tie with the team we are checking (and NOT overtake it).
+
+And the flow from the source represents the games played.
+
+If the max flow is equal to the number of remaining games, it means the flow (or other games) can be distributed in this network in such a way that all other teams can, at best, tie with the team we are checking. This means our team is not eliminated - it has a chance of winning!
+
+
+Scene 8
+If the max flow is less than the number of remaining games between all other teams, it means it is not possible to play all remaining games such that our team wins. 
+
+This is because the flow represents the number of games played so that no team overtakes our team, and since the max flow is less than the number of remaining games, well, our team will be overtaken.
+
+So our team is eliminated.
+
+
+Scene 9
+Let's do one more example with that really complicated one from the start.
+
+
+Scene 10
+Let's code this now.
