@@ -1,6 +1,6 @@
 from manim import *
 from Leaderboard import Board
-from FlowNetwork import FlowNetwork
+from FlowNetwork import FlowNetwork, BaseballNetwork
 
 
 config.background_color = "#15131c"
@@ -110,6 +110,36 @@ class Leaderboard(Scene):
 		no_win_group = VGroup(no_win_team, no_win_text).arrange().move_to(UP*3).scale(0.8)
 		self.play(
 			Transform(question_group, no_win_group)
+		)
+		self.wait(2)
+
+
+
+class HarderExample(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		w = [22, 20, 19, 19]
+		l = None
+		r = [6, 7, 9, 4]
+		g = [[0, 3, 2, 1], [3, 0, 4, 0], [2, 4, 0, 3], [1, 0, 3, 0]]
+
+		
+		lb = Board(w, l, r, g)
+		lb.create_grid()
+
+		self.play(Create(lb.grid.scale(0.8)), run_time=2)
+		self.wait(2)
+
+
+		eliminated_team = lb.teams[3].copy()
+		eliminated_text = Text("Can you show ", font_size=24)
+		eliminated_text_2 = Text(" has no chance of winning?", font_size=24)
+		eliminated_group = VGroup(eliminated_text, eliminated_team, eliminated_text_2).arrange().move_to(UP*3).scale(0.8)
+		self.play(
+			Write(eliminated_text),
+			Write(eliminated_text_2),
+			Create(eliminated_team)
 		)
 		self.wait(2)
 
@@ -230,6 +260,49 @@ class MaxFlowMinCut(Scene):
 		fn.min_cut_animation(self, [[0, 3], [1, 4], [2, 6]])
 		self.wait(2)
 
+
+
+class BaseballWalkthrough(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		w = [22, 20, 19, 19]
+		l = None
+		r = [6, 7, 9, 4]
+		g = [[0, 3, 2, 1], [3, 0, 4, 0], [2, 4, 0, 3], [1, 0, 3, 0]]
+
+		
+		lb = Board(w, l, r, g)
+		lb.create_grid()
+
+		self.play(Create(lb.grid.scale(0.8)), run_time=2)
+		self.wait(2)
+
+		eliminated_team = lb.teams[3].copy()
+		eliminated_text = Text("Is ", font_size=24)
+		eliminated_text_2 = Text(" eliminated?", font_size=24)
+		eliminated_group = VGroup(eliminated_text, eliminated_team, eliminated_text_2).arrange().move_to(UP*3).scale(0.8)
+		self.play(
+			Write(eliminated_text),
+			Write(eliminated_text_2),
+			Create(eliminated_team)
+		)
+		self.wait(2)
+
+		rect = lb.put_rectangle_around(self, 4)
+		board = VGroup(lb.grid, rect)
+		self.play(
+			board.animate.scale(0.4).move_to(UP*2 + LEFT*5),
+			eliminated_group.animate.move_to(UP*3.5 + LEFT*5)
+		)
+
+		line = Line(UP*3 + LEFT*2.5, DOWN*3 + LEFT*2.5)
+		self.play(Create(line))
+
+		fn = BaseballNetwork(w, r, g, lb.teams, 3)
+		fn.create_network(0.7, RIGHT*2.25)
+		self.add(fn.network)
+		self.wait(2)
 
 
 

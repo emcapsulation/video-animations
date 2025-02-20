@@ -32,6 +32,8 @@ class Board:
 	# Creates the grid
 	def create_grid(self):
 		heading_text = ["t", "w", "l", "r"]
+		if self.l == None:
+			heading_text = ["t", "w", "r"]
 
 		headings = VGroup()
 		for h in heading_text:
@@ -45,6 +47,8 @@ class Board:
 		self.grid.add(headings)
 
 		vectors = [self.teams, self.w, self.l, self.r, self.g]
+		if self.l == None:
+			vectors = [self.teams, self.w, self.r, self.g]
 
 		for i in range(0, len(vectors[0])):
 			row = VGroup(self.teams[i])
@@ -119,8 +123,7 @@ class Board:
 			)
 
 		scene.play(
-			row[1].animate.set_color(WHITE),
-			row[3].animate.set_color(WHITE)
+			row[1].animate.set_color(WHITE)
 		)
 
 
