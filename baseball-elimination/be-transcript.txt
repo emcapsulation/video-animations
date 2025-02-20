@@ -63,15 +63,19 @@ In fact the maximum flow is equal to the minimum cut. A cut is a set of edges wh
 
 This makes sense because the minimum cut essentially represents your bottlenecks in all the paths from the source to the sink. So this caps your maximum flow.
 
-Going back to our previous example, these are all cuts because the source is disconnected from the sink. But to find the max flow, we want the min cut, which is this one because removing these edges disconnects the source and sink, and 3 + 2 is the minimum total edge weights for any cut in this network.
+Going back to our previous example, the edges I'm removing are all cuts because the source is disconnected from the sink. 
 
-Bringing back our larger network, can you find the max flow?
+But to find the max flow, we want the min cut, which is this one because removing these edges disconnects the source and sink, and 3 + 2 is the minimum total edge weights for any cut in this network. So the max flow is 3 + 2 = 5.
+
+Bringing back our larger network, can you find the max flow by searching for the min cut?
 
 
 Scene 6
-Ok so how do we turn the baseball elimination problem into a max flow problem?
+Ok so what does all this have to do with the baseball elimination problem?
 
 Let's use this scoresheet as an example - we want to check if blah is eliminated.
+
+Put the source in.
 
 Step 1: Create a game vertex for each combination of two teams in the table (not including the team we are checking). These game vertices represent the remaining games those two teams have to play against one another. 
 
