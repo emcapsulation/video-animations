@@ -29,11 +29,11 @@ Circle has three games left to play against Triangle. Remember, Circle needs to 
 
 This means Triangle must win those three games. But, this would actually put Triangle into first place instead.
 
-As a result, Pentagon cannot win the season. They are eliminated too, but not trivially.
+As a result, Pentagon cannot win the season. They are eliminated too, but less trivially.
 
 
 Scene 2
-And to see how complicated this can get, here is a much larger example. Can you show that <shape> has no chance of winning the season?
+And to see how complicated this can get, here is a harder example. Can you show that <shape> has no chance of winning the season?
 
 What if I told you this could be turned into a max flow problem?
 
@@ -69,51 +69,57 @@ But to find the max flow, we want the min cut, which is this one because removin
 
 Bringing back our larger network, can you find the max flow by searching for the min cut?
 
+That's right, this is the max flow.
+
 
 Scene 6
 Ok so what does all this have to do with the baseball elimination problem?
 
-Let's use this scoresheet as an example - we want to check if blah is eliminated.
+Let's use this scoresheet as an example - we want to check if blah is eliminated. We create a flow network of the other teams' remaining games.
 
-Put the source in.
+First, create a game vertex for each combination of two teams in the table (not including the team we are checking). These game vertices represent the remaining games of the other teams. 
 
-Step 1: Create a game vertex for each combination of two teams in the table (not including the team we are checking). These game vertices represent the remaining games those two teams have to play against one another. 
+So, we set the capacity of the edges from the source to these game vertices as the number of remaining games those two teams have to play against each other.
 
-Step 2: Set the capacity of the edges from the source to these game vertices as the number of remaining games those two teams have to play against each other.
+Next, create a team vertex for each team, not including the team we are checking. These represent the winners of the games from the game vertices.
 
-Step 3: Create a team vertex for each team, not including the team we are checking. These represent the winners of the games in the game vertices.
+Join each game vertex to the two teams playing in that game. We set the capacity of these edges to be infinity, because we don't wish to restrict the flow here. We are going to determine the flow, or number of wins from the game vertices, later.
 
-Step 4: Join each game vertex to the two teams playing in that game. The flow of an edge here represents the number of wins for the team which the edge is pointing to. So we set the capacity of these edges to be infinity, because we don't wish to restrict the flow here. We are going to determine the flow, or number of wins, later.
-
-Step 5: Connect each of these team vertices to the sink. Now, we do want to restrict the flow here. We want to set the capacity to be the maximum number of wins this team can get such that it cannot overtake the team we are checking.
+Connect each of these team vertices to the sink. Now, we do want to restrict the flow here. We want to set the capacity to be the maximum number of wins this team can get such that it cannot overtake the team we are checking.
 
 This is equal to the total number of wins possible for the team we are checking (w + r), minus the number of wins which this team vertex has already achieved.
 
-For example (give example based on table).
+For example, the total number of wins possible for blah is all of their current wins, plus the number of remaining games they have. 
 
-Amazingly, the team is eliminated if and only if the maximum flow is equal to the number of remaining games between all other teams. I.e. the sum of all these edge weights from the source to the game vertices.
+So if we look at the first team vertex in our network, what do we set the capacity to be such that they don't overtake blah? Blah's possible wins minus team's wins so far. In other words, team is ok to win n more games and not overtake blah.
 
-Remember the max flow is equal to the min cut - in this case the min cut is blah, so our team is eliminated.
+Amazingly, blah is eliminated if and only if the maximum flow is less than the number of remaining games between all other teams. I.e. the sum of all these edge weights from the source to the game vertices.
+
+Remember the max flow is equal to the min cut - in this case the min cut is 8, which is less than the number of remaining games between the other teams (9), so blah is eliminated.
 
 
 Scene 7
-Let's explain why with two examples - first where our team is not eliminated, and then where our team is eliminated.
-
-In this example we wish to see if blah is eliminated.
+If we analyse the flow here, you can pick up some intuition about why this works.
 
 In the edges to the sink, we restrict the flow representing the wins of the other teams. This restriction ensures the number of wins of all other teams is enought to, at best, tie with the team we are checking (and NOT overtake it).
 
 And the flow from the source represents the games played.
 
-If the max flow is equal to the number of remaining games, it means the flow (or other games) can be distributed in this network in such a way that all other teams can, at best, tie with the team we are checking. This means our team is not eliminated - it has a chance of winning!
-
-
-Scene 8
 If the max flow is less than the number of remaining games between all other teams, it means it is not possible to play all remaining games such that our team wins. 
 
-This is because the flow represents the number of games played so that no team overtakes our team, and since the max flow is less than the number of remaining games, well, our team will be overtaken.
+As you can see here, we cannot distribute the wins of all the remaining games, amongst the other teams such that no one overtakes blah.
 
 So our team is eliminated.
+
+
+Scene 7
+Let's look at an example where the team is not eliminated.
+
+In this example we wish to see if blah is eliminated.
+
+If the max flow is equal to the number of remaining games, it means the flow (or other games) can be distributed in this network in such a way that all other teams can, at best, tie with the team we are checking. This means our team is not eliminated - it has a chance of winning!
+
+In this case, we can distribute the wins of the other teams' remaining games in this way. This allows blah to win.
 
 
 Scene 9

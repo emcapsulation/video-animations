@@ -3,25 +3,35 @@ import random
 
 
 class Board:
-	def __init__(self, w, l, r, g):
+	def __init__(self, w, l, r, g, t=None):
 		self.w = w
 		self.l = l
 		self.r = r
 		self.g = g
+		self.t = t
 
 		self.num_teams = len(self.w)
-		self.teams = self.get_teams()
+
+		if t == None:
+			self.teams = self.get_teams()
+		else:
+			self.teams = self.get_teams(t[0], t[1])
 
 		self.grid = VGroup()
 
 
 
 	# Randomly generate team logos
-	def get_teams(self):
-		colour_list = [BLUE, TEAL, GREEN, YELLOW, GOLD, ORANGE, RED, MAROON, PURPLE, PINK]
-		colors = random.sample(colour_list, self.num_teams)
-		shape_list = [Circle(), Square(), Triangle(), RegularPolygon(n=4), RegularPolygon(n=5), RegularPolygon(n=6)]
-		shapes = random.sample(shape_list, self.num_teams)
+	def get_teams(self, colour_list=None, shape_list=None):
+		colors = colour_list
+		shapes = shape_list
+
+		if colour_list == None:
+			colour_list = [BLUE, TEAL, GREEN, YELLOW, GOLD, ORANGE, RED, MAROON, PURPLE, PINK]
+			colors = random.sample(colour_list, self.num_teams)
+		if shape_list == None:
+			shape_list = [Circle(), Square(), Triangle(), RegularPolygon(n=4), RegularPolygon(n=5), RegularPolygon(n=6)]
+			shapes = random.sample(shape_list, self.num_teams)	
 
 		teams = []
 		for i in range(0, self.num_teams):
@@ -240,6 +250,18 @@ class Board:
 		)
 
 		scene.play(Create(surround))
+		return surround
+
+
+	# Put a rectangle around a row
+	def add_rectangle_around(self, scene, i):
+		surround = SurroundingRectangle(
+			self.grid[i],
+			buff=0.4,
+			color=WHITE
+		)
+
+		scene.add(surround)
 		return surround
 
 

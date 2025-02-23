@@ -57,6 +57,9 @@ class FlowEdge:
 		self.n1.neighbours.append(self.n2)
 		self.n1.edges.append(self)
 
+		# This is for flow animations
+		self.flow = None
+
 
 
 class FlowNetwork:
@@ -106,6 +109,7 @@ class FlowNetwork:
 		visited = [cur]
 		queue = [cur]
 		scene.play(Create(cur.dot))
+		scene.play(Create(self.sink.dot))
 
 		while len(queue) > 0:
 			cur = queue[0]
@@ -113,8 +117,9 @@ class FlowNetwork:
 			for e in cur.edges:
 				scene.play(Create(e.arrow))
 
-				if e.n2 not in visited:					
-					scene.play(Create(e.n2.dot))
+				if e.n2 not in visited:	
+					if e.n2 != self.sink:				
+						scene.play(Create(e.n2.dot))
 					queue.append(e.n2)
 					visited.append(e.n2)
 
@@ -176,7 +181,19 @@ class FlowNetwork:
 
 		scene.play(*edge_set)
 		scene.wait(2)
-		scene.play(*edge_set_2, min_cut_set.animate.set_color(BLUE).scale(1.5).arrange(buff=0.5).move_to(UP))
+
+		s = 0
+		i = 0
+		while i < len(min_cut_set):
+			s += int(min_cut_set[i].get_text())
+			i += 1
+			if i < len(min_cut_set):
+				min_cut_set.insert(i, Text("+", color=WHITE, font_size=20))
+			i += 1
+		min_cut_set.add(Text("=", color=WHITE, font_size=20))
+		min_cut_set.add(Text(str(s), color=WHITE, font_size=20))
+
+		scene.play(*edge_set_2, min_cut_set.animate.set_color(BLUE).set_font_size(30).arrange(buff=0.5).move_to(UP))
 
 
 
@@ -240,8 +257,6 @@ class BaseballNetwork:
 		pos = [2, 4]
 		pos_increment = 2*pos[1]/((self.num_teams-1)-1)
 
-		self.team_to_index = {}
-
 		for i in range(0, len(self.no_check)):
 			team_node = TeamNode(i, self.no_check[i].copy(), pos)
 			self.team_nodes.append(team_node)
@@ -299,9 +314,153 @@ class BaseballNetwork:
 		self.network = network.scale(scale).move_to(position)
 
 
+	# Creates the source and sink
+	def draw_source_sink(self, scene):
+		scene.play(Create(self.source.dot))
+		scene.play(Create(self.sink.dot))
 
 
+	# Creates the game vertices
+	def draw_vertices(self, scene, type):
+		if type == "game":
+			for gn in self.game_nodes:
+				scene.play(Create(gn.dot))
+		elif type == "team":
+			for tn in self.team_nodes:
+				scene.play(Create(tn.dot))
 
 
+	# Creates the game edges
+	def draw_edges(self, scene, type):
+		if type == "game":
+			for ge in self.game_edges:
+				scene.play(GrowArrow(ge.arrow[0]))
+				scene.play(Write(ge.arrow[1]))
+		elif type == "team":
+			for te in self.game_to_team:
+				scene.play(GrowArrow(te.arrow[0]))
+				scene.play(Write(te.arrow[1]))
+		elif type == "sink":
+			i = 0
+			for te in self.team_edges:
+				scene.play(GrowArrow(te.arrow[0]))
+
+				sum_text = Text(str(self.w[self.check]) + ' + ' + str(self.r[self.check]) + ' - ' + str(self.w[i]), font_size=20).move_to(te.arrow[1].get_center())
+				scene.play(Write(sum_text))
+				i += 1
+
+				scene.wait(2)
+				scene.play(Transform(sum_text, te.arrow[1]))
+
+
+	# Highlights the game edges
+	def highlight_edges(self, scene, type):
+		l = None
+		if type == "game":
+			l = self.game_edges
+		elif type == "team":
+			l = self.team_edges
+
+		turn_blue = []
+		turn_white = []
+
+		for ge in l:
+			ge.arrow.set_color(BLUE)
+
+		scene.wait(2)
+
+		for ge in l:
+			ge.arrow.set_color(WHITE)
+
+
+	# Removes edges of the min cut
+	def num_remaining_animation(self, scene):
+		edge_list = self.game_edges
+		min_cut_set = VGroup(Text("# remaining games = ", font_size=20))
+
+		for e2 in edge_list:
+			min_cut_set.add(e2.arrow[1].copy())
+		scene.wait(2)
+
+		s = 0
+		i = 1
+		while i < len(min_cut_set):
+			s += int(min_cut_set[i].get_text())
+			i += 1
+			if i < len(min_cut_set):
+				min_cut_set.insert(i, Text("+", color=WHITE, font_size=20))
+			i += 1
+
+		min_cut_set.add(Text("=", color=WHITE, font_size=20))
+		min_cut_set.add(Text(str(s), color=WHITE, font_size=20))
+
+		scene.play(min_cut_set.animate.set_font_size(30).arrange(buff=0.25).next_to(self.network, UP*2))
+
+
+	# Removes edges of the min cut
+	def min_cut_animation(self, scene, edge_list):
+		if edge_list == "team":
+			edge_list = self.team_edges
+
+		edge_set_2 = []
+		min_cut_set = VGroup(Text("max flow = ", font_size=20))
+
+		for e2 in edge_list:
+			edge_set_2.append(e2.arrow.animate.set_color(RED))
+			min_cut_set.add(e2.arrow[1].copy())
+		scene.wait(2)
+
+		s = 0
+		i = 1
+		while i < len(min_cut_set):
+			s += int(min_cut_set[i].get_text())
+			i += 1
+			if i < len(min_cut_set):
+				min_cut_set.insert(i, Text("+", color=WHITE, font_size=20))
+			i += 1
+
+		min_cut_set.add(Text("=", color=WHITE, font_size=20))
+		min_cut_set.add(Text(str(s), color=WHITE, font_size=20))
+
+		scene.play(*edge_set_2, min_cut_set.animate.set_font_size(30).arrange(buff=0.25).next_to(self.network, UP))
+
+
+	# Turns the edges in edge_list white
+	def turn_white(self, edge_list):
+		if edge_list == "team":
+			edge_list = self.team_edges
+
+		edge_set_2 = []
+		for e2 in edge_list:
+			e2.arrow.set_color(WHITE)
+
+
+	# Animates flow
+	def flow_animate(self, scene, edge_list):
+		# Edge list is: [[[edge, flow], [edge, flow]], [[edge, flow], [edge, flow]]]
+		for edge_set in edge_list:
+			edge_anim = []
+
+			for e in edge_set:
+				a = e[0].arrow[0].copy().set_color(BLUE)				
+				edge_anim.append(GrowArrow(a))
+
+				if e[0].flow != None:
+					f = Text(str(int(e[0].flow[1].get_text())+e[1]), font_size=20, color=BLUE).move_to(e[0].arrow[1].get_center() + RIGHT*0.5)
+					edge_anim.append(ReplacementTransform(e[0].flow[1], f))
+				else:
+					f = Text(str(e[1]), font_size=20, color=BLUE).move_to(e[0].arrow[1].get_center() + RIGHT*0.5)
+					edge_anim.append(Write(f))
+				e[0].flow = VGroup(a, f)
+
+			for ea in edge_anim:
+				scene.play(ea)
+
+
+	# Make the edges red
+	def make_edges_red(self, edge_list):
+		for e in edge_list:
+			e.arrow.set_color(RED)
+			e.flow[0].set_color(RED)
 
 

@@ -15,9 +15,10 @@ class Leaderboard(Scene):
 		l = [0, 2, 4, 6]
 		r = [4, 4, 2, 2]
 		g = [[0, 3, 1, 0], [3, 0, 0, 1], [1, 0, 0, 1], [0, 1, 1, 0]]
+		t = [[LIGHT_PINK, PURPLE, BLUE, TEAL], [Circle(), Square(), Triangle(), RegularPolygon(n=4)]]
 
 		
-		lb = Board(w, l, r, g)
+		lb = Board(w, l, r, g, t)
 		lb.create_grid()
 
 		self.play(Create(lb.grid.scale(0.8)), run_time=2)
@@ -123,9 +124,10 @@ class HarderExample(Scene):
 		l = None
 		r = [6, 7, 9, 4]
 		g = [[0, 3, 2, 1], [3, 0, 4, 0], [2, 4, 0, 3], [1, 0, 3, 0]]
+		t = [[MAROON, RED, GOLD, YELLOW], [Square(), RegularPolygon(n=5), Triangle(), RegularPolygon(n=4)]]
 
 		
-		lb = Board(w, l, r, g)
+		lb = Board(w, l, r, g, t)
 		lb.create_grid()
 
 		self.play(Create(lb.grid.scale(0.8)), run_time=2)
@@ -213,15 +215,15 @@ class MaxFlowMinCut(Scene):
 
 		mfmc_text = Text("max flow = min cut", color=WHITE, font_size=36)
 		mfmc_text[8:11].set_color(YELLOW)
-		mfmc_text[11:14].set_color(PINK)
+		mfmc_text[11:14].set_color(GREEN)
 		self.play(Write(mfmc_text))
 		self.wait(2)
 		
-		cut_text = Text("set of edges whose removal\ndisconnects source from sink", color=PINK, font_size=24).move_to(mfmc_text.get_center() + UP*1.1 + RIGHT*2)
+		cut_text = Text("set of edges whose removal\ndisconnects source from sink", color=GREEN, font_size=24).move_to(mfmc_text.get_center() + UP*1.1 + RIGHT*3.5)
 		self.play(Write(cut_text))
 		self.wait(2)
 
-		min_text = Text("smallest total of\nedge weights", color=YELLOW, font_size=24).move_to(mfmc_text.get_center() + DOWN*1.1 + LEFT*0.5)
+		min_text = Text("smallest total\nof edge weights", color=YELLOW, font_size=24).move_to(mfmc_text.get_center() + DOWN*1.1)
 		self.play(Write(min_text))
 		self.wait(2)
 
@@ -247,8 +249,22 @@ class MaxFlowMinCut(Scene):
 		self.wait(2)
 
 		self.remove(fn2.network)
-		self.wait(2)
+		self.wait(2)		
 
+
+
+class MaxFlowMinCut2(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		max_flow_title = Text("Max Flow").shift(UP*3)
+		self.add(max_flow_title)
+
+		mfmc_text = Text("max flow = min cut", color=WHITE, font_size=36).scale(0.8).move_to(UP*2)
+		mfmc_text[8:11].set_color(YELLOW)
+		mfmc_text[11:14].set_color(GREEN)
+		self.add(mfmc_text)
+		self.wait(2)
 
 		edge_list = [[0, 1, 10], [0, 2, 12], [0, 3, 4], [1, 4, 3], [1, 2, 6], [3, 5, 7], [2, 6, 9], [4, 6, 10], [5, 6, 5]]
 		positions = [[-5, 0], [-1, -0.5], [1, 2], [-2, -2], [1.5, -0.5], [3, -2], [5, 0]]
@@ -270,9 +286,10 @@ class BaseballWalkthrough(Scene):
 		l = None
 		r = [6, 7, 9, 4]
 		g = [[0, 3, 2, 1], [3, 0, 4, 0], [2, 4, 0, 3], [1, 0, 3, 0]]
+		t = [[MAROON, RED, GOLD, YELLOW], [Square(), RegularPolygon(n=5), Triangle(), RegularPolygon(n=4)]]
 
 		
-		lb = Board(w, l, r, g)
+		lb = Board(w, l, r, g, t)
 		lb.create_grid()
 
 		self.play(Create(lb.grid.scale(0.8)), run_time=2)
@@ -300,8 +317,151 @@ class BaseballWalkthrough(Scene):
 		self.play(Create(line))
 
 		fn = BaseballNetwork(w, r, g, lb.teams, 3)
-		fn.create_network(0.7, RIGHT*2.25)
+		fn.create_network(0.7, RIGHT*2.25)		
+		fn.draw_source_sink(self)
+
+		game_vertices_text = Text("Create game vertices representing\ngames.", font_size=24).scale(0.5).next_to(board, DOWN)
+		self.play(Write(game_vertices_text))
+		self.wait(2)
+		fn.draw_vertices(self, "game")
+		self.wait(2)
+
+		game_capacity_text = Text("Set capacity to number of remaining\ngames between those teams.", font_size=24).scale(0.5).next_to(game_vertices_text, DOWN)
+		self.play(Write(game_capacity_text))
+		self.wait(2)
+		fn.draw_edges(self, "game")
+		self.wait(2)
+
+		team_vertices_text = Text("Create team vertices representing\nthe winners of the game vertices.", font_size=24).scale(0.5).next_to(game_capacity_text, DOWN)
+		self.play(Write(team_vertices_text))
+		self.wait(2)
+		fn.draw_vertices(self, "team")
+		self.wait(2)
+
+		team_capacity_text = Text("Don't restrict flow from game to\nteam vertices.", font_size=24).scale(0.5).next_to(team_vertices_text, DOWN)
+		self.play(Write(team_capacity_text))
+		self.wait(2)
+		fn.draw_edges(self, "team")
+		self.wait(2)
+
+		sink_capacity_text = Text("Set capacity of team vertices to\nsink:\n- Maximum number of wins so that\nthis team doesn't overtake the\nteam we are checking (k).\n- capacity = w[k]+r[k]-w[i]", font_size=24).scale(0.5).next_to(team_capacity_text, DOWN)
+		self.play(Write(sink_capacity_text))
+		self.wait(2)
+		fn.draw_edges(self, "sink")
+		self.wait(2)
+
+		win_text = Text("Team is eliminated if:\nmax flow < num remaining games", font_size=24).scale(0.5).next_to(sink_capacity_text, DOWN)
+		self.play(Write(win_text))
+		self.wait(2)
+		fn.highlight_edges(self, "game")
+		self.wait(2)
+		self.play(fn.network.animate.shift(DOWN*0.5))
+		fn.num_remaining_animation(self)
+		self.wait(2)
+		fn.min_cut_animation(self, "team")
+		self.wait(2)
+
+		max_flow_text = Text("max flow < num remaining games", color=BLACK, font_size=24)
+		max_flow_team = lb.teams[3].copy().scale(1.5)
+		max_flow_text_2 = Text("is eliminated", color=BLACK, font_size=24)
+		max_flow_group_2 = VGroup(max_flow_team, max_flow_text_2).arrange()
+		max_flow_group = VGroup(max_flow_text, max_flow_group_2).arrange(DOWN)
+
+		surround = BackgroundRectangle(max_flow_group, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2).move_to(ORIGIN)
+		self.play(
+			Create(surround),
+			Write(max_flow_text)
+		)
+		self.play(
+			Write(max_flow_text_2),
+			Create(max_flow_team)
+		)
+		self.wait(2)
+
+		self.play(
+			FadeOut(surround, max_flow_group)
+		)
+
+
+
+class BaseballFlow(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		w = [22, 20, 19, 19]
+		l = None
+		r = [6, 7, 9, 4]
+		g = [[0, 3, 2, 1], [3, 0, 4, 0], [2, 4, 0, 3], [1, 0, 3, 0]]
+		t = [[MAROON, RED, GOLD, YELLOW], [Square(), RegularPolygon(n=5), Triangle(), RegularPolygon(n=4)]]
+
+		
+		lb = Board(w, l, r, g, t)
+		lb.create_grid()
+		lb.grid.scale(0.8)
+
+		eliminated_team = lb.teams[3].copy()
+		eliminated_text = Text("Is ", font_size=24)
+		eliminated_text_2 = Text(" eliminated?", font_size=24)
+		eliminated_group = VGroup(eliminated_text, eliminated_team, eliminated_text_2).arrange().move_to(UP*3).scale(0.8)
+		self.add(
+			eliminated_text,
+			eliminated_text_2,
+			eliminated_team
+		)
+
+		rect = lb.add_rectangle_around(self, 4)
+		board = VGroup(lb.grid, rect)
+		self.add(
+			board.scale(0.4).move_to(UP*2 + LEFT*5),
+			eliminated_group.move_to(UP*3.5 + LEFT*5)
+		)
+
+		line = Line(UP*3 + LEFT*2.5, DOWN*3 + LEFT*2.5)
+		self.add(line)
+
+		fn = BaseballNetwork(w, r, g, lb.teams, 3)
+		fn.create_network(0.7, RIGHT*2.25+DOWN*0.5)		
 		self.add(fn.network)
+
+		game_vertices_text = Text("Create game vertices representing\ngames.", font_size=24).scale(0.5).next_to(board, DOWN)
+		self.add(game_vertices_text)
+
+		game_capacity_text = Text("Set capacity to number of remaining\ngames between those teams.", font_size=24).scale(0.5).next_to(game_vertices_text, DOWN)
+		self.add(game_capacity_text)
+
+		team_vertices_text = Text("Create team vertices representing\nthe winners of the game vertices.", font_size=24).scale(0.5).next_to(game_capacity_text, DOWN)
+		self.add(team_vertices_text)
+		
+		team_capacity_text = Text("Don't restrict flow from game to\nteam vertices.", font_size=24).scale(0.5).next_to(team_vertices_text, DOWN)
+		self.add(team_capacity_text)
+
+		sink_capacity_text = Text("Set capacity of team vertices to\nsink:\n- Maximum number of wins so that\nthis team doesn't overtake the\nteam we are checking (k).\n- capacity = w[k]+r[k]-w[i]", font_size=24).scale(0.5).next_to(team_capacity_text, DOWN)
+		self.add(sink_capacity_text)
+
+		win_text = Text("Team is eliminated if:\nmax flow < num remaining games", font_size=24).scale(0.5).next_to(sink_capacity_text, DOWN)
+		self.add(win_text)
+
+		fn.num_remaining_animation(self)
+		fn.min_cut_animation(self, "team")
+		fn.turn_white("team")
+		self.wait(2)
+
+		fn.highlight_edges(self, "team")
+		self.wait(2)
+		fn.highlight_edges(self, "game")
+		self.wait(2)
+
+		edge_list = [[[fn.game_edges[0], 3]], [[fn.game_to_team[0], 1], [fn.team_edges[0], 1]], [[fn.game_to_team[1], 2], [fn.team_edges[1], 2]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+		edge_list = [[[fn.game_edges[1], 2]], [[fn.game_to_team[3], 2]], [[fn.team_edges[2], 2]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+		edge_list = [[[fn.game_edges[2], 4]], [[fn.game_to_team[4], 1], [fn.team_edges[1], 1]], [[fn.game_to_team[5], 3], [fn.team_edges[2], 3]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+
+		fn.make_edges_red([fn.team_edges[2]])
 		self.wait(2)
 
 
