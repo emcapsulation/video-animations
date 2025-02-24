@@ -172,7 +172,6 @@ class Board:
 				*incs, *decs
 			)
 
-
 		scene.play(
 			row[1].animate.set_color(WHITE),
 			row[3].animate.set_color(WHITE)
@@ -278,3 +277,29 @@ class Board:
 		)
 
 		return surround
+
+
+	# Animates winning games
+	def win_games(self, scene, vs, wins):
+		t1, t2 = vs[0], vs[1]
+		w1, w2 = wins[0], wins[1]
+
+		for i in range(0, 2):
+			win_team = vs[i]
+
+			for j in range(0, wins[i]):
+				inc_cells = [self.grid[win_team+1][1]]
+				dec_cells = [self.grid[t1+1][t2+1+2], self.grid[t2+1][t1+1+2], self.grid[t1+1][2], self.grid[t2+1][2]]
+
+				incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=30, color=GREEN).move_to(ic.get_center()).scale(0.4)) for ic in inc_cells]
+				decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=30).move_to(dc.get_center()).scale(0.4)) for dc in dec_cells]
+
+				scene.play(
+					*incs, *decs
+				)
+
+			scene.play(
+				self.grid[win_team+1][1].animate.set_color(WHITE)
+			)
+
+
