@@ -265,3 +265,31 @@ class DrawAndGlowLetter(Scene):
         self.play(FadeOut(letter_e_stroke, glow_effect))
 
         self.wait(3)
+
+
+
+class Thumbnail(Scene):
+    def construct(self):
+        Text.set_default(font="Monospace")
+
+        title_text = Text("Floyd's Cycle Finding Algorithm").shift(UP*3)
+        self.add(title_text)
+
+        time_complexity = Text("Time complexity: O(n), Space complexity: O(1)", font_size=24).shift(UP*2)    
+        time_complexity[15:19].set_color(GREEN)   
+        time_complexity[36:40].set_color(GREEN)
+        self.add(time_complexity)
+
+        pointer = Dot(color=P1_COL, radius=P_RAD).shift(UP*1 + LEFT*3.5)
+        slow_text = Text("Slow pointer (tortoise) \n - Moves one node at a time", font_size=24).shift(UP*1)
+
+        pointer2 = Dot(color=P2_COL, radius=P_RAD).shift(LEFT*3.5)
+        fast_text = Text("Fast pointer (hare) \n - Moves two nodes at a time", font_size=24)
+
+        p_group = VGroup(pointer, slow_text, pointer2, fast_text)
+        self.add(p_group)
+
+        LL = LinkedList(True)
+        LL.create_large_list()
+        self.add(LL.ll_group)
+

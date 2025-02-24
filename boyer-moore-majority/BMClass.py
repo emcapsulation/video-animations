@@ -27,11 +27,13 @@ class Votes:
 
 	def get_votes(self):
 		return self.votes
+		
 
 	def init_votes(self):
 		open_bracket = Text("[");
 		close_bracket = Text("]").move_to(open_bracket.get_right() + RIGHT*0.2);
 		self.votes.add(open_bracket, close_bracket)
+
 
 	def show_votes(self, scene, order):
 		for i in range(0, len(order)):
@@ -42,6 +44,7 @@ class Votes:
 			self.votes[-1].shift(RIGHT*1.5*cur_dot.get_width())
 			self.votes.move_to(ORIGIN + DOWN*1.5)	
 		scene.add(self.votes)	
+
 
 	# Order is the order of votes
 	def animate_votes(self, scene, order):
@@ -465,7 +468,6 @@ class Votes:
 
 		scene.wait(2)
 		scene.play(Write(Text("Majority Element", font_size=24).shift(UP*3 + LEFT*3)))
-
 
 
 	def create_rects_mobile(self, scene):
