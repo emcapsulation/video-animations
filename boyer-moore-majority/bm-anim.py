@@ -502,3 +502,55 @@ class DrawAndGlowLetter(Scene):
         self.play(FadeOut(letter_e_stroke, glow_effect))
 
         self.wait(3)
+
+
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title_text = Text("Boyer Moore Majority Vote Algorithm").shift(UP*3)
+		time_complexity = Text("Time complexity: O(n), Space complexity: O(1)", font_size=24).shift(UP*2)    
+		time_complexity[15:19].set_color(GREEN)   
+		time_complexity[36:40].set_color(GREEN)
+
+		self.add(title_text)
+		self.add(time_complexity)
+
+		# Candidate and count rectangles
+		candidate_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+		count_rect = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=WHITE
+		)
+		count_rect.next_to(candidate_rect, RIGHT, buff=2)
+
+		cand_text = Text("Candidate", font_size=24).move_to(candidate_rect.get_center()).shift(UP*0.25)
+		count_text = Text("Count", font_size=24).move_to(count_rect.get_center()).shift(UP*0.25)
+
+		rects = VGroup(candidate_rect, count_rect, cand_text, count_text).move_to(ORIGIN)
+
+		cand_dot = Dot(color=GOLD, radius=0.2).move_to(candidate_rect.get_center()).shift(DOWN*0.25)
+		rects.add(cand_dot)
+
+		count_num = Text("1", font_size=30).move_to(count_rect.get_center()).shift(DOWN*0.25)
+		rects.add(count_num)
+
+		self.add(rects)
+
+		v = Votes(20)
+		order = [TEAL, TEAL, GOLD, MAROON, GOLD, TEAL, TEAL, PURPLE, MAROON, GOLD, GOLD, TEAL, TEAL, TEAL, TEAL, TEAL, GOLD, TEAL, TEAL, PURPLE]	
+		v.show_votes(self, order)
+		v.votes.shift(DOWN)
+
+		arrow = Arrow(start=DOWN, end=ORIGIN, color=WHITE, stroke_width=8).next_to(v.get_votes()[11], DOWN, buff=0.2)
+		self.add(arrow)
+
+

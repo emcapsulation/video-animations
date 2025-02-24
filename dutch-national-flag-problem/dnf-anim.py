@@ -246,3 +246,27 @@ class Explanation(Scene):
 		s.fade_out(self)
 
 
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")	
+
+		title_text = Text("Dutch National Flag Problem").shift(UP*3)
+		self.add(title_text)
+
+		time_complexity_3 = Text("Time complexity: O(n), Space complexity: O(1)", font_size=24).shift(UP*2)    
+		time_complexity_3[15:19].set_color(GREEN)   
+		time_complexity_3[36:40].set_color(GREEN)
+		self.add(time_complexity_3)
+
+		dnf = VGroup()
+		red = Rectangle(width=3, height=2/3, stroke_width=0, fill_color=VERM_RED, fill_opacity=1)
+		white = Rectangle(width=3, height=2/3, stroke_width=0, fill_color=WHITE, fill_opacity=1).next_to(red.get_center(), DOWN*4/3)
+		blue = Rectangle(width=3, height=2/3, stroke_width=0, fill_color=COB_BLUE, fill_opacity=1).next_to(white.get_center(), DOWN*4/3)
+
+		dnf.add(red, white, blue)
+		dnf.move_to(DOWN*2)
+		self.add(dnf)
+
+		s = Sorter([3, 1, 2, 2, 1, 3, 2, 1, 1, 3, 3, 2], UP*0.5, 3, colours=[VERM_RED, WHITE, COB_BLUE], type="balls")
+		self.add(s.scene_elems.scale(0.9))
