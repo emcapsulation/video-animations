@@ -25,7 +25,7 @@ class FlowNode:
 
 
 class FlowEdge:
-	def __init__(self, n1, n2, capacity, baseball=False):
+	def __init__(self, n1, n2, capacity, baseball=False, stroke_width=3):
 		self.capacity = capacity
 		if capacity == "infinity":
 			self.capacity = 100000
@@ -42,15 +42,13 @@ class FlowEdge:
 			a = Arrow(
 				start=self.n1.dot.get_center(), 
 				end=self.n2.dot.get_center(),
-				buff=0.75
+				buff=0.75,
+				stroke_width=stroke_width
 			)			
 
-		pos_array = [UP*0.35, DOWN*0.35]
-		pos = pos_array[random.randint(0, 1)]
-
-		c = Text(str(self.capacity), font='Monospace', font_size=20).move_to(a.get_center() + pos)
+		c = Text(str(self.capacity), font='Monospace', font_size=20).move_to(a.get_center() + UP*0.35)
 		if capacity == "infinity":
-			c = MathTex("\\infty", font_size=20).move_to(a.get_center() + pos)
+			c = MathTex("\\infty", font_size=20).move_to(a.get_center() + UP*0.35)
 
 		self.arrow = VGroup(a, c)
 
@@ -258,12 +256,16 @@ class BaseballNetwork:
 		pos_increment = 2*pos[1]/((self.num_teams-1)-1)
 
 		for i in range(0, len(self.no_check)):
+			i1 = i
+			if i >= self.check:
+				i1 += 1
+
 			team_node = TeamNode(i, self.no_check[i].copy(), pos)
 			self.team_nodes.append(team_node)
 			pos[1] -= pos_increment
 
 			# Capacity is w[check] + r[check] - w[i]
-			e = FlowEdge(self.team_nodes[-1], self.sink, self.w[check]+self.r[check]-self.w[i], baseball=True)
+			e = FlowEdge(self.team_nodes[-1], self.sink, self.w[check]+self.r[check]-self.w[i1], baseball=True)
 			self.team_edges.append(e)
 
 
@@ -275,20 +277,28 @@ class BaseballNetwork:
 		pos_increment = 2*pos[1]/(((self.num_teams-1)*(self.num_teams-2)/2)-1) # Don't even ask
 
 		for i in range(0, len(self.no_check)):
+			i1 = i
+			if i >= self.check:
+				i1 += 1
+
 			for j in range(i+1, len(self.no_check)):
+				j1 = j
+				if j >= self.check:
+					j1 += 1
+
 				game_node = GameNode([self.no_check[i].copy(), self.no_check[j].copy()], i, j, pos)
 				self.game_nodes.append(game_node)
 				pos[1] -= pos_increment
 
 				# Capacity is number of games left between i and j
-				e = FlowEdge(self.source, self.game_nodes[-1], self.g[i][j], baseball=True)
+				e = FlowEdge(self.source, self.game_nodes[-1], self.g[i1][j1], baseball=True)
 				self.game_edges.append(e)
 
 				# Add edges from games to teams
-				f = FlowEdge(self.game_nodes[-1], self.team_nodes[i], "infinity", baseball=True)
+				f = FlowEdge(self.game_nodes[-1], self.team_nodes[i], "infinity", baseball=True, stroke_width=0.5)
 				self.game_to_team.append(f)
 
-				g = FlowEdge(self.game_nodes[-1], self.team_nodes[j], "infinity", baseball=True)
+				g = FlowEdge(self.game_nodes[-1], self.team_nodes[j], "infinity", baseball=True, stroke_width=0.5)
 				self.game_to_team.append(g)		
 
 
@@ -343,6 +353,9 @@ class BaseballNetwork:
 		elif type == "sink":
 			i = 0
 			for te in self.team_edges:
+				if i == self.check:
+					i += 1
+
 				scene.play(GrowArrow(te.arrow[0]))
 
 				sum_text = Text(str(self.w[self.check]) + ' + ' + str(self.r[self.check]) + ' - ' + str(self.w[i]), font_size=20).move_to(te.arrow[1].get_center())
@@ -350,7 +363,7 @@ class BaseballNetwork:
 				i += 1
 
 				scene.wait(2)
-				scene.play(Transform(sum_text, te.arrow[1]))
+				scene.play(ReplacementTransform(sum_text, te.arrow[1]))
 
 
 	# Highlights the game edges
@@ -401,6 +414,8 @@ class BaseballNetwork:
 	def min_cut_animation(self, scene, edge_list):
 		if edge_list == "team":
 			edge_list = self.team_edges
+		elif edge_list == "game":
+			edge_list = self.game_edges
 
 		edge_set_2 = []
 		min_cut_set = VGroup(Text("max flow = ", font_size=20))
@@ -445,11 +460,13 @@ class BaseballNetwork:
 				a = e[0].arrow[0].copy().set_color(BLUE)				
 				edge_anim.append(GrowArrow(a))
 
+				flow_pos = e[0].arrow[0].get_start() + (e[0].arrow[0].get_end() - e[0].arrow[0].get_start())*0.65 + UP*0.25
+
 				if e[0].flow != None:
-					f = Text(str(int(e[0].flow[1].get_text())+e[1]), font_size=20, color=BLUE).move_to(e[0].arrow[1].get_center() + RIGHT*0.5)
+					f = Text(str(int(e[0].flow[1].get_text())+e[1]), font_size=14, color=BLUE).move_to(flow_pos)
 					edge_anim.append(ReplacementTransform(e[0].flow[1], f))
 				else:
-					f = Text(str(e[1]), font_size=20, color=BLUE).move_to(e[0].arrow[1].get_center() + RIGHT*0.5)
+					f = Text(str(e[1]), font_size=14, color=BLUE).move_to(flow_pos)
 					edge_anim.append(Write(f))
 				e[0].flow = VGroup(a, f)
 
@@ -458,9 +475,10 @@ class BaseballNetwork:
 
 
 	# Make the edges red
-	def make_edges_red(self, edge_list):
+	def make_edges_colour(self, edge_list, colour):
 		for e in edge_list:
-			e.arrow.set_color(RED)
-			e.flow[0].set_color(RED)
+			e.arrow.set_color(colour)
+			if e.flow != None:
+				e.flow[0].set_color(colour)
 
 

@@ -451,18 +451,198 @@ class BaseballFlow(Scene):
 		fn.highlight_edges(self, "game")
 		self.wait(2)
 
+		lb.win_games(self, [3, 0], [1, 0])
+		lb.win_games(self, [3, 2], [3, 0])
+		self.wait(2)
+
 		edge_list = [[[fn.game_edges[0], 3]], [[fn.game_to_team[0], 1], [fn.team_edges[0], 1]], [[fn.game_to_team[1], 2], [fn.team_edges[1], 2]]]
 		fn.flow_animate(self, edge_list)
 		self.wait(2)
+
+		lb.win_games(self, [0, 1], [1, 2])
+		self.wait(2)
+
 		edge_list = [[[fn.game_edges[1], 2]], [[fn.game_to_team[3], 2]], [[fn.team_edges[2], 2]]]
 		fn.flow_animate(self, edge_list)
 		self.wait(2)
+
+		lb.win_games(self, [0, 2], [0, 2])
+		self.wait(2)
+
 		edge_list = [[[fn.game_edges[2], 4]], [[fn.game_to_team[4], 1], [fn.team_edges[1], 1]], [[fn.game_to_team[5], 3], [fn.team_edges[2], 3]]]
 		fn.flow_animate(self, edge_list)
 		self.wait(2)
 
-		fn.make_edges_red([fn.team_edges[2]])
+		lb.win_games(self, [1, 2], [1, 3])
 		self.wait(2)
+
+		fn.make_edges_colour([fn.team_edges[2]], RED)
+		self.wait(2)
+
+		win_team = lb.teams[3].copy()
+		win_text = Text(" cannot win", font_size=24)
+		win_group = VGroup(win_team, win_text).arrange().move_to(LEFT*5 + UP*3.5).scale(0.8)
+		self.play(
+			Transform(eliminated_group, win_group),
+			Uncreate(rect)
+		)
+		self.wait(2)
+
+		lb.swap_rows(self, 3, 1)
+		self.wait(2)
+
+
+
+class BaseballExample(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		w = [7, 5, 3, 2, 2]
+		l = None
+		r = [5, 6, 6, 5, 6]
+		g = [[0, 2, 1, 1, 1], [2, 0, 2, 1, 1], [1, 2, 0, 1, 2], [1, 1, 1, 0, 2], [1, 1, 2, 2, 0]]
+		t = [[MAROON, LIGHT_PINK, PURPLE, BLUE, TEAL], [Square(), RegularPolygon(n=5), Triangle(), RegularPolygon(n=4), RegularPolygon(n=6)]]
+
+		
+		lb = Board(w, l, r, g, t)
+		lb.create_grid()
+
+		self.play(Create(lb.grid.scale(0.8)), run_time=2)
+		self.wait(2)
+
+		eliminated_team = lb.teams[3].copy()
+		eliminated_text = Text("Is ", font_size=24)
+		eliminated_text_2 = Text(" eliminated?", font_size=24)
+		eliminated_group = VGroup(eliminated_text, eliminated_team, eliminated_text_2).arrange().move_to(UP*3.5).scale(0.8)
+		self.play(
+			Write(eliminated_text),
+			Write(eliminated_text_2),
+			Create(eliminated_team)
+		)
+		self.wait(2)
+
+		rect = lb.put_rectangle_around(self, 4)
+		board = VGroup(lb.grid, rect)
+		self.play(
+			board.animate.scale(0.4).move_to(LEFT*5),
+			eliminated_group.animate.move_to(LEFT*5 + UP*2)
+		)
+
+		line = Line(UP*3 + LEFT*2.5, DOWN*3 + LEFT*2.5)
+		self.play(Create(line))
+
+		fn = BaseballNetwork(w, r, g, lb.teams, 3)
+		fn.create_network(0.7, RIGHT*2.25)		
+		fn.draw_source_sink(self)
+		fn.draw_vertices(self, "game")
+		self.wait(2)
+
+		fn.draw_edges(self, "game")
+		self.wait(2)
+
+		fn.draw_vertices(self, "team")
+		self.wait(2)
+
+		fn.draw_edges(self, "team")
+		self.wait(2)
+
+		fn.draw_edges(self, "sink")
+		self.wait(2)
+
+		fn.highlight_edges(self, "game")
+		self.wait(2)
+
+		self.play(fn.network.animate.shift(DOWN*0.5))
+		fn.num_remaining_animation(self)
+		self.wait(2)
+		fn.min_cut_animation(self, "game")
+		self.wait(2)
+
+		max_flow_text = Text("max flow >= num remaining games", color=BLACK, font_size=24)
+		max_flow_team = lb.teams[3].copy().scale(1.5)
+		max_flow_text_2 = Text("has a chance of winning", color=BLACK, font_size=24)
+		max_flow_group_2 = VGroup(max_flow_team, max_flow_text_2).arrange()
+		max_flow_group = VGroup(max_flow_text, max_flow_group_2).arrange(DOWN)
+
+		surround = BackgroundRectangle(max_flow_group, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2).move_to(ORIGIN)
+		self.play(
+			Create(surround),
+			Write(max_flow_text)
+		)
+		self.play(
+			Write(max_flow_text_2),
+			Create(max_flow_team)
+		)
+		self.wait(2)
+
+		self.play(
+			FadeOut(surround, max_flow_group)
+		)
+
+		fn.make_edges_colour(fn.game_edges, WHITE)
+		self.wait(2)
+
+		lb.win_games(self, [3, 0], [1, 0])
+		lb.win_games(self, [3, 1], [1, 0])
+		lb.win_games(self, [3, 2], [1, 0])
+		lb.win_games(self, [3, 4], [2, 0])
+		self.wait(2)
+
+		edge_list = [[[fn.game_edges[0], 2]], [[fn.game_to_team[1], 2], [fn.team_edges[1], 2]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+
+		lb.win_games(self, [0, 1], [0, 2])
+		self.wait(2)
+
+		edge_list = [[[fn.game_edges[1], 1]], [[fn.game_to_team[3], 1], [fn.team_edges[2], 1]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+
+		lb.win_games(self, [0, 2], [0, 1])
+		self.wait(2)
+
+		edge_list = [[[fn.game_edges[2], 1]], [[fn.game_to_team[5], 1], [fn.team_edges[3], 1]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+
+		lb.win_games(self, [0, 4], [0, 1])
+		self.wait(2)
+
+		edge_list = [[[fn.game_edges[3], 2]], [[fn.game_to_team[7], 2], [fn.team_edges[2], 2]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+
+		lb.win_games(self, [1, 2], [0, 2])
+		self.wait(2)
+
+		edge_list = [[[fn.game_edges[4], 1]], [[fn.game_to_team[9], 1], [fn.team_edges[3], 1]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+
+		lb.win_games(self, [1, 4], [0, 1])
+		self.wait(2)
+
+		edge_list = [[[fn.game_edges[5], 2]], [[fn.game_to_team[10], 1], [fn.team_edges[2], 1]], [[fn.game_to_team[11], 1], [fn.team_edges[3], 1]]]
+		fn.flow_animate(self, edge_list)
+		self.wait(2)
+
+		lb.win_games(self, [2, 4], [1, 1])
+		self.wait(2)
+
+		win_team = lb.teams[3].copy()
+		win_text = Text(" can win", font_size=24)
+		win_group = VGroup(win_team, win_text).arrange().move_to(LEFT*5 + UP*2).scale(0.8)
+		self.play(
+			Transform(eliminated_group, win_group),
+			Uncreate(rect)
+		)
+		self.wait(2)
+
+		lb.swap_rows(self, 4, 1)
+		self.wait(2)
+
+
 
 
 
