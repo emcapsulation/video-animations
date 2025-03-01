@@ -213,3 +213,62 @@ Then get the total number of games remaining between other teams.
 If the max flow is less than this value, our team is eliminated.
 
 Otherwise, they have a chance of winning.
+
+
+MOBILE
+Here's a problem for you. This is the leaderboard of a sports league. 
+
+The table shows the number of wins each team has received (w), number of losses (l), number of remaining games (r), and the four columns after that show who the remaining games are to be played against.
+
+The winner of the season is whichever team wins the most games.
+
+The question for you is: Which teams have no chance of winning the season?
+
+Let's consider the team currently in last place - Diamond. They have two wins, but only two games remaining.
+
+Even if they win both their remaining games, they still end up with only four wins, which is not enough to ever take the lead.
+
+So Diamond is "trivially eliminated".
+
+But what about Triangle?
+
+If they win both their two remaining games, as long as the team currently in first place - Circle - loses all of their remaining games, they can both finish off the season with 6 wins and tie for the trophy right?
+
+Well, not quite.
+
+Circle has three games left to play and they are all against Square. Since Circle needs to lose all three of their remaining games to not overtake Triangle, this means Square must win those three games. And this would actually put Square into first place instead.
+
+As a result, Triangle cannot win the season - They are eliminated too, but less trivially.
+
+
+Scene 2
+Here is a harder example. Can you show that Diamond has no chance of winning the season?
+
+This is known as the Baseball Elimination Problem, and it can actually be solved by turning this into a flow network.
+
+- The source is connected to game vertices with the number of games remaining between each combination of two teams, not including Diamond (the team we are checking).
+--> Square and Pentagon have 3 games against each other, Square and Triangle have 2, and Pentagon and Triangle have 4
+- These are connected to the team vertices representing the winners of these games. For example the top vertex is Square vs. Pentagon so connect it to those two teams.
+--> Set the capacity of these edges to be infinity since we don't want to restrict flow here.
+- And these team vertices are connected to the sink, with the flow capped at the maximum number of wins they can get to not eliminate Diamond the team we are checking.
+--> For example, Diamond can win up to 23 games if they win all their remaining games. But Square has already won 22 games. So Square can only win 1 more game to not eliminate Diamond. So set the capacity of this edge to 1.
+
+Diamond is eliminated if the max flow of this flow network is less than the number of games remaining between the other teams, as in the sum of these edge weights here.
+
+Since the max flow of this network is 8, Diamond is eliminated.
+
+Let's try it:
+Assume Diamond wins all 4 of their remaining games so they are on 23 wins.
+
+- Square and Pentagon have 3 games against each other. 
+--> Let Square win one, because they can only win one more otherwise they'll eliminate Diamond.
+--> Then Pentagon has to win the remaining 2 games. 
+- Square and Triangle have 2 games.
+--> Square doesn't have room to win any more games so let Triangle win both. 
+- Pentagon and Triangle have 4 games against each other. 
+--> Pentagon can win 1 more.
+--> But, Triangle can only win 2 more to not eliminate Diamond... yet there are three wins to distribute!
+
+As you can see, we cannot distribute the wins of all the remaining games, amongst the other teams such that no one overtakes Diamond.
+
+So our team is eliminated.
