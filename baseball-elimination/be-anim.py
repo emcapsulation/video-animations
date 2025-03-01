@@ -214,16 +214,16 @@ class MaxFlowMinCut(Scene):
 		self.add(max_flow_title)
 
 		mfmc_text = Text("max flow = min cut", color=WHITE, font_size=36)
-		mfmc_text[8:11].set_color(YELLOW)
-		mfmc_text[11:14].set_color(GREEN)
+		mfmc_text[8:11].set_color(LIGHT_PINK)
+		mfmc_text[11:14].set_color(PURPLE)
 		self.play(Write(mfmc_text))
 		self.wait(2)
 		
-		cut_text = Text("set of edges whose removal\ndisconnects source from sink", color=GREEN, font_size=24).move_to(mfmc_text.get_center() + UP*1.1 + RIGHT*3.5)
+		cut_text = Text("set of edges whose removal\ndisconnects source from sink", color=PURPLE, font_size=24).move_to(mfmc_text.get_center() + UP*1.1 + RIGHT*3.5)
 		self.play(Write(cut_text))
 		self.wait(2)
 
-		min_text = Text("smallest total\nof edge weights", color=YELLOW, font_size=24).move_to(mfmc_text.get_center() + DOWN*1.1)
+		min_text = Text("smallest total\nof edge weights", color=LIGHT_PINK, font_size=24).move_to(mfmc_text.get_center() + DOWN*1.1)
 		self.play(Write(min_text))
 		self.wait(2)
 
@@ -261,8 +261,8 @@ class MaxFlowMinCut2(Scene):
 		self.add(max_flow_title)
 
 		mfmc_text = Text("max flow = min cut", color=WHITE, font_size=36).scale(0.8).move_to(UP*2)
-		mfmc_text[8:11].set_color(YELLOW)
-		mfmc_text[11:14].set_color(GREEN)
+		mfmc_text[8:11].set_color(LIGHT_PINK)
+		mfmc_text[11:14].set_color(PURPLE)
 		self.add(mfmc_text)
 		self.wait(2)
 
@@ -558,7 +558,7 @@ class BaseballExample(Scene):
 		fn.min_cut_animation(self, "game")
 		self.wait(2)
 
-		max_flow_text = Text("max flow >= num remaining games", color=BLACK, font_size=24)
+		max_flow_text = Text("max flow = num remaining games", color=BLACK, font_size=24)
 		max_flow_team = lb.teams[3].copy().scale(1.5)
 		max_flow_text_2 = Text("has a chance of winning", color=BLACK, font_size=24)
 		max_flow_group_2 = VGroup(max_flow_team, max_flow_text_2).arrange()
@@ -644,5 +644,72 @@ class BaseballExample(Scene):
 
 
 
+class DrawAndGlowLetter(Scene):
+    def construct(self):
+        Text.set_default(font="Monospace")
+
+        self.play(Write(Text("Thank you for watching!").shift(UP*2)))
+
+        letter_e = Text("e", font_size=200, color=TEAL)
+        self.play(Write(letter_e))
+
+        letter_e_stroke = letter_e.copy().set_color(TEAL).set_opacity(1).set_stroke(width=3)        
+        glow_effect = letter_e_stroke.copy().set_stroke(width=3, color=WHITE).set_opacity(0.6)
+        self.play(FadeIn(letter_e_stroke), Transform(letter_e_stroke, glow_effect))
+        self.play(FadeOut(letter_e_stroke, glow_effect))
+
+        self.wait(3)
 
 
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title_text = Text("Baseball Elimination Problem").shift(UP*3)
+		self.add(title_text)
+
+		w = [7, 5, 3, 2, 2]
+		l = None
+		r = [5, 6, 6, 5, 6]
+		g = [[0, 2, 1, 1, 1], [2, 0, 2, 1, 1], [1, 2, 0, 1, 2], [1, 1, 1, 0, 2], [1, 1, 2, 2, 0]]
+		t = [[MAROON, LIGHT_PINK, PURPLE, BLUE, TEAL], [Square(), RegularPolygon(n=5), Triangle(), RegularPolygon(n=4), RegularPolygon(n=6)]]
+
+		
+		lb = Board(w, l, r, g, t)
+		lb.create_grid()
+		self.add(lb.grid.scale(0.8).scale(0.4).move_to(LEFT*5).shift(DOWN*0.5))
+
+		eliminated_team = lb.teams[3].copy()
+		eliminated_text = Text("Is ", font_size=24)
+		eliminated_text_2 = Text(" eliminated?", font_size=24)
+		eliminated_group = VGroup(eliminated_text, eliminated_team, eliminated_text_2).arrange().move_to(UP*3.5).scale(0.8).move_to(LEFT*5 + UP*2)
+		self.add(eliminated_group.shift(DOWN*0.5))
+
+		line = Line(UP*3 + LEFT*2.5, DOWN*3 + LEFT*2.5)
+		self.add(line.shift(DOWN*0.5))
+
+		fn = BaseballNetwork(w, r, g, lb.teams, 3)
+		fn.create_network(0.7, RIGHT*2.25)	
+		self.add(fn.network.shift(DOWN*0.5))	
+
+
+
+class CodeBackground(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		w = [7, 5, 3, 2, 2]
+		l = None
+		r = [5, 6, 6, 5, 6]
+		g = [[0, 2, 1, 1, 1], [2, 0, 2, 1, 1], [1, 2, 0, 1, 2], [1, 1, 1, 0, 2], [1, 1, 2, 2, 0]]
+		t = [[MAROON, LIGHT_PINK, PURPLE, BLUE, TEAL], [Square(), RegularPolygon(n=5), Triangle(), RegularPolygon(n=4), RegularPolygon(n=6)]]
+
+		
+		lb = Board(w, l, r, g, t)
+		lb.create_grid()
+		self.add(lb.grid.scale(0.8).scale(0.4).move_to(LEFT*4.5).shift(UP*2))
+
+		fn = BaseballNetwork(w, r, g, lb.teams, 3)
+		fn.create_network(0.7, RIGHT*2.25)	
+		self.add(fn.network.move_to(LEFT*4.5).shift(DOWN*2).scale(0.5))	
