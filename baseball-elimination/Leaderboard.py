@@ -123,13 +123,13 @@ class Board:
 
 
 	# Increments number of wins for team
-	def increment_wins(self, scene, team, num_wins):
+	def increment_wins(self, scene, team, num_wins, scale=0.8):
 		row = self.grid[team]
 
 		for i in range(1, num_wins-int(row[1].get_text())+1):
 			scene.play(
-				Transform(row[1], Text(str(int(row[1].get_text())+i), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(0.8)),
-				Transform(row[3], Text(str(int(row[3].get_text())-i), font_size=36).move_to(row[3].get_center()).scale(0.8))
+				Transform(row[1], Text(str(int(row[1].get_text())+i), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(scale)),
+				Transform(row[3], Text(str(int(row[3].get_text())-i), font_size=36).move_to(row[3].get_center()).scale(scale))
 			)
 
 		scene.play(
@@ -138,7 +138,7 @@ class Board:
 
 
 	# Increments number of wins for a team and decrements remaining games too
-	def increment_wins_2(self, scene, team, num_wins):
+	def increment_wins_2(self, scene, team, num_wins, scale=0.8):
 		row = self.grid[team]
 
 		for i in range(1, num_wins-int(row[1].get_text())+1):
@@ -162,11 +162,11 @@ class Board:
 					break
 
 
-			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36).move_to(ic.get_center()).scale(0.8)) for ic in inc_cells]
-			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(0.8)) for dc in dec_cells]
+			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36).move_to(ic.get_center()).scale(scale)) for ic in inc_cells]
+			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(scale)) for dc in dec_cells]
 
-			incs.append(ReplacementTransform(row[1], Text(str(int(row[1].get_text())+1), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(0.8)))
-			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36).move_to(row[3].get_center()).scale(0.8)))
+			incs.append(ReplacementTransform(row[1], Text(str(int(row[1].get_text())+1), font_size=36, color=GREEN).move_to(row[1].get_center()).scale(scale)))
+			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36).move_to(row[3].get_center()).scale(scale)))
 
 			scene.play(
 				*incs, *decs
@@ -179,7 +179,7 @@ class Board:
 
 
 	# Increments number of losses for a team and decrements remaining games too
-	def increment_losses_2(self, scene, team, num_losses):
+	def increment_losses_2(self, scene, team, num_losses, scale=0.8):
 		row = self.grid[team]
 		row_num = 0
 
@@ -203,11 +203,11 @@ class Board:
 						inc_cells.append(self.grid[row_num][1])
 					break
 
-			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36, color=GREEN).move_to(ic.get_center()).scale(0.8)) for ic in inc_cells]
-			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(0.8)) for dc in dec_cells]
+			incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=36, color=GREEN).move_to(ic.get_center()).scale(scale)) for ic in inc_cells]
+			decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=36).move_to(dc.get_center()).scale(scale)) for dc in dec_cells]
 
-			incs.append(ReplacementTransform(row[2], Text(str(int(row[2].get_text())+1), font_size=36, color=RED).move_to(row[2].get_center()).scale(0.8)))
-			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36).move_to(row[3].get_center()).scale(0.8)))
+			incs.append(ReplacementTransform(row[2], Text(str(int(row[2].get_text())+1), font_size=36, color=RED).move_to(row[2].get_center()).scale(scale)))
+			decs.append(ReplacementTransform(row[3], Text(str(int(row[3].get_text())-1), font_size=36).move_to(row[3].get_center()).scale(scale)))
 
 			scene.play(
 				*incs, *decs
@@ -280,7 +280,7 @@ class Board:
 
 
 	# Animates winning games
-	def win_games(self, scene, vs, wins):
+	def win_games(self, scene, vs, wins, scale=0.4):
 		t1, t2 = vs[0], vs[1]
 		w1, w2 = wins[0], wins[1]
 
@@ -291,8 +291,8 @@ class Board:
 				inc_cells = [self.grid[win_team+1][1]]
 				dec_cells = [self.grid[t1+1][t2+1+2], self.grid[t2+1][t1+1+2], self.grid[t1+1][2], self.grid[t2+1][2]]
 
-				incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=30, color=GREEN).move_to(ic.get_center()).scale(0.4)) for ic in inc_cells]
-				decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=30).move_to(dc.get_center()).scale(0.4)) for dc in dec_cells]
+				incs = [ReplacementTransform(ic, Text(str(int(ic.get_text())+1), font_size=30, color=GREEN).move_to(ic.get_center()).scale(scale)) for ic in inc_cells]
+				decs = [ReplacementTransform(dc, Text(str(int(dc.get_text())-1), font_size=30).move_to(dc.get_center()).scale(scale)) for dc in dec_cells]
 
 				scene.play(
 					*incs, *decs

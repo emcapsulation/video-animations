@@ -25,7 +25,7 @@ class FlowNode:
 
 
 class FlowEdge:
-	def __init__(self, n1, n2, capacity, baseball=False, stroke_width=3):
+	def __init__(self, n1, n2, capacity, baseball=False, stroke_width=3, font_size=20):
 		self.capacity = capacity
 		if capacity == "infinity":
 			self.capacity = 100000
@@ -46,9 +46,9 @@ class FlowEdge:
 				stroke_width=stroke_width
 			)			
 
-		c = Text(str(self.capacity), font='Monospace', font_size=20).move_to(a.get_center() + UP*0.35)
+		c = Text(str(self.capacity), font='Monospace', font_size=font_size).move_to(a.get_center() + UP*0.35)
 		if capacity == "infinity":
-			c = MathTex("\\infty", font_size=20).move_to(a.get_center() + UP*0.35)
+			c = MathTex("\\infty", font_size=font_size).move_to(a.get_center() + UP*0.35)
 
 		self.arrow = VGroup(a, c)
 
@@ -230,7 +230,7 @@ class GameNode:
 
 
 class BaseballNetwork:
-	def __init__(self, w, r, g, t, check):
+	def __init__(self, w, r, g, t, check, font_size=20):
 		self.w = w
 		self.r = r
 		self.g = g
@@ -265,7 +265,7 @@ class BaseballNetwork:
 			pos[1] -= pos_increment
 
 			# Capacity is w[check] + r[check] - w[i]
-			e = FlowEdge(self.team_nodes[-1], self.sink, self.w[check]+self.r[check]-self.w[i1], baseball=True)
+			e = FlowEdge(self.team_nodes[-1], self.sink, self.w[check]+self.r[check]-self.w[i1], baseball=True, font_size=font_size)
 			self.team_edges.append(e)
 
 
@@ -291,7 +291,7 @@ class BaseballNetwork:
 				pos[1] -= pos_increment
 
 				# Capacity is number of games left between i and j
-				e = FlowEdge(self.source, self.game_nodes[-1], self.g[i1][j1], baseball=True)
+				e = FlowEdge(self.source, self.game_nodes[-1], self.g[i1][j1], baseball=True, font_size=font_size)
 				self.game_edges.append(e)
 
 				# Add edges from games to teams
