@@ -1,0 +1,18 @@
+YOUTUBE
+
+Scene 1
+This is a flow network. You have a source node where flow is emanating from, and a sink node where the flow will reach. 
+
+Nodes are joined with weighted directed edges, where each edge weight defines the maximum flow (or capacity) which can be sent through this edge.
+
+Typically in flow networks, the challenge is to find: What is the maximum flow that can reach the sink?
+
+
+Scene 2
+In this video we will first cover useful flow network properties. 
+
+Then we will do a walkthrough of the Ford Fulkerson method for finding the max flow. 
+
+We will then code this with the Edmonds-Karp implementation in C++. 
+
+Finally we will go through a proof of Ford-Fulkerson, and explain how this also proves max flow min cut theorem. So stay tuned, and feel free to skip to the relevant parts of the video if you already know some of this stuff.
