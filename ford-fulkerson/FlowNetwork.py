@@ -38,7 +38,8 @@ class FlowEdge:
 		self.n1.edges.append(self)
 
 		# This is for flow animations
-		self.flow = None
+		self.flow_arrow = None
+		self.flow_num = 0
 
 
 class FlowNetwork:
@@ -59,6 +60,7 @@ class FlowNetwork:
 	def __init__(self, node_list, font_size=20):
 		self.nodes = []
 		self.edges = []
+		self.font_size = font_size
 
 
 		i = 0
@@ -92,6 +94,7 @@ class FlowNetwork:
 			network.add(e.arrow)
 
 		self.network = network.scale(scale).move_to(position)
+		self.scale = scale
 
 
 	# Creates the source and sink
@@ -162,33 +165,49 @@ class FlowNetwork:
 
 
 	# Animates flow
-	def flow_animate(self, scene, edge_list):
+	def flow_animate(self, scene, edge_list, replace_flow=False):
 		# Edge list is: [[[edge, flow], [edge, flow]], [[edge, flow], [edge, flow]]]
 		for edge_set in edge_list:
 			edge_anim = []
+			text_anim = []
 
 			for e in edge_set:
-				a = e[0].arrow[0].copy().set_color(BLUE)				
-				edge_anim.append(GrowArrow(a))
+				a = e[0].arrow[0].copy().set_color(BLUE)		
+				edge_anim.append(GrowArrow(a))	
 
-				flow_pos = e[0].arrow[0].get_start() + (e[0].arrow[0].get_end() - e[0].arrow[0].get_start())*0.65 + UP*0.25
+				# Position where to write the flow
+				flow_pos = e[0].arrow[0].get_start() + (e[0].arrow[0].get_end() - e[0].arrow[0].get_start())*0.65 + UP*0.3
 
-				if e[0].flow != None:
-					f = Text(str(int(e[0].flow[1].get_text())+e[1]), font_size=14, color=BLUE).move_to(flow_pos)
-					edge_anim.append(ReplacementTransform(e[0].flow[1], f))
+				if e[0].flow_arrow != None:
+					e[0].flow_num += e[1]
+					if replace_flow:
+						e[0].flow_num = e[1]
+
+					new_flow = str(e[0].flow_num)
+
+					f = Text(new_flow, font_size=self.font_size, color=BLUE).move_to(flow_pos).scale(self.scale)
+					text_anim.append(ReplacementTransform(e[0].flow_arrow[1], f))
+
 				else:
-					f = Text(str(e[1]), font_size=14, color=BLUE).move_to(flow_pos)
-					edge_anim.append(Write(f))
-				e[0].flow = VGroup(a, f)
+					e[0].flow_num = e[1]
+					f = Text(str(e[1]), font_size=self.font_size, color=BLUE).move_to(flow_pos).scale(self.scale)
+					text_anim.append(Write(f))
+
+				if e[0].flow_arrow != None:
+					e[0].flow_arrow = None		
+				e[0].flow_arrow = VGroup(a, f)
 
 			scene.play(*edge_anim)
+			scene.play(*text_anim)
 
 
 	# Make the edges red
-	def make_edges_colour(self, edge_list, colour):
+	def make_edges_colour(self, scene, edge_list, colour, include_text=True):
+		anim_list = []
 		for e in edge_list:
-			e.arrow.set_color(colour)
-			if e.flow != None:
-				e.flow[0].set_color(colour)
-
+			if include_text:
+				anim_list.append(e.animate.set_color(colour))
+			else:
+				anim_list.append(e[0].animate.set_color(colour))
+		scene.play(*anim_list)
 
