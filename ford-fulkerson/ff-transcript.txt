@@ -16,3 +16,43 @@ Then we will do a walkthrough of the Ford Fulkerson method for finding the max f
 We will then code this with the Edmonds-Karp implementation in C++. 
 
 Finally we will go through a proof of Ford-Fulkerson, and explain how this also proves max flow min cut theorem. So stay tuned, and feel free to skip to the relevant parts of the video if you already know some of this stuff.
+
+
+Scene 3
+Flow networks have a source node where flow is emanating from, and a sink node where flow will terminate.
+
+Nodes are joined with weighted directed edges, where each edge weight defines the capacity of that edge, i.e. the max number of flow units which can be sent through that edge.
+
+Let's look at the paths in this network. Imagine these are pipes or roads.
+
+Our first constraint is: All edges in the graph can only carry a flow which is less than or equal to its capacity.
+
+In the top path, we can push 5 units of flow through the first edge. But then the second edge only has a capacity of 3. So only 3 units of flow can possibly be carried through that edge. 
+
+This means the total amount of flow which can reach the sink from this top path, is actually reduced to 3. 
+
+Edges which cap the flow of a path in this way, are called bottlenecks. The bottleneck is the edge with the smallest capacity in a particular path, because it restricts the flow.
+
+Our second property is: For all nodes other than the source and sink, the flow in must equal the flow out.
+
+In the bottom path, we can push 2 units of flow through the first edge. Even though the second edge has a capacity of 4, only 2 units of flow entered it from the first edge. So it will simply transport these 2 units of flow to the sink.
+
+In the bottom path, the edge with weight 2 is the bottleneck, being the edge with the smallest capacity in the path.
+
+Under these contraints, the network flow is the the sum of the flows which entered the sink (or left the source). In this case that's 3 + 2 - which is 5. In this example 5 is also the max flow which can reach the sink.
+
+
+Scene 4
+It begs the question - How do we find the maximum flow that can reach the sink?
+
+You might think based on the previous example we could just:
+1. Find our bottlenecks
+2. Push the maximum flow we can through each path, given the bottlenecks restrict the flow on this path.
+
+But let me show you an example where this approach fails.
+
+
+Scene 5
+Ford Fulkerson addresses this problem by inserting back edges. This means we have the chance to correct our flow if we accidentally saturate an edge and leave ourselves with no paths left. Because we all make mistakes.
+
+Let's walk through the algorithm.
