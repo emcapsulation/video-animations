@@ -20,19 +20,39 @@ class FlowNode:
 
 
 class FlowEdge:
-	def __init__(self, n1, n2, capacity, font_size=20):
+	def __init__(self, n1, n2, capacity, font_size=20, back_edge=False):
 		self.capacity = capacity
 
 		self.n1 = n1
 		self.n2 = n2
 
-		a = Arrow(
-			start=self.n1.dot.get_center(), 
-			end=self.n2.dot.get_center(),
-		)
 
-		c = Text(str(self.capacity), font='Monospace', font_size=font_size).move_to(a.get_center() + UP*0.35)
-		self.arrow = VGroup(a, c)
+		if not back_edge:
+			self.is_back_edge = False
+
+			a = Arrow(
+				start=self.n1.dot.get_center(), 
+				end=self.n2.dot.get_center(),
+				tip_length=0.2
+			)
+
+			c = Text(str(self.capacity), font='Monospace', font_size=font_size).move_to(a.get_center() + UP*0.35)
+			self.arrow = VGroup(a, c)
+
+		else:
+			self.is_back_edge = True
+
+			a = CurvedArrow(
+				self.n1.dot.get_center(), 
+				self.n2.dot.get_center(),
+				angle=-PI/4,
+				stroke_width=2,
+				tip_length=0.2
+			).shift(DOWN*0.1)
+
+			c = Text(str(self.capacity), font='Monospace', font_size=font_size).move_to((self.n2.dot.get_center() + a.get_center())/2 + DOWN*0.6 + RIGHT*0.2)
+			self.arrow = VGroup(a, c)
+
 
 		self.n1.neighbours.append(self.n2)
 		self.n1.edges.append(self)
@@ -40,6 +60,10 @@ class FlowEdge:
 		# This is for flow animations
 		self.flow_arrow = None
 		self.flow_num = 0
+
+		# This is for the back edge
+		self.back_edge = None
+		self.forward_edge = None
 
 
 class FlowNetwork:
@@ -139,14 +163,25 @@ class FlowNetwork:
 			queue.pop(0)
 
 
-	# Removes edges of the min cut
-	def min_cut_animation(self, scene, edge_list):
+	# Highlights edges of the min cut
+	def min_cut_animation(self, scene, edge_list, colour, max_flow=False):
 		edge_set_2 = []
-		min_cut_set = VGroup(Text("max flow = ", font_size=20))
+		min_cut_set = VGroup()
+		if max_flow:
+			min_cut_set.add(Text("max flow = ", font_size=20))
+		else:
+			min_cut_set.add(Text("flow = ", font_size=20))
 
 		for e2 in edge_list:
-			edge_set_2.append(e2.arrow.animate.set_color(RED))
-			min_cut_set.add(e2.arrow[1].copy())
+			if hasattr(e2, "arrow"):
+				if colour != None:
+					edge_set_2.append(e2.arrow.animate.set_color(colour))
+				min_cut_set.add(e2.arrow[1].copy())
+			else:
+				# Flow arrow passed in
+				if colour != None:
+					edge_set_2.append(e2.animate.set_color(colour))
+				min_cut_set.add(e2[1].copy())
 		scene.wait(2)
 
 		s = 0
@@ -162,6 +197,8 @@ class FlowNetwork:
 		min_cut_set.add(Text(str(s), color=WHITE, font_size=20))
 
 		scene.play(*edge_set_2, min_cut_set.animate.set_font_size(30).arrange(buff=0.25).next_to(self.network, UP))
+		self.min_cut_set = min_cut_set
+		self.network.add(min_cut_set)
 
 
 	# Animates flow
@@ -172,11 +209,14 @@ class FlowNetwork:
 			text_anim = []
 
 			for e in edge_set:
-				a = e[0].arrow[0].copy().set_color(BLUE)		
-				edge_anim.append(GrowArrow(a))	
+				a = e[0].arrow[0].copy().set_color(BLUE_D)		
+				edge_anim.append(Create(a))	
 
 				# Position where to write the flow
-				flow_pos = e[0].arrow[0].get_start() + (e[0].arrow[0].get_end() - e[0].arrow[0].get_start())*0.65 + UP*0.3
+				if not e[0].is_back_edge:
+					flow_pos = e[0].arrow[0].get_start() + (e[0].arrow[0].get_end() - e[0].arrow[0].get_start())*0.65 + UP*0.3
+				else:
+					flow_pos = e[0].arrow[1].get_center() + RIGHT*0.2 + DOWN*0.3
 
 				if e[0].flow_arrow != None:
 					e[0].flow_num += e[1]
@@ -185,20 +225,37 @@ class FlowNetwork:
 
 					new_flow = str(e[0].flow_num)
 
-					f = Text(new_flow, font_size=self.font_size, color=BLUE).move_to(flow_pos).scale(self.scale)
+					f = Text(new_flow, font_size=self.font_size, color=BLUE_D).move_to(flow_pos).scale(self.scale)
 					text_anim.append(ReplacementTransform(e[0].flow_arrow[1], f))
 
 				else:
 					e[0].flow_num = e[1]
-					f = Text(str(e[1]), font_size=self.font_size, color=BLUE).move_to(flow_pos).scale(self.scale)
+					f = Text(str(e[1]), font_size=self.font_size, color=BLUE_D).move_to(flow_pos).scale(self.scale)
 					text_anim.append(Write(f))
+
+
+				# Decrease the flow of the forward edge (if back edge)
+				if e[0].is_back_edge:
+					e[0].forward_edge.flow_num -= e[1]
+					f = Text(str(e[0].forward_edge.flow_num), font_size=self.font_size, color=BLUE_D).move_to(e[0].forward_edge.flow_arrow[1].get_center()).scale(self.scale)
+
+					text_anim.append(ReplacementTransform(e[0].forward_edge.flow_arrow[1], f))
+
 
 				if e[0].flow_arrow != None:
 					e[0].flow_arrow = None		
 				e[0].flow_arrow = VGroup(a, f)
+				self.network.add(e[0].flow_arrow[1])
 
 			scene.play(*edge_anim)
 			scene.play(*text_anim)
+
+		scene.wait(2)
+		single_list = []
+		for edge_set in edge_list:
+			for e in edge_set:
+				single_list.append(FadeOut(e[0].flow_arrow[0]))
+		scene.play(*single_list)
 
 
 	# Make the edges red
@@ -210,4 +267,48 @@ class FlowNetwork:
 			else:
 				anim_list.append(e[0].animate.set_color(colour))
 		scene.play(*anim_list)
+
+
+	# Removes the flow from the network
+	def remove_flow(self, scene):
+		fade_out = []
+		for e in self.edges:
+			e.flow_num = 0
+
+			if e.flow_arrow != None:
+				fade_out.append(FadeOut(e.flow_arrow[1]))	
+
+			e.flow_arrow = None	
+
+		if self.min_cut_set != None:
+			for t in self.min_cut_set:
+				fade_out.append(FadeOut(t))
+			self.network.remove(self.min_cut_set)
+
+		scene.play(*fade_out)
+
+
+	# Creates the back edges on a path
+	def create_back_edges(self, scene, edge_list):
+		for e in edge_list:
+			back_edge = FlowEdge(e.n2, e.n1, e.flow_num, back_edge=True)
+			back_edge.arrow.scale(self.scale)
+
+			# Add it to the network
+			if e.back_edge != None:
+				scene.play(ReplacementTransform(e.back_edge.arrow, back_edge.arrow))
+
+			else:				
+				scene.play(Create(back_edge.arrow))
+				self.network.add(back_edge.arrow)
+
+			e.back_edge = back_edge
+			e.back_edge.forward_edge = e
+
+
+			
+			
+			
+
+			
 
