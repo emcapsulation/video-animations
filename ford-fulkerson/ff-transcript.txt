@@ -46,13 +46,28 @@ Scene 4
 It begs the question - How do we find the maximum flow that can reach the sink?
 
 You might think based on the previous example we could just:
-1. Find our bottlenecks
-2. Push the maximum flow we can through each path, given the bottlenecks restrict the flow on this path.
+While there are still paths from s to t:
+1. Find the bottleneck of the path
+2. Push the maximum flow we can through each path, given the bottlenecks
+Then return the flow as the maximum flow.
 
 But let me show you an example where this approach fails.
+
+Here is a path. The bottleneck is 1. Let's push 1 unit of flow through this path. Now there are no more paths left from s to t. So the maximum flow is returned as 1.
+
+Yet if we take these paths, the maximum flow is 3. So the greedy algorithm fails because it depends on the order of paths you choose.
 
 
 Scene 5
 Ford Fulkerson addresses this problem by inserting back edges. This means we have the chance to correct our flow if we accidentally saturate an edge and leave ourselves with no paths left. Because we all make mistakes.
 
 Let's walk through the algorithm.
+1. Initialise the flow on all edges to 0.
+2. While there is a path p from source to sink in the network:
+2. a. Find the bottleneck capacity of the path.
+2. b. Send a flow equal to the bottleneck through all edges in the path.
+2. c. For each edge in the path, draw a back edge whose capacity is the flow sent through that edge. 
+This just gives you a chance to backtrack the flow on this edge in future iterations. Think of these back edges as taking away flow from the edge on this path, and moving it to another path.
+3. When there are no more augmenting paths from s to t, output the flow. It is the max flow.
+
+Let's do an example. 
