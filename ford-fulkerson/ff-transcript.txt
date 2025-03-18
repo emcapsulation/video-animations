@@ -15,9 +15,11 @@ In this video we will first cover useful flow network properties.
 
 Then we will do a walkthrough of the Ford Fulkerson method for finding the max flow. 
 
-We will then go through a proof of Ford-Fulkerson, and explain how this also proves max flow min cut theorem. 
+We will then do a larger example. 
 
-Finally we will then code this with the Edmonds-Karp implementation in C++. 
+We will then code this with the Edmonds-Karp implementation in C++.
+
+Finally we will go through max-flow min-cut theorem. 
 
 So stay tuned, and feel free to skip to the relevant parts of the video if you already know some of this stuff.
 
@@ -35,7 +37,7 @@ In the top path, we could push 5 units of flow through the first edge. But then 
 
 This means the total amount of flow which can reach the sink from this top path, is actually reduced to 3. 
 
-Edges which cap the flow of a path in this way, are called bottlenecks. The bottleneck is the edge with the smallest capacity in a particular path, because it restricts the flow.
+Edges which cap the flow of a path in this way, are called bottlenecks. The bottleneck is the edge which can carry the least amount of flow in a particular path, because it restricts the flow of the entire path.
 
 So let's update the first edge in this path to be 3.
 
@@ -49,12 +51,12 @@ Under these contraints, the network flow is the the sum of the flows which enter
 
 
 Scene 4
-It begs the question - How do we find the maximum flow that can reach the sink?
+It begs the question - How do we find this max flow programmatically?
 
 You might think based on the previous example we could just:
-While there are still paths from s to t:
+Keep finding paths from s to t.
 1. Find the bottleneck of the path
-2. Push the maximum flow we can through each path, given the bottlenecks
+2. Push the maximum flow we can through each path, capped by the bottlenecks
 Then return the flow as the maximum flow.
 
 For example in this case you might think - the bottlenecks of the top and bottom paths are 3 and 2 respectively, so push 3 and 2 units of flow through these paths to get the max flow value of 5.
@@ -73,9 +75,12 @@ But this is the wrong answer.
 
 If we consider these two paths, we can see the maximum flow is actually 3. So the greedy algorithm fails because it depends on the order of paths you choose.
 
-Ford Fulkerson addresses this problem by making one tweak - after we push the flow through a path, we then insert a back edge for each edge in the path, and we set the capacity of this new back edge to the flow we just pushed. 
 
-This means we have the chance to correct our flow if we saturate an edge and leave ourselves with no paths left. 
+Scene 6
+
+Ford Fulkerson addresses this problem by making one tweak - after we push the flow through a path, we then insert a back edge for each edge in the path, and we set the capacity of this new back edge to be the flow we just pushed. 
+
+This means we have the chance to correct our flow if we saturate an edge and leave ourselves with no paths left. Because we all make mistakes.
 
 Let's walk through the algorithm.
 1. Initialise the flow on all edges to 0.
@@ -89,9 +94,9 @@ Let's walk through the algorithm.
 2. c. And now here's the extra step - for each edge in the path, draw a back edge whose capacity is the flow sent through that edge. 
 In other words, the capacity of these backward edges will be 1.
 
-This just gives you a chance to backtrack the flow on this edge in future iterations. Think of these back edges as giving you the ability to take away flow from the edge on this path, and move it to another path.
+This just gives you a chance to backtrack the flow on this edge in future iterations. Think of these back edges as giving you the ability to take away flow from this path, and move it to another path.
 
-Let's keep looking for paths until we run out. Here is another one - bottleneck capacity is 1.
+Let's keep looking for paths until we run out. Here is another one - bottleneck capacity is 1. Push 1 unit of flow through this path.
 
 Note that the flow through the second edge is 2 now, so we need to update the capacity of the back edge to 2. This is because we can correct up to two units of flow now.
 
@@ -100,6 +105,10 @@ And draw the back edge for that first edge in the path, with a capacity of 1 sin
 There is another path here. Can you see it? Yes we can now take the back edge.
 
 We can push 1 unit of flow through this path. 
+
+Note that when we push 1 unit of flow through the back edge, we take away flow on the forward edge.
+
+Now backtrack and update the back edge capacities to match the new flows.
 
 The important thing to remember is for all nodes other than the source and sink, the flow into a node equals the flow out.
 
@@ -113,7 +122,7 @@ Firstly look for a path from s to t. This looks like a good one.
 
 Find the bottleneck capacity of this path, which is the edge which restricts your flow in this path. In this case it is 5 because 5 is the smallest amount of flow we can send through any edge in this path.
 
-Send an amount of flow through your path equal to the bottleneck capacity.
+Send an amount of flow through the path equal to the bottleneck capacity.
 
 For each edge in the path, we create back edges. The capacity of a back edge is equal to the flow sent through that edge.
 
@@ -135,19 +144,23 @@ Now let's choose this bottom path. The bottleneck is 4, caused by the first edge
 
 There is one more path, we can take this one through one of the back edges. The bottleneck of this path is 3, so let's push 3 units of flow through.
 
-Now backtrack and update the back edge capacities to match the new flows. The first back edge needs to have its capacity updated to 7. This back edge has capacity 3, capacity 5 still, and capacity 7.
+Remember, when we push 3 units through the back edge, we take away 3 units of flow on the forward edge.
+
+Now backtrack and update the back edge capacities to match the new flows. The first back edge needs to have its capacity updated to 7. This back edge has capacity 3, capacity 2 now, and capacity 7.
 
 There are no more paths from s to t, so let's return this flow as the max flow. The flow is the sum of the flows leaving the source, or the sum of the flows entering the sink. That is 9 plus 7 which is 16. 
 
 
 Scene 7
-How does this return the max flow every time?
+Time to code I reckon. 
 
-Firstly, let's define a cut as a set of edges where, if you removed them, you would disconnect the source from the sink.
+The algorithm we will be coding is the Edmonds-Karp implementation of Ford-Fulkerson.
 
-A cut as partitions the network into two sets, A and B.
+You might be thinking who are these guys. Well Ford-Fulkerson simply says to find the augmenting paths, but doesn't specify how. 
 
-Due to the conservation of flow property, the network flow is then equal to the flow which left set A and is heading towards the sink, minus any flow which is leaving B and heading back into set A.
+So if you want to code it, you need a way to actually find the paths.
 
-This means the capacity of the cut is actually an upper bound on the network flow. In other words we cannot have a flow in the network which is greater than the value of a cut.
+Edmonds-Karp simply says "Let's use a BFS to find the augmenting paths". BFS being a breadth first search.
+
+
 

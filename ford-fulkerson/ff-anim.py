@@ -11,16 +11,15 @@ class FlowNetworkIntro(Scene):
 
 		# [N1 -> N2, weight]
 		node_list = [
-			{"neighbours": [[1, 5], [2, 12], [3, 4]], "pos": [-5, 0], "type": "source"},
-			{"neighbours": [[4, 3], [2, 6]], "pos": [-1, -0.5], "type": ""},
-			{"neighbours": [[6, 9]], "pos": [1, 2], "type": ""},
-			{"neighbours": [[5, 7]], "pos": [-2, -2], "type": ""},
-			{"neighbours": [[6, 10]], "pos": [1.5, -0.5], "type": ""},
-			{"neighbours": [[6, 5]], "pos": [3, -2], "type": ""},
-			{"neighbours": [], "pos": [5, 0], "type": "sink"}
+			{"neighbours": [[1, 5], [2, 12], [3, 4]], "pos": [-6, 0], "type": "source"},
+			{"neighbours": [[4, 3], [2, 6]], "pos": [-1.5, 0], "type": ""},
+			{"neighbours": [[5, 9]], "pos": [0, 3.5], "type": ""},
+			{"neighbours": [[4, 7]], "pos": [-4, -3], "type": ""},
+			{"neighbours": [[5, 10]], "pos": [2, -0.5], "type": ""},
+			{"neighbours": [], "pos": [6, 0], "type": "sink"}
 		]
 		fn = FlowNetwork(node_list)
-		fn.create_network(0.9, DOWN*1)
+		fn.create_network(0.8, DOWN*1)
 
 		src_node = Dot(color=TEAL, radius=0.2)
 		src_text = Text("source (s)", font_size=24)
@@ -63,7 +62,7 @@ class SceneDescription(Scene):
 
 		scene_1 = Text("1. Useful flow network properties", font_size=20)
 		scene_2 = Text("2. Ford-Fulkerson walkthrough", font_size=20)
-		scene_3 = Text("3. Ford-Fulkerson and max-flow min-cut proof", font_size=20)
+		scene_3 = Text("3. Ford-Fulkerson larger example", font_size=20)
 		scene_4 = Text("4. Edmonds-Karp implementation in C++", font_size=20)
 
 		scene_desc = VGroup(scene_1, scene_2, scene_3, scene_4).arrange(DOWN, buff=1).next_to(line, LEFT)
@@ -153,7 +152,7 @@ class FlowNetworks(Scene):
 		self.wait(2)
 
 		# Label the bottleneck
-		fn.make_edges_colour(self, [fn.edges[2].arrow], MAROON, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[2]], MAROON)
 		self.play(Write(Text("bottleneck", font_size=20, color=MAROON).next_to(fn.edges[2].arrow, UP*0.1)))
 		self.wait(2)
 
@@ -188,7 +187,7 @@ class FlowNetworks(Scene):
 
 
 		# Label the bottleneck
-		fn.make_edges_colour(self, [fn.edges[1].arrow], MAROON, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1]], MAROON)
 		self.play(Write(Text("bottleneck", font_size=20, color=MAROON).next_to(fn.edges[1].arrow, UP*0.1)))
 		self.wait(2)
 
@@ -245,7 +244,7 @@ class Greedy(Scene):
 
 		greedy_alg = Code(code="""while there is a path p from s to t:
 	find the bottleneck capacity fb of p
-	push fb units of flow through that path
+	push fb units of flow through p
 return flow""", 
 			font_size=14,
             language="C++",
@@ -255,7 +254,7 @@ return flow""",
 
 
 		# Show the bottlenecks
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[2].arrow], MAROON, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[2]], MAROON)
 		b1 = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[1].arrow, UP*0.1)
 		b2 = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[2].arrow, UP*0.1)
 		self.play(Write(b1), Write(b2))
@@ -274,7 +273,8 @@ return flow""",
 		self.wait(2)
 
 
-class Greedy2(Scene):
+
+class GreedyFail(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
@@ -286,7 +286,7 @@ class Greedy2(Scene):
 
 		greedy_alg = Code(code="""while there is a path p from s to t:
 	find the bottleneck capacity fb of p
-	push fb units of flow through that path
+	push fb units of flow through p
 return flow""", 
 			font_size=14,
             language="C++",
@@ -308,14 +308,14 @@ return flow""",
 
 
 		# Zig zag path
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[2].arrow, fn.edges[4].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[2], fn.edges[4]], GREEN)
 		self.wait(2)
 
 		b_neck = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[0].arrow, UP*0.1)
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[2].arrow, fn.edges[4].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[2], fn.edges[4]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		zig_zag_path = [[[fn.edges[0], 1]], [[fn.edges[2], 1]], [[fn.edges[4], 1]]]
@@ -325,14 +325,14 @@ return flow""",
 
 
 		# Bottom path
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[4].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4]], GREEN)
 		self.wait(2)
 
-		b_neck = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[4].arrow).shift(LEFT*0.5)
+		b_neck = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[4].arrow)
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[4].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		bottom_path = [[[fn.edges[1], 1]], [[fn.edges[4], 1]]]
@@ -349,10 +349,10 @@ return flow""",
 
 
 		# Label the correct max flow paths (3)
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[1].arrow, fn.edges[3].arrow, fn.edges[4].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[1], fn.edges[3], fn.edges[4]], GREEN)
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[1].arrow, fn.edges[3].arrow, fn.edges[4].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[1], fn.edges[3], fn.edges[4]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		paths = [[[fn.edges[0], 1], [fn.edges[1], 2]], [[fn.edges[3], 1], [fn.edges[4], 2]]]
@@ -363,32 +363,66 @@ return flow""",
 		self.wait(2)
 
 
+		self.play(FadeOut(fn.network))
+		self.wait(2)
+
+
+		fail_text = Text("Greedy algorithm fails", font_size=24, color=RED).move_to(ORIGIN)
+		self.play(Write(fail_text))
+		self.wait(2)
+
+
+
+class FFExample(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")		
 
 		ff_title = Text("Ford-Fulkerson").shift(UP*3)
 
 		ff_alg = Code(code="""while there is a path (p) from s to t:
 	find the bottleneck capacity (fb) of p
-	push fb units of flow through p
-	create back edges with capacity equal to flow
+
+	for each edge e in p:
+		push fb units of flow through e
+
+		if e is a back edge:
+			deduct fb units of flow from 
+			the corresponding forward edge
+
+	create back edges with capacity equal to 
+	the flow in the corresponding forward edge
 return flow""", 
 			font_size=14,
             language="C++",
-            background="rectangle").next_to(question_group, DOWN)
-		self.play(ReplacementTransform(greedy_alg, ff_alg), ReplacementTransform(question_group, ff_title))
+            background="rectangle").next_to(ff_title, DOWN).shift(LEFT*3.5 + DOWN*1.5)
+
+		self.play(Write(ff_title))
+		self.play(Create(ff_alg))
 		self.wait(2)
 
-		fn.remove_flow(self)
+
+		# Show the greedy flow failing
+		node_list = [
+			{"neighbours": [[1, 1], [2, 2]], "pos": [-4, -0.5], "type": "source"},
+			{"neighbours": [[2, 3], [3, 1]], "pos": [-1.5, 2], "type": ""},
+			{"neighbours": [[3, 2]], "pos": [1.5, -2], "type": ""},
+			{"neighbours": [], "pos": [4, 0.5], "type": "sink"}
+		]
+		fn = FlowNetwork(node_list)
+		fn.create_network(0.8, RIGHT*3 + DOWN*0.5)
+		fn.bfs_animation(self)
+		self.wait(2)
 
 
 		# Zig zag path
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[2].arrow, fn.edges[4].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[2], fn.edges[4]], GREEN)
 		self.wait(2)
 
 		b_neck = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[0].arrow, UP*0.1)
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[2].arrow, fn.edges[4].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[2], fn.edges[4]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		zig_zag_path = [[[fn.edges[0], 1]], [[fn.edges[2], 1]], [[fn.edges[4], 1]]]
@@ -400,14 +434,14 @@ return flow""",
 
 
 		# Bottom path
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[4].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4]], GREEN)
 		self.wait(2)
 
-		b_neck = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[4].arrow).shift(LEFT*0.5)
+		b_neck = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[4].arrow).shift(LEFT*1 + DOWN*1)
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[4].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		bottom_path = [[[fn.edges[1], 1]], [[fn.edges[4], 1]]]
@@ -420,14 +454,14 @@ return flow""",
 
 
 		# Label the path
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[2].back_edge.arrow, fn.edges[3].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[2].back_edge, fn.edges[3]], GREEN)
 		self.wait(2)
 
 		b_neck = Text("bottleneck", font_size=16, color=MAROON).next_to(fn.edges[3].arrow).shift(LEFT)
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[2].back_edge.arrow, fn.edges[3].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[2].back_edge, fn.edges[3]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		bottom_path = [[[fn.edges[1], 1]], [[fn.edges[2].back_edge, 1]], [[fn.edges[3], 1]]]
@@ -456,7 +490,7 @@ class FordFulkerson(Scene):
 
 		line_1 = Text("1. Find an augmenting\npath from s to t (p).", font_size=16)
 		line_2 = Text("2. Find the bottleneck\ncapacity of p (fb).", font_size=16)
-		line_3 = Text("3. Push fb amount of\nflow through p.", font_size=16)
+		line_3 = Text("3. For each edge e in p:\nflow through e += fb\nIf e is a back edge:\nDeduct fb from the\ncorresponding forward\nedge's flow.", font_size=16)
 		line_4 = Text("4. Build the residual\ngraph.\nFor each edge e in p,\ncreate a back edge with\ncapacity = flow in e.", font_size=16)
 		line_5 = Text("5. Return the flow when\nthere are no more\naugmenting paths.", font_size=16)
 
@@ -484,7 +518,7 @@ class FordFulkerson(Scene):
 		self.play(line_1.animate.set_color(MAROON))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[4].arrow, fn.edges[5].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[4], fn.edges[5]], GREEN)
 		self.wait(2)
 
 		self.play(line_1.animate.set_color(WHITE))
@@ -498,7 +532,7 @@ class FordFulkerson(Scene):
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[0].arrow, fn.edges[4].arrow, fn.edges[5].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[4], fn.edges[5]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		self.play(line_2.animate.set_color(WHITE))
@@ -530,7 +564,7 @@ class FordFulkerson(Scene):
 		self.play(line_1.animate.set_color(MAROON))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[5].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[5]], GREEN)
 		self.wait(2)
 
 		self.play(line_1.animate.set_color(WHITE))
@@ -544,7 +578,7 @@ class FordFulkerson(Scene):
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[5].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[5]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		self.play(line_2.animate.set_color(WHITE))
@@ -576,7 +610,7 @@ class FordFulkerson(Scene):
 		self.play(line_1.animate.set_color(MAROON))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[2].arrow, fn.edges[6].arrow, fn.edges[7].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[2], fn.edges[6], fn.edges[7]], GREEN)
 		self.wait(2)
 
 		self.play(line_1.animate.set_color(WHITE))
@@ -590,7 +624,7 @@ class FordFulkerson(Scene):
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[2].arrow, fn.edges[6].arrow, fn.edges[7].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[2], fn.edges[6], fn.edges[7]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		self.play(line_2.animate.set_color(WHITE))
@@ -622,7 +656,7 @@ class FordFulkerson(Scene):
 		self.play(line_1.animate.set_color(MAROON))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[4].back_edge.arrow, fn.edges[3].arrow, fn.edges[7].arrow], GREEN, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4].back_edge, fn.edges[3], fn.edges[7]], GREEN)
 		self.wait(2)
 
 		self.play(line_1.animate.set_color(WHITE))
@@ -636,7 +670,7 @@ class FordFulkerson(Scene):
 		self.play(Write(b_neck))
 		self.wait(2)
 
-		fn.make_edges_colour(self, [fn.edges[1].arrow, fn.edges[4].back_edge.arrow, fn.edges[3].arrow, fn.edges[7].arrow], WHITE, include_text=False)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4].back_edge, fn.edges[3], fn.edges[7]], WHITE, reset_edge=True)
 		self.wait(2)
 
 		self.play(line_2.animate.set_color(WHITE))
