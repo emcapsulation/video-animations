@@ -49,11 +49,11 @@ class FlowEdge:
 				angle=-PI/12,
 				stroke_width=2,
 				tip_length=0.2,
-				color=GRAY_B
+				color=GRAY_C
 			).shift(DOWN*0.1)
 
 			c = Text("0/" + str(self.capacity), font='Monospace', font_size=(font_size-4), color="#15131c").move_to(a.get_center() + DOWN*0.45)
-			r = BackgroundRectangle(c, buff=0.1, stroke_width=0, color=GRAY_B, fill_opacity=1, corner_radius=0.2)
+			r = BackgroundRectangle(c, buff=0.1, stroke_width=0, color=GRAY_C, fill_opacity=1, corner_radius=0.2)
 			self.arrow = VGroup(a, r, c)
 
 
@@ -202,7 +202,7 @@ class FlowNetwork:
 
 
 	# Animates flow
-	def flow_animate(self, scene, edge_list, replace_flow=False):
+	def flow_animate(self, scene, edge_list):
 		# Edge list is: [[[edge, flow], [edge, flow]], [[edge, flow], [edge, flow]]]
 		for edge_set in edge_list:
 			edge_anim = []
@@ -213,23 +213,21 @@ class FlowNetwork:
 				edge_anim.append(Create(a))	
 
 				new_flow = ""
-				if e[0].flow_arrow != None:
-					# Some flow has already passed through this edge
-					e[0].flow_num += e[1]
-					if replace_flow:
-						e[0].flow_num = e[1]
-
-				else:
-					e[0].flow_num = e[1]
-
-				new_flow = str(e[0].flow_num)
+				e[0].flow_num += e[1]
 
 				fz = self.font_size
 				if e[0].is_back_edge:
+					e[0].forward_edge.flow_num -= e[1]
 					fz -= 4
+
+				new_flow = str(e[0].flow_num)
 
 				f = Text(new_flow + "/" + str(e[0].capacity), font_size=fz, color="#15131c").move_to(e[0].arrow[2].get_center()).scale(self.scale)
 				text_anim.append(ReplacementTransform(e[0].arrow[2], f))
+
+				if e[0].is_back_edge:
+					f2 = Text(str(e[0].forward_edge.flow_num) + "/" + str(e[0].forward_edge.capacity), font_size=self.font_size, color="#15131c").move_to(e[0].forward_edge.arrow[2].get_center()).scale(self.scale)
+					text_anim.append(ReplacementTransform(e[0].forward_edge.arrow[2], f2))
 
 				if e[0].flow_arrow != None:
 					e[0].flow_arrow = None		
@@ -247,13 +245,21 @@ class FlowNetwork:
 
 
 	# Make the edges red
-	def make_edges_colour(self, scene, edge_list, colour, include_text=True):
+	def make_edges_colour(self, scene, edge_list, colour, reset_edge=False, include_text=False):
 		anim_list = []
 		for e in edge_list:
-			if include_text:
-				anim_list.append(e.animate.set_color(colour))
+			if reset_edge:
+				if e.is_back_edge:
+					anim_list.append(e.arrow[0].animate.set_color(GRAY_C))
+				else:
+					anim_list.append(e.arrow[0].animate.set_color(WHITE))
+
 			else:
-				anim_list.append(e[0].animate.set_color(colour))
+				if include_text:
+					anim_list.append(e.arrow.animate.set_color(colour))
+				else:
+					anim_list.append(e.arrow[0].animate.set_color(colour))
+
 		scene.play(*anim_list)
 
 
@@ -281,7 +287,8 @@ class FlowNetwork:
 	def create_back_edges(self, scene, edge_list):
 		for e in edge_list:		
 			if e.back_edge != None:
-				f = Text(str(e.back_edge.flow_num) + "/" + str(e.flow_num), font_size=self.font_size-4, color="#15131c").move_to(e.back_edge.arrow[2].get_center()).scale(self.scale)
+				e.back_edge.arrow[0].set_color(GRAY_C)
+				f = Text("0/" + str(e.flow_num), font_size=self.font_size-4, color="#15131c").move_to(e.back_edge.arrow[2].get_center()).scale(self.scale)
 				scene.play(ReplacementTransform(e.back_edge.arrow[2], f))
 
 			else:	
