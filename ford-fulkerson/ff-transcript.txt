@@ -152,7 +152,7 @@ There are no more paths from s to t, so let's return this flow as the max flow. 
 
 
 Scene 7
-Time to code I reckon. 
+Time to code.
 
 The algorithm we will be coding is the Edmonds-Karp implementation of Ford-Fulkerson.
 
@@ -160,7 +160,110 @@ You might be thinking who are these guys. Well Ford-Fulkerson simply says to fin
 
 So if you want to code it, you need a way to actually find the paths.
 
-Edmonds-Karp simply says "Let's use a BFS to find the augmenting paths". BFS being a breadth first search.
+Edmonds-Karp simply says "Let's use a BFS to find the augmenting paths". BFS being a breadth first search. 
+
+This has the major advantage that in each iteration, a BFS will find the path with the least number of edges.
+
+This leaves the time complexity as O(m^2 n). I won't go into detail about this, but if you guys want maybe another network flow video with proofs of the topics in this video, say Ford-Fulkerson proof, max-flow min-cut and so on, I'd be happy to do that.
 
 
+Scene 8
+Firstly, in my function I'm passing in the flow graph. It maps each node, to a list of neighbours. Each element of the neighbours vector contains a pair with the name of the neighbour, and the capacity of that edge to the neighbour.
 
+Firstly, lets create a mapping of each edge to the current flow in that edge, and the capacity of the edge.
+
+I also keep track of my back edges in a separate list.
+
+Next let's map each node to a set of its neighbours.
+
+We need to go through and create the edge and node maps. So let's loop through each node in the input graph.
+
+And let's loop through each neighbour for this node.
+
+Firstly, we can insert this neighbour into the neighbours set for the current node.
+
+Next we need to add the edge. I name the edge node 1 dash node 2. 
+
+The current flow of this edge is 0, and the capacity of this edge was given in the input graph.
+
+Now it is time to find the max flow.
+
+The new flow from an augmenting path is given by a BFS.
+
+While there is still flow from the augmenting paths, i.e. the new flow is not 0, we want to keep incrementing the max flow by this new flow value from the augmenting path.
+
+Then return the max flow at the end.
+
+Ok so I'm not tricking you here, we will implement the breadth first search too. 
+
+I'm passing in the node and edge maps.
+
+Firstly, we need to map each node to its parent in the path. This is so when we find the path using the BFS, we can go back through the path and update the flows and stuff.
+
+Next we keep track of the visited nodes. This is standard BFS stuff so we don't keep pushing the same node to the queue and end up in an infinite loop.
+
+Speaking of the queue, here it is. We'll start with the source.
+
+Also I forgot to insert the source into the visited set but I think that's just being extra anyway.
+
+completed denotes the BFS found a path. I start it as false and flip it to true when it finds the sink.
+
+Grab the node at the start of the queue. If the node is the sink we can break, and set completed to true.
+
+Otherwise, let's loop through the neighbours of the current node.
+
+If the current neighbour is in the visited set, meaning it is already in the queue or been processed already, let's leave it.
+
+Otherwise, we will check out the edge from the current node to this neighbour.
+
+We check if the current flow is below the capacity for this edge, and search for it in the edges and back edges lists.
+
+If it has room for flow to be pushed through it, we add this neighbour to the queue, and set the parent of it to be the current node so we can backtrack.
+
+Then remember to denote it as visited. We don't want to put it in the queue twice.
+
+If no path was found, return 0 because we added 0 new flow. This will terminate the entire algorithm back in the edmonds Karp function.
+
+Otherwise, we need to find the bottleneck of the path. 
+
+We start at the sink and go backwards by visiting the parents.
+
+In each iteration, check the edge from the parent to the current node. 
+
+Then the bottleneck is the minimum of the current bottleneck, and the remaining flow which can be pushed through this edge, i.e. capacity minus current flow.
+
+For example if the current bottleneck is 5, but this edge can only have 3 units of flow pushed through it, the new bottleneck is 3.
+
+Do the same but checking if the edge between the parent and current node lives in the back edges map. Because remember I've split up my edges.
+
+Then move up to the parent of this node.
+
+Now we have the bottleneck we need to correct the flows, and you will see why I split up my edges and back edges.
+
+So we do the same thing, start at the sink and make our way to the source.
+
+This time we are going to add back edges. These go the opposite way, i.e. from current node to the parent.
+
+If the edge from the parent to the current node was a forward edge, we simply push an amount of flow on this edge equal to the bottleneck.
+
+Then we create a back edge the other way, with capacity equal to the flow of the forward edge.
+
+Else, if the edge from the parent to the current node was a back edge, we actually deduct bottleneck amount of flow from the corresponding forward edge. 
+
+Remember the forward edge goes the other way to this back edge we took.
+
+Then we update this back edge to have a capacity equal to the new flow of the corresponding forward edge. 
+
+Finally, because we inserted a back edge from the current node to the parent, we need to insert the parent as a neighbour of the current node.
+
+Then move up to the parent.
+
+Return the bottleneck flow because that is the amount of flow pushed through the augmenting path in this iteration of BFS.
+
+
+Scene 9
+I added heaps of print statements to this, then I ran this on a new graph and I can show you the paths it took.
+
+The other cool thing is that in my last video I talked about an application of max flow in proving whether a sports team is eliminated from a competition. So I ran this with the code from that last video too.
+
+I'll put a link to all of this code in the description.
