@@ -158,7 +158,7 @@ class FlowNetworks(Scene):
 
 		# Adjust flow
 		top_path = [[[fn.edges[0], 3]]]
-		fn.flow_animate(self, top_path, replace_flow=True)
+		fn.flow_animate(self, top_path)
 
 
 		# Conservation of flow
@@ -692,7 +692,7 @@ class FordFulkerson(Scene):
 		self.play(line_4.animate.set_color(GREEN))
 		self.wait(2)
 
-		fn.create_back_edges(self, [fn.edges[1], fn.edges[4], fn.edges[3], fn.edges[7]])
+		fn.create_back_edges(self, [fn.edges[7], fn.edges[3], fn.edges[4], fn.edges[1]])
 
 		self.play(line_4.animate.set_color(WHITE))
 		self.wait(2)
@@ -706,4 +706,36 @@ class FordFulkerson(Scene):
 
 		self.play(line_5.animate.set_color(WHITE))
 		self.wait(2)
+
+
+
+class EdmondsKarp(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		ek_title = Text("Edmonds-Karp Algorithm").shift(UP*3)
+		self.play(Write(ek_title))
+
+		ek_desc = Text("Uses a BFS to find augmenting paths", font_size=24).next_to(ek_title, DOWN)
+		self.play(Write(ek_desc))
+
+		# [N1 -> N2, weight]
+		node_list = [
+			{"neighbours": [[1, 5], [2, 12], [3, 4]], "pos": [-6, 0], "type": "source"},
+			{"neighbours": [[4, 3], [2, 6]], "pos": [-1.5, 0], "type": ""},
+			{"neighbours": [[5, 9]], "pos": [0, 3.5], "type": ""},
+			{"neighbours": [[4, 7]], "pos": [-4, -3], "type": ""},
+			{"neighbours": [[5, 10]], "pos": [2, -0.5], "type": ""},
+			{"neighbours": [], "pos": [6, 0], "type": "sink"}
+		]
+		fn = FlowNetwork(node_list)
+		fn.create_network(0.6, DOWN*1.25)
+		self.add(fn.network)
+		fn.bfs_animation_2(self)
+		self.wait(2)
+
+		time_complexity_1 = Text("Time Complexity: ", font_size=24)
+		time_complexity_2 = MathTex("O(m^{2} n)", font_size=28, color=GREEN).next_to(time_complexity_1)
+		time_complexity = VGroup(time_complexity_1, time_complexity_2).next_to(ek_desc, DOWN)
+		self.play(Write(time_complexity))
 

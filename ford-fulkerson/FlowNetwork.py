@@ -302,9 +302,25 @@ class FlowNetwork:
 				e.back_edge.forward_edge = e
 
 
-			
-			
-			
+	# Show a bfs with arrows
+	def bfs_animation_2(self, scene):
+		queue = [self.source]
+		visited = []
 
-			
+		while len(queue) != 0:
+			cur = queue[0];
+			queue.pop(0);
+
+			if cur == self.sink:
+				found_text = Text("sink found", font_size=20).next_to(self.network, RIGHT)
+				scene.play(Write(found_text))
+
+			for edge in cur.edges:
+				if edge.n2 not in visited:
+					a = edge.arrow[0].copy().set_color(GREEN)		
+					scene.play(Create(a))	
+
+					visited.append(edge.n2)
+					queue.append(edge.n2)
+
 
