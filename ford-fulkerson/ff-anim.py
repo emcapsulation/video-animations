@@ -157,7 +157,7 @@ class FlowNetworks(Scene):
 		self.wait(2)
 
 		# Adjust flow
-		top_path = [[[fn.edges[0], 3]]]
+		top_path = [[[fn.edges[0], -2]]]
 		fn.flow_animate(self, top_path)
 
 
@@ -383,9 +383,10 @@ class FFExample(Scene):
 	find the bottleneck capacity (fb) of p
 
 	for each edge e in p:
-		push fb units of flow through e
+		if e is a forward edge:
+			push fb units of flow through e
 
-		if e is a back edge:
+		else if e is a back edge:
 			deduct fb units of flow from 
 			the corresponding forward edge
 
@@ -477,6 +478,7 @@ return flow""",
 		self.wait(2)
 
 
+
 class FordFulkerson(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
@@ -490,12 +492,12 @@ class FordFulkerson(Scene):
 
 		line_1 = Text("1. Find an augmenting\npath from s to t (p).", font_size=16)
 		line_2 = Text("2. Find the bottleneck\ncapacity of p (fb).", font_size=16)
-		line_3 = Text("3. For each edge e in p:\nflow through e += fb\nIf e is a back edge:\nDeduct fb from the\ncorresponding forward\nedge's flow.", font_size=16)
+		line_3 = Text("3. For each edge e in p:\nIf e is a forward edge,\npush fb units of flow.\nIf e is a back edge,\ndeduct fb units of flow\nfrom the corresponding\nforward edge.", font_size=16)
 		line_4 = Text("4. Build the residual\ngraph.\nFor each edge e in p,\ncreate a back edge with\ncapacity = flow in e.", font_size=16)
 		line_5 = Text("5. Return the flow when\nthere are no more\naugmenting paths.", font_size=16)
 
 		algo = VGroup(line_1, line_2, line_3, line_4, line_5).arrange(DOWN, buff=0.5).next_to(line, LEFT)
-		self.add(algo)
+		self.play(Write(algo))
 
 
 		# [N1 -> N2, weight]
@@ -738,4 +740,204 @@ class EdmondsKarp(Scene):
 		time_complexity_2 = MathTex("O(m^{2} n)", font_size=28, color=GREEN).next_to(time_complexity_1)
 		time_complexity = VGroup(time_complexity_1, time_complexity_2).next_to(ek_desc, DOWN)
 		self.play(Write(time_complexity))
+
+
+
+class AlgorithmPaths(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		# First network
+		node_list = [
+			{"neighbours": [[1, 1], [2, 2]], "pos": [-4, -0.5], "type": "source"},
+			{"neighbours": [[2, 3], [3, 1]], "pos": [-1.5, 2], "type": ""},
+			{"neighbours": [[3, 2]], "pos": [1.5, -2], "type": ""},
+			{"neighbours": [], "pos": [4, 0.5], "type": "sink"}
+		]
+		fn = FlowNetwork(node_list)
+		fn.create_network(0.8, RIGHT*2.5)
+		self.add(fn.network)
+
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4]], GREEN)
+		self.wait(2)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4]], WHITE, reset_edge=True)
+		fn.flow_animate(self, [[[fn.edges[1], 2]], [[fn.edges[4], 2]]])
+		fn.create_back_edges(self, [fn.edges[4], fn.edges[1]])
+
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[3]], GREEN)
+		self.wait(2)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[3]], WHITE, reset_edge=True)
+		fn.flow_animate(self, [[[fn.edges[0], 1]], [[fn.edges[3], 1]]])
+		fn.create_back_edges(self, [fn.edges[3], fn.edges[0]])
+
+		fn.min_cut_animation(self, [fn.edges[3], fn.edges[4]], max_flow=True)
+		self.wait(2)
+
+		self.play(*[FadeOut(mob) for mob in self.mobjects])
+		fn = None
+
+
+		# Second network
+		node_list = [
+			{"neighbours": [[1, 5], [2, 12], [3, 4]], "pos": [-6, 0], "type": "source"},
+			{"neighbours": [[4, 3], [2, 6]], "pos": [-1.5, 0], "type": ""},
+			{"neighbours": [[5, 9]], "pos": [0, 3.5], "type": ""},
+			{"neighbours": [[4, 7]], "pos": [-4, -3], "type": ""},
+			{"neighbours": [[5, 10]], "pos": [2, -0.5], "type": ""},
+			{"neighbours": [], "pos": [6, 0], "type": "sink"}
+		]
+		fn = FlowNetwork(node_list)
+		fn.create_network(0.7, RIGHT*2.5)
+		self.add(fn.network)
+
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[5]], GREEN)
+		self.wait(2)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[5]], WHITE, reset_edge=True)
+		fn.flow_animate(self, [[[fn.edges[1], 9]], [[fn.edges[5], 9]]])
+		fn.create_back_edges(self, [fn.edges[5], fn.edges[1]])
+
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[3], fn.edges[7]], GREEN)
+		self.wait(2)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[3], fn.edges[7]], WHITE, reset_edge=True)
+		fn.flow_animate(self, [[[fn.edges[0], 3]], [[fn.edges[3], 3]], [[fn.edges[7], 3]]])
+		fn.create_back_edges(self, [fn.edges[7], fn.edges[3], fn.edges[0]])
+
+		fn.make_edges_colour(self, [fn.edges[2], fn.edges[6], fn.edges[7]], GREEN)
+		self.wait(2)
+		fn.make_edges_colour(self, [fn.edges[2], fn.edges[6], fn.edges[7]], WHITE, reset_edge=True)
+		fn.flow_animate(self, [[[fn.edges[2], 4]], [[fn.edges[6], 4]], [[fn.edges[7], 4]]])
+		fn.create_back_edges(self, [fn.edges[7], fn.edges[6], fn.edges[2]])
+
+		fn.min_cut_animation(self, [fn.edges[5], fn.edges[7]], max_flow=True)
+		self.wait(2)
+
+		self.play(*[FadeOut(mob) for mob in self.mobjects])
+		fn = None
+
+
+		# Third network
+		node_list = [
+			{"neighbours": [[1, 4], [2, 4]], "pos": [-5, 0], "type": "source"},
+			{"neighbours": [[3, 6], [6, 5]], "pos": [-2, 2], "type": ""},
+			{"neighbours": [[4, 7]], "pos": [-3, -2], "type": ""},
+			{"neighbours": [[5, 3]], "pos": [0, 3], "type": ""},
+			{"neighbours": [[6, 3]], "pos": [-1, -3], "type": ""},
+			{"neighbours": [[7, 8]], "pos": [2, 2], "type": ""},
+			{"neighbours": [[7, 4]], "pos": [3, -2], "type": ""},
+			{"neighbours": [], "pos": [5, 0], "type": "sink"}
+		]
+		fn = FlowNetwork(node_list)
+		fn.create_network(0.7, RIGHT*2.5)
+		self.add(fn.network)
+
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[3], fn.edges[8]], GREEN)
+		self.wait(2)
+		fn.make_edges_colour(self, [fn.edges[0], fn.edges[3], fn.edges[8]], WHITE, reset_edge=True)
+		fn.flow_animate(self, [[[fn.edges[0], 4]], [[fn.edges[3], 4]], [[fn.edges[8], 4]]])
+		fn.create_back_edges(self, [fn.edges[8], fn.edges[3], fn.edges[0]])
+
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4], fn.edges[6], fn.edges[3].back_edge, fn.edges[2], fn.edges[5], fn.edges[7]], GREEN)
+		self.wait(2)
+		fn.make_edges_colour(self, [fn.edges[1], fn.edges[4], fn.edges[6], fn.edges[3].back_edge, fn.edges[2], fn.edges[5], fn.edges[7]], WHITE, reset_edge=True)
+		fn.flow_animate(self, [[[fn.edges[1], 3]], [[fn.edges[4], 3]], [[fn.edges[6], 3]], [[fn.edges[3].back_edge, 3]], [[fn.edges[2], 3]], [[fn.edges[5], 3]], [[fn.edges[7], 3]]])
+		fn.create_back_edges(self, [fn.edges[7], fn.edges[5], fn.edges[2], fn.edges[3], fn.edges[6], fn.edges[4], fn.edges[1]])
+
+		fn.min_cut_animation(self, [fn.edges[7], fn.edges[8]], max_flow=True)
+		self.wait(2)
+
+
+
+class DrawAndGlowLetter(Scene):
+    def construct(self):
+        Text.set_default(font="Monospace")
+
+        self.play(Write(Text("Thank you for watching!").shift(UP*2)))
+
+        letter_e = Text("e", font_size=200, color=TEAL)
+        self.play(Write(letter_e))
+
+        letter_e_stroke = letter_e.copy().set_color(TEAL).set_opacity(1).set_stroke(width=3)        
+        glow_effect = letter_e_stroke.copy().set_stroke(width=3, color=WHITE).set_opacity(0.6)
+        self.play(FadeIn(letter_e_stroke), Transform(letter_e_stroke, glow_effect))
+        self.play(FadeOut(letter_e_stroke, glow_effect))
+
+        self.wait(3)
+
+
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title_text = Text("Ford-Fulkerson and Edmonds-Karp").shift(UP*3)
+		self.add(title_text)
+
+		question_text = Text("How do we find the maximum flow that can reach", font_size=24)
+		sink_node_2 = Dot(color=ORANGE, radius=0.2)
+		question_mark = Text("?", font_size=24)
+		question_group = VGroup(question_text, sink_node_2, question_mark).arrange(buff=0.5).shift(UP*2)
+		self.add(question_group)
+
+		# Capacity constraint
+		capacity_rect = RoundedRectangle(
+			width=5, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=PURPLE
+		)
+		capacity_limit = Text("Capacity Limit", font_size=24).set_color(PURPLE);
+		capacity_desc = Text("Flow through an edge is at most", font_size=20)
+		capacity_desc_2 = Text("the capacity of that edge", font_size=20)
+		capacity_tex = MathTex("\\forall e \\in E, 0 \\leq f(e) \\leq c(e)", font_size=30)
+		capacity_group = VGroup(capacity_limit, capacity_desc, capacity_desc_2, capacity_tex).arrange(DOWN).scale(0.8).move_to(capacity_rect.get_center())
+
+		# Conservation of flow
+		conservation_rect = RoundedRectangle(
+			width=5, height=2,
+			corner_radius=0.3,
+			stroke_width=6,
+			stroke_color=LIGHT_PINK
+		).next_to(capacity_rect, DOWN*2)
+		conservation_limit = Text("Flow Conservation", font_size=24).set_color(LIGHT_PINK);
+		conservation_desc = Text("Flow leaving a node equals the", font_size=20)
+		conservation_desc_2 = Text("flow entering it", font_size=20)
+		conservation_tex = MathTex("\\forall v \\in V \\setminus \\{s, t\\} \\sum_{e_1 = (u, v) \\in E} f(e_1) = \\sum_{e_2 = (v, w) \\in E} f(e_2)", font_size=24)
+		conservation_group = VGroup(conservation_limit, conservation_desc, conservation_desc_2, conservation_tex).arrange(DOWN).scale(0.8).move_to(conservation_rect.get_center())
+
+		rectangles = VGroup(capacity_rect, capacity_group, conservation_rect, conservation_group).shift(LEFT*4.5).scale(0.8)
+		self.add(rectangles)
+
+
+		# [N1 -> N2, weight]
+		node_list = [
+			{"neighbours": [[1, 5], [2, 12], [3, 4]], "pos": [-6, 0], "type": "source"},
+			{"neighbours": [[4, 3], [2, 6]], "pos": [-1.5, 0], "type": ""},
+			{"neighbours": [[5, 9]], "pos": [0, 3.5], "type": ""},
+			{"neighbours": [[4, 7]], "pos": [-4, -3], "type": ""},
+			{"neighbours": [[5, 10]], "pos": [2, -0.5], "type": ""},
+			{"neighbours": [], "pos": [6, 0], "type": "sink"}
+		]
+		fn = FlowNetwork(node_list)	
+		fn.create_network(0.8, RIGHT*2.25 + DOWN*1.25)	
+
+		fn.add_flows([
+			[fn.edges[0], 3], 
+			[fn.edges[1], 9], 
+			[fn.edges[2], 4], 
+			[fn.edges[3], 3],
+			[fn.edges[4], 0], 
+			[fn.edges[5], 9], 
+			[fn.edges[6], 4],
+			[fn.edges[7], 7]
+		])
+		fn.add_back_edges(fn.edges)
+		fn.add_max_flow(self, [fn.edges[5], fn.edges[7]])
+		fn.make_edges_colour_2([fn.edges[2], fn.edges[6], fn.edges[7]], GREEN)
+		fn.create_network(0.8, RIGHT*2.25 + DOWN*1.25)
+
+		self.add(fn.network)
+
+
+
+
 

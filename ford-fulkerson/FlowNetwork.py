@@ -120,6 +120,9 @@ class FlowNetwork:
 		for e in self.edges:
 			network.add(e.arrow)
 
+			if e.back_edge != None:
+				network.add(e.back_edge.arrow)
+
 		self.network = network.scale(scale).move_to(position)
 		self.scale = scale
 
@@ -322,5 +325,53 @@ class FlowNetwork:
 
 					visited.append(edge.n2)
 					queue.append(edge.n2)
+
+
+	# Add flows to the graph for a thumbnail
+	def add_flows(self, edge_list):
+		for e in edge_list:
+			e[0].flow_num = e[1]
+			e[0].arrow[2] = Text(str(e[1]) + "/" + str(e[0].capacity), font_size=self.font_size, color="#15131c").move_to(e[0].arrow[2].get_center()).scale(self.scale)
+
+
+	# Add back edges to the graph for a thumbnail
+	def add_back_edges(self, edge_list):
+		for e in edge_list:	
+			back_edge = FlowEdge(e.n2, e.n1, e.flow_num, back_edge=True)
+			back_edge.arrow.scale(self.scale)	
+
+			e.back_edge = back_edge
+			e.back_edge.forward_edge = e
+
+
+	# Add max flow text for the thumbnail
+	def add_max_flow(self, scene, edge_list):
+		min_cut_set = VGroup()
+		min_cut_set.add(Text("max flow", font_size=20))		
+		min_cut_set.add(Text("=", font_size=20))
+
+		s = 0
+		for e2 in edge_list:
+			min_cut_set.add(Text(str(e2.flow_num), color=BLUE_D, font_size=20))
+			s += e2.flow_num
+
+		i = 2
+		while i < len(min_cut_set):
+			i += 1
+			if i < len(min_cut_set):					
+				min_cut_set.insert(i, Text("+", color=WHITE, font_size=20))
+			i += 1
+
+		min_cut_set.add(Text("=", color=WHITE, font_size=20))
+		min_cut_set.add(Text(str(s), color=WHITE, font_size=20))
+
+		scene.add(min_cut_set.set_font_size(30).arrange(buff=0.25).next_to(self.network, UP).shift(DOWN*0.5))
+
+
+	# Makes the edges a colour for the thumbnail
+	def make_edges_colour_2(self, edge_list, colour):
+		for e in edge_list:
+			e.arrow[0].set_color(colour)
+
 
 
