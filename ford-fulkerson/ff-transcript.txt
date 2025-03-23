@@ -3,7 +3,7 @@ YOUTUBE
 Scene 1
 This is a flow network. You have a source node where flow is emanating from, and a sink node where the flow will reach. 
 
-Nodes are joined with weighted directed edges, where each edge weight defines the maximum flow (or capacity) which can be sent through this edge.
+Nodes are joined with weighted directed edges, where each edge weight defines the maximum flow which can be sent through this edge, also known as its capacity.
 
 Each edge starts off empty, with 0 units of flow.
 
@@ -17,23 +17,23 @@ Then we will do a walkthrough of the Ford Fulkerson method for finding the max f
 
 We will then do a larger example. 
 
-We will then code this with the Edmonds-Karp implementation in C++.
-
-Finally we will go through max-flow min-cut theorem. 
+Finally, we will code this with the Edmonds-Karp implementation in C++.
 
 So stay tuned, and feel free to skip to the relevant parts of the video if you already know some of this stuff.
 
 
 Scene 3
-Flow networks have a source node where flow is emanating from, and a sink node where flow will terminate.
+Flow networks have a source node where flow is coming from, and a sink node where flow will terminate.
 
-Nodes are joined with weighted directed edges, where each edge weight defines the capacity of that edge, i.e. the max number of flow units which can be sent through that edge.
+Nodes are joined with weighted directed edges. Each edge weight defines the capacity of that edge, i.e. the max amount of flow which can be sent through that edge.
 
-Let's look at the paths in this network. Imagine these are pipes or roads.
+Let's look at the paths in this network. Imagine these are pipes or something similar.
 
 Our first constraint is: All edges in the graph can only carry a flow which is less than or equal to its capacity.
 
-In the top path, we could push 5 units of flow through the first edge. But then the second edge only has a capacity of 3. So only 3 units of flow can possibly be carried through that edge. 
+For example if this edge is a pipe, and it has a capacity of 5 litres of water per second, you cannot push through 6 litres of water per second or it will burst.
+
+So in the top path, we could push 5 units of flow through the first edge. But then the second edge only has a capacity of 3. So only 3 units of flow can possibly be carried through that edge. 
 
 This means the total amount of flow which can reach the sink from this top path, is actually reduced to 3. 
 
@@ -55,9 +55,9 @@ It begs the question - How do we find this max flow programmatically?
 
 You might think based on the previous example we could just:
 Keep finding paths from s to t.
-1. Find the bottleneck of the path
-2. Push the maximum flow we can through each path, capped by the bottlenecks
-Then return the flow as the maximum flow.
+1. We find the bottleneck of the path
+2. Then push the most flow we can through each path, capped by the bottlenecks
+Then return the final network flow as the maximum flow.
 
 For example in this case you might think - the bottlenecks of the top and bottom paths are 3 and 2 respectively, so push 3 and 2 units of flow through these paths to get the max flow value of 5.
 
@@ -78,7 +78,7 @@ If we consider these two paths, we can see the maximum flow is actually 3. So th
 
 Scene 6
 
-Ford Fulkerson addresses this problem by making one tweak - after we push the flow through a path, we then insert a back edge for each edge in the path, and we set the capacity of this new back edge to be the flow we just pushed. 
+Ford Fulkerson addresses this problem by making one tweak - after we push the flow through a path, we then insert a back edge for each edge in the path, and we set the capacity of this new back edge to be the flow we pushed through that edge. 
 
 This means we have the chance to correct our flow if we saturate an edge and leave ourselves with no paths left. Because we all make mistakes.
 
@@ -96,7 +96,7 @@ In other words, the capacity of these backward edges will be 1.
 
 This just gives you a chance to backtrack the flow on this edge in future iterations. Think of these back edges as giving you the ability to take away flow from this path, and move it to another path.
 
-Let's keep looking for paths until we run out. Here is another one - bottleneck capacity is 1. Push 1 unit of flow through this path.
+Let's keep looking for paths until we run out. Here is another one - bottleneck capacity is 1 because the second edge can only carry 1 more unit of flow before it's at capacity. Push 1 unit of flow through this path.
 
 Note that the flow through the second edge is 2 now, so we need to update the capacity of the back edge to 2. This is because we can correct up to two units of flow now.
 
@@ -106,13 +106,15 @@ There is another path here. Can you see it? Yes we can now take the back edge.
 
 We can push 1 unit of flow through this path. 
 
-Note that when we push 1 unit of flow through the back edge, we take away flow on the forward edge.
+Note that when we push 1 unit of flow through the back edge, we minus 1 unit of flow on the forward edge. Because we are correcting our previous flow pushed through that edge.
 
 Now backtrack and update the back edge capacities to match the new flows.
 
-The important thing to remember is for all nodes other than the source and sink, the flow into a node equals the flow out.
+Now there are no more paths from s to t. So the final flow is our max flow. 
 
-Now there are no more paths from s to t. So the final flow is our max flow.
+The final flow being the sum of flows leaving the source or entering the sink.
+
+The important thing to remember is for all nodes other than the source and sink, the flow into a node equals the flow out. You can look at the final graph and confirm that is true.
 
 
 Scene 6
@@ -136,19 +138,19 @@ The bottleneck capacity here is 4 because this second edge can only carry 4 more
 
 Let's push 4 units of flow through this path.
 
-Now we insert the back edges, with capacities equal to the flows of the edges. The back edge on the second edge of the path needs to have its capacity updated to 9 because the flow of this edge is 9 now.
+Now we insert the back edges, with capacities equal to the flows of the edges. The back edge on the second edge of the path needs to have its capacity updated to 9 because the flow through this edge is 9 now.
 
 This first edge has a back edge of capacity 4.
 
 Now let's choose this bottom path. The bottleneck is 4, caused by the first edge. Let's send through 4 units of flow. And create the back edges.
 
-There is one more path, we can take this one through one of the back edges. The bottleneck of this path is 3, so let's push 3 units of flow through.
+There is one more path, we can go through one of the back edges. The bottleneck of this path is 3, so let's push 3 units of flow through.
 
-Remember, when we push 3 units through the back edge, we take away 3 units of flow on the forward edge.
+Remember, when we push 3 units through the back edge, we take away 3 units of flow from the forward edge.
 
-Now backtrack and update the back edge capacities to match the new flows. The first back edge needs to have its capacity updated to 7. This back edge has capacity 3, capacity 2 now, and capacity 7.
+Now backtrack and update the back edge capacities to match the new flows. The first back edge needs to have its capacity updated to 7. This back edge has capacity 3. This back edge has capacity 2 now after we updated the flow on the forward edge. And capacity 7.
 
-There are no more paths from s to t, so let's return this flow as the max flow. The flow is the sum of the flows leaving the source, or the sum of the flows entering the sink. That is 9 plus 7 which is 16. 
+There are no more paths from s to t, so let's return this final flow as the max flow. The flow is the sum of the flows leaving the source, or the sum of the flows entering the sink. That is 9 plus 7 which is 16. 
 
 
 Scene 7
@@ -168,9 +170,9 @@ This leaves the time complexity as O(m^2 n). I won't go into detail about this, 
 
 
 Scene 8
-Firstly, in my function I'm passing in the flow graph. It maps each node, to a list of neighbours. Each element of the neighbours vector contains a pair with the name of the neighbour, and the capacity of that edge to the neighbour.
+Firstly, in my function I'm passing in the flow graph. It maps each node to a list of neighbours. Each element of the neighbours vector contains a pair with the name of the neighbour, and the capacity of that edge to the neighbour.
 
-Firstly, lets create a mapping of each edge to the current flow in that edge, and the capacity of the edge.
+Firstly, lets store a mapping of each edge to the current flow in that edge, and the capacity of the edge.
 
 I also keep track of my back edges in a separate list.
 
@@ -178,11 +180,11 @@ Next let's map each node to a set of its neighbours.
 
 We need to go through and create the edge and node maps. So let's loop through each node in the input graph.
 
-And let's loop through each neighbour for this node.
+And let's loop through each neighbour for the current node.
 
 Firstly, we can insert this neighbour into the neighbours set for the current node.
 
-Next we need to add the edge. I name the edge node 1 dash node 2. 
+Next we need to add the edge. I name the edge node dash neighbour. 
 
 The current flow of this edge is 0, and the capacity of this edge was given in the input graph.
 
@@ -198,7 +200,7 @@ Ok so I'm not tricking you here, we will implement the breadth first search too.
 
 I'm passing in the node and edge maps.
 
-Firstly, we need to map each node to its parent in the path. This is so when we find the path using the BFS, we can go back through the path and update the flows and stuff.
+Firstly, we need to map each node to its parent in the path. This is so when we find the path using the BFS, we can go back through the path and update the flows.
 
 Next we keep track of the visited nodes. This is standard BFS stuff so we don't keep pushing the same node to the queue and end up in an infinite loop.
 
@@ -206,23 +208,23 @@ Speaking of the queue, here it is. We'll start with the source.
 
 Also I forgot to insert the source into the visited set but I think that's just being extra anyway.
 
-completed denotes the BFS found a path. I start it as false and flip it to true when it finds the sink.
+The completed flag denotes the BFS found a path. I start it as false and flip it to true when it finds the sink.
 
 Grab the node at the start of the queue. If the node is the sink we can break, and set completed to true.
 
 Otherwise, let's loop through the neighbours of the current node.
 
-If the current neighbour is in the visited set, meaning it is already in the queue or been processed already, let's leave it.
+If the current neighbour is in the visited set, meaning it is already in the queue or been processed already, let's leave it. We don't want to add it to the queue again.
 
 Otherwise, we will check out the edge from the current node to this neighbour.
 
-We check if the current flow is below the capacity for this edge, and search for it in the edges and back edges lists.
+We check if the current flow (index 0) is below the capacity (index 1) for this edge, and search for it in the edges and back edges lists.
 
-If it has room for flow to be pushed through it, we add this neighbour to the queue, and set the parent of it to be the current node so we can backtrack.
+If it has room for more flow to be pushed through it, we add this neighbour to the queue, and set the parent of it to be the current node so we can backtrack.
 
 Then remember to denote it as visited. We don't want to put it in the queue twice.
 
-If no path was found, return 0 because we added 0 new flow. This will terminate the entire algorithm back in the edmonds Karp function.
+If no path was found, return 0 because we added 0 new flow. This will terminate the entire algorithm back in the edmondsKarp function.
 
 Otherwise, we need to find the bottleneck of the path. 
 
@@ -234,7 +236,7 @@ Then the bottleneck is the minimum of the current bottleneck, and the remaining 
 
 For example if the current bottleneck is 5, but this edge can only have 3 units of flow pushed through it, the new bottleneck is 3.
 
-Do the same but checking if the edge between the parent and current node lives in the back edges map. Because remember I've split up my edges.
+Do the same but checking if the edge between the parent and current node lives in the back edges map. Because remember I've split up my edges into two maps, so you need to check both maps to find the edge.
 
 Then move up to the parent of this node.
 
@@ -248,7 +250,7 @@ If the edge from the parent to the current node was a forward edge, we simply pu
 
 Then we create a back edge the other way, with capacity equal to the flow of the forward edge.
 
-Else, if the edge from the parent to the current node was a back edge, we actually deduct bottleneck amount of flow from the corresponding forward edge. 
+Else, if the edge from the parent to the current node was a back edge, i.e. we travelled through a back edge in our path, we actually deduct bottleneck amount of flow from the corresponding forward edge. 
 
 Remember the forward edge goes the other way to this back edge we took.
 
@@ -262,8 +264,18 @@ Return the bottleneck flow because that is the amount of flow pushed through the
 
 
 Scene 9
-I added heaps of print statements to this, then I ran this on a new graph and I can show you the paths it took.
+I added heaps of print statements to this, then I ran this on the graphs in the video and I can show you the paths it took.
 
-The other cool thing is that in my last video I talked about an application of max flow in proving whether a sports team is eliminated from a competition. So I ran this with the code from that last video too.
+Here is the first graph. You can see it first picks the bottom path and pushes a flow of 2 through it. Then it picks the top path and pushes a flow of 1 through it. There are no more paths so it returns the max flow as 2 + 1 which is 3.
+
+Here is the larger graph. It first picks that top path and pushes a flow of 9 through it. Next it picks this middle path and pushes a flow of 3 through it. Then it picks the bottom path and pushes a flow of 4 through it. There are no more paths so it returns the max flow as 16.
+
+It hasn't shown itself taking a back edge yet. But that's because Edmond's Karp will take the path with the least of number of edges because it uses a BFS. And the paths with the least number of edges in these two examples just didn't include back edges.
+
+So I ran it on this new graph. It pushes 4 units of flow through this middle path. Then it gets stuck so it has to take this path with the back edge. It pushes 3 units of flow through here. And remember when it pushes 3 units of flow through the back edge it minuses 3 units of flow from the corresponding forward edge, to keep flow conserved. So the flow in this forward edge goes down to 1. Then it returns the max flow as 7.
+
+
+Scene 10
+Now you are a bit of a flow pro, you could apply your skills. I made a video about an appliction of max flow to proving whether a sports team is eliminated based on a leaderboard. So I added this code to the graphs shown in that video too.
 
 I'll put a link to all of this code in the description.
