@@ -205,11 +205,12 @@ class FlowNetwork:
 
 
 	# Animates flow
-	def flow_animate(self, scene, edge_list):
+	def flow_animate(self, scene, edge_list, wait_time=2):
 		# Edge list is: [[[edge, flow], [edge, flow]], [[edge, flow], [edge, flow]]]
 		for edge_set in edge_list:
 			edge_anim = []
 			text_anim = []
+			text_anim_2 = []
 
 			for e in edge_set:
 				a = e[0].arrow[0].copy().set_color(BLUE_D)		
@@ -230,16 +231,19 @@ class FlowNetwork:
 
 				if e[0].is_back_edge:
 					f2 = Text(str(e[0].forward_edge.flow_num) + "/" + str(e[0].forward_edge.capacity), font_size=self.font_size, color="#15131c").move_to(e[0].forward_edge.arrow[2].get_center()).scale(self.scale)
-					text_anim.append(ReplacementTransform(e[0].forward_edge.arrow[2], f2))
+					text_anim_2.append(ReplacementTransform(e[0].forward_edge.arrow[2], f2))
 
 				if e[0].flow_arrow != None:
 					e[0].flow_arrow = None		
 				e[0].flow_arrow = a
 
-			scene.play(*edge_anim)
+			scene.play(*edge_anim)			
 			scene.play(*text_anim)
+			if len(text_anim_2) != 0:
+				scene.play(*text_anim_2)
 
-		scene.wait(2)
+
+		scene.wait(wait_time)
 		single_list = []
 		for edge_set in edge_list:
 			for e in edge_set:
@@ -289,6 +293,9 @@ class FlowNetwork:
 	# Creates the back edges on a path
 	def create_back_edges(self, scene, edge_list):
 		for e in edge_list:		
+			if e.is_back_edge:
+				e = e.forward_edge
+
 			if e.back_edge != None:
 				e.back_edge.arrow[0].set_color(GRAY_C)
 				f = Text("0/" + str(e.flow_num), font_size=self.font_size-4, color="#15131c").move_to(e.back_edge.arrow[2].get_center()).scale(self.scale)
