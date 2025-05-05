@@ -1,7 +1,7 @@
 Scene 1
 In a previous video, we made a terminal snake game in under 50 lines of Python code using the curses library. But our snake is lonely.
 
-In this video we are going to give him some friends by turning this snake game multiplayer. At the same time we will take a deep dive into socket programming in Python.
+Let's give him some mates by turning this snake game multiplayer. At the same time we will take a deep dive into socket programming in Python.
 
 We are going to be making this multiplayer snake game together. So let's dive right in!
 
@@ -9,20 +9,79 @@ We are going to be making this multiplayer snake game together. So let's dive ri
 Scene 2
 Before we write a single line of code, let's go through the basic architecture of how multiplayer games work.
 
-A multiplayer game is essentially a distributed system. Players on separate machines will interact with a shared world which which needs to stay synchronised for everybody.
+A multiplayer game is essentially a distributed system. Players on separate machines will interact with a shared world which needs to stay synchronised for everybody. Or someone's snake might start teleporting.
 
-To make that happen, all clients (the players' computers) will connect to a server, which will act as the source of truth for the game state. Each client will send updates to the server, like "Hey, I pressed the W key, move my snake upwards!" Or "Hey I just joined the game, here is my username!"
+To make that happen, all clients (the players' computers) will connect to a server, which will act as the source of truth for the game state. Each client will send updates to the server, like "Hey, I pressed the W key, move my snake upwards!" Or "Hey I just joined, here is my username!"
 
-The server gathers these messages from every connected player, updates the game state accordingly - "ok, your snake is now moving upwards!" "And, some other guy ate the food!". Then it will broadcast this new game state out to every client.
+The server gathers these messages from every connected player, and updates the game state accordingly - "ok, your snake is now moving upwards!" "And, some other guy ate the food, increment his score". Then it will broadcast this new game state out to every client.
 
-Each client is running a loop that listens for updates from the server. When it receives the new game state, it renders it to the screen so the player sees the latest version of the world.
+Each client is running a loop that continually receives these updates from the server. Each time it receives the new game state, it renders it to the screen so the player sees the latest version of the world.
 
 
 Scene 3
-Create a new directory for your game. Now create two folders - server and client.
+Inside your game directory, create two folders - server and client.
 
 Inside server we will make a new file called server.py. And import the socket library.
 
 
 Scene 4
-Now is a good time to teach you about sockets. 
+But what is a socket? I'm glad you asked.
+
+A socket is an endpoint in a communication stream, allowing a program to send and receive data over a network. You can read from it, and write to it, just like you would a file. But instead of reading from disk, you are reading and writing bytes over a network.
+
+In IP networking, a socket is identified by three parts:
+- The IP address to identify the host machine
+- The port number to identify the specific service or process
+- And the protocol (usually TCP or UDP), which determines how the data is transmitted.
+
+Then two sockets can communicate when a connection is established between them.
+
+
+Scene 5
+Then this is the typical plotline:
+
+We create a server socket, and we bind this server socket to the host and port. Basically - this is my address, come find me here.
+
+We then call listen on the server socket to mark it as a passive socket. That means it's not initiating connections, but it is waiting to accept them from clients.
+
+On the client side, we also create a socket object. But instead of waiting, we call connect to initiate a connection to the server.
+
+The server accepts the incoming connection. This returns a new socket object, conn, dedicated to communicating with that particular client. The original server socket continues to listen for more connections.
+
+Now the server and client can both communicate through this connection. The server will send and receive on the conn socket, and the client will send and receive on its socket.
+
+Until of course, they close their sockets.
+
+
+Scene 6
+Before we dive into creating the server, I made a log_message function in a file called logging_utils.py. This is completely optional, as this is purely for outputting logs to the screen in a nice format, but I will put the code here anyway. 
+
+Now onto the good stuff - in server.py, create your new Server class. Mine is set up with that logging function.
+
+In the init, we want to pass in the host IP and the port. Then create the socket with socket (the library) dot socket. AF_INET means we are using IPv4 addresses, and SOCK_STREAM means our protocol will be TCP. 
+
+Remember how earlier I said a socket is defined by three things? Well now we've caught all three pokemon - host, port and protocol.
+
+In the main function I will make the host 127.0.1.1 - This is the loopback interface and just means it will only accept connections from the same machine right now, as in my own laptop. But don't worry, later I will show you how to set this up so other computers can connect.
+
+The port is 5050 - doesn't matter, it can be basically anything in the range 1024 - 49151 (lots of options).
+
+It doesn't do anything yet so let's define the start method. First we bind the socket to the host and port. Then listen for incoming connections. Let's print this nice log message to the screen.
+
+Before we venture further, we should create a close method so we can free up the address once we're done. Otherwise you might get this address already in use error which is annoying.
+
+For now we just close the server listening socket.
+
+Of course we need to accept these connections. This should be in a while True so that we keep accepting connections until we ctrl C outta there. 
+
+So except KeyboardInterrupt. And finally close everything using that flashy new close method.
+
+This accept method returns two things: Conn is the socket for communicating with the client that just connected, and address is the IP and port of the client, so we know who just rang the doorbell.
+
+So why do we have conn? This is a new socket object for chatting to this particular client, so our listen socket can still listen for other clients too.
+
+Let's run it - it's just sitting there listening but unfortunately no one is showing up to its party just yet.
+
+
+Scene 7
+Let's make some guests show up. In the client directory, make a Client class. This host, port and socket initialisation should look familiar.
