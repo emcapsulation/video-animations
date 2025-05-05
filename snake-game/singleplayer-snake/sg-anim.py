@@ -6,7 +6,7 @@ config.background_color = "#15131c"
 
 class PythonIntro(Scene):
 	def construct(self):
-		Text.set_default(font="Monospace")		
+		Text.set_default(font="Monospace")
 
 		blue_horizontal = RoundedRectangle(
 			width=2, height=2,
@@ -507,3 +507,55 @@ class DrawAndGlowLetter(Scene):
         self.play(FadeOut(letter_e_stroke, glow_effect))
 
         self.wait(3)
+
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title_text = Text("Python Snake Game").shift(UP*3)
+		self.add(title_text)
+
+		question_text = Text("In under 50 lines of code", color="WHITE", font_size=24)
+		question_group = VGroup(question_text).arrange(buff=0.5).shift(UP*2)
+		self.add(question_group)
+
+
+		# SNAKE AND FOOD
+		segments = [[4, 0], [4, 1], [4, 2], [3, 2], [2, 2], [1, 2], [0, 2], [0, 3], [0, 4], [1, 4]]
+		squares = VGroup()
+		
+		colours = ["#306998", "#FFD43B"]
+		count = 0
+		for piece in segments:
+			i, j = piece[0], piece[1]
+
+			snake_piece = Rectangle(
+				width=1, height=1, 
+				color=colours[count%2], 
+				fill_opacity=1,
+				stroke_width=0
+			).move_to(ORIGIN + DOWN*i + RIGHT*j)
+			scale = VGroup(snake_piece)
+
+			squares.add(scale)
+			count += 1
+
+		squares.move_to(DOWN + RIGHT*4)
+		self.add(squares.scale(0.9))
+
+		food = Dot(color=WHITE, radius=0.2).move_to(DOWN + RIGHT*2.8)
+		self.add(food.shift(RIGHT*3))
+
+
+		# LINE NUMBERS
+		for i in range(37, 50):
+			line = Rectangle(
+				width=1, height=1,
+				color=GRAY_A,
+				fill_opacity=1,
+				stroke_width=0
+			)
+			text = Text(str(i+1), color=BLACK).move_to(line.get_center())
+			group = VGroup(line, text).scale(0.62).to_corner(UL).shift(UP*0.5 + LEFT*0.5 + DOWN*(i-37)*0.62)
+			self.add(group)

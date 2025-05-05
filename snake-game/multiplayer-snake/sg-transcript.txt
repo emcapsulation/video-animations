@@ -1,0 +1,28 @@
+Scene 1
+In a previous video, we made a terminal snake game in under 50 lines of Python code using the curses library. But our snake is lonely.
+
+In this video we are going to give him some friends by turning this snake game multiplayer. At the same time we will take a deep dive into socket programming in Python.
+
+We are going to be making this multiplayer snake game together. So let's dive right in!
+
+
+Scene 2
+Before we write a single line of code, let's go through the basic architecture of how multiplayer games work.
+
+A multiplayer game is essentially a distributed system. Players on separate machines will interact with a shared world which which needs to stay synchronised for everybody.
+
+To make that happen, all clients (the players' computers) will connect to a server, which will act as the source of truth for the game state. Each client will send updates to the server, like "Hey, I pressed the W key, move my snake upwards!" Or "Hey I just joined the game, here is my username!"
+
+The server gathers these messages from every connected player, updates the game state accordingly - "ok, your snake is now moving upwards!" "And, some other guy ate the food!". Then it will broadcast this new game state out to every client.
+
+Each client is running a loop that listens for updates from the server. When it receives the new game state, it renders it to the screen so the player sees the latest version of the world.
+
+
+Scene 3
+Create a new directory for your game. Now create two folders - server and client.
+
+Inside server we will make a new file called server.py. And import the socket library.
+
+
+Scene 4
+Now is a good time to teach you about sockets. 
