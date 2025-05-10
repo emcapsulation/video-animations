@@ -1,9 +1,11 @@
 Scene 1
-In a previous video, we made a terminal snake game in under 50 lines of Python code using the curses library. But our snake is lonely.
+In a previous video, we made a terminal snake game in under 50 lines of Python code using the curses library. But our snake is lonely. He's been chasing and eating food by himself for too long.
 
 Let's give him some mates by turning this snake game multiplayer. At the same time we will take a deep dive into socket programming in Python.
 
-We are going to be making this multiplayer snake game together. So let's dive right in!
+We are going to be making this multiplayer snake game together. However, slight disclaimer - This tutorial assumes you already know a bit of Python. I won't be explaining every line but I will definitely walk you through the important concepts.
+
+So let's dive right in!
 
 
 Scene 2
@@ -34,7 +36,7 @@ In IP networking, a socket is identified by three parts:
 - The port number to identify the specific service or process
 - And the protocol (usually TCP or UDP), which determines how the data is transmitted.
 
-Then two sockets can communicate when a connection is established between them.
+Then once a connection is established between them, two sockets can send and receive data. This connection forms a 5-tuple consisting of the source IP and port, destination IP and port, and the protocol being used.
 
 
 Scene 5
@@ -54,27 +56,29 @@ Until of course, they close their sockets.
 
 
 Scene 6
-Before we dive into creating the server, I made a log_message function in a file called logging_utils.py. This is completely optional, as this is purely for outputting logs to the screen in a nice format, but I will put the code here anyway. 
+Before we dive into creating the server, I made a log_message function in a file called logging_utils.py. This is completely optional, as this is purely for outputting logs to the screen in a nice format, but I will put the code here anyway. If you hate amazing logging feel free to just use print I guess.
 
 Now onto the good stuff - in server.py, create your new Server class. Mine is set up with that logging function.
 
 In the init, we want to pass in the host IP and the port. Then create the socket with socket (the library) dot socket. AF_INET means we are using IPv4 addresses, and SOCK_STREAM means our protocol will be TCP. 
 
-Remember how earlier I said a socket is defined by three things? Well now we've caught all three pokemon - host, port and protocol.
+TCP and other protocols is a topic in itself - out of scope for us today. But a brief summary is that TCP ensures reliabile, ordered, error-checked packet delivery. So our game won't have random glitches or missing snake moves.
 
-In the main function I will make the host 127.0.1.1 - This is the loopback interface and just means it will only accept connections from the same machine right now, as in my own laptop. But don't worry, later I will show you how to set this up so other computers can connect.
+Earlier I said a socket is defined by three things. Well now we've caught all three pokemon - host, port and protocol.
 
-The port is 5050 - doesn't matter, it can be basically anything in the range 1024 - 49151 (lots of options).
+In the main function I will make the host 127.0.0.1 - This is the loopback interface and just means it will only accept connections from the same machine right now, as in my own laptop. But don't worry, later I will show you how to set this up so other computers can connect to you.
 
-It doesn't do anything yet so let's define the start method. First we bind the socket to the host and port. Then listen for incoming connections. Let's print this nice log message to the screen.
+The port is 5050 - doesn't matter, it can be basically anything in the registered port range (lots of options).
 
-Before we venture further, we should create a close method so we can free up the address once we're done. Otherwise you might get this address already in use error which is annoying.
+Let's define the start method. First we bind the socket to the host and port. Then listen for incoming connections. Let's print this nice log message to the screen.
+
+Before we venture further and make it actually accept incoming connections, we should create a close method so we can free up the address once we're done. Otherwise you might get this address already in use error which is annoying.
 
 For now we just close the server listening socket.
 
-Of course we need to accept these connections. This should be in a while True so that we keep accepting connections until we ctrl C outta there. 
+Of course we need to accept these connections. This should be in a while True so that we keep accepting connections until we CTRL+C outta there. 
 
-So except KeyboardInterrupt. And finally close everything using that flashy new close method.
+So except KeyboardInterrupt. And finally close everything using that flashy new close method. Quick heads up for Windows users, CTRL+C doesn't always stop the server in the terminal.
 
 This accept method returns two things: Conn is the socket for communicating with the client that just connected, and address is the IP and port of the client, so we know who just rang the doorbell.
 
@@ -82,6 +86,92 @@ So why do we have conn? This is a new socket object for chatting to this particu
 
 Let's run it - it's just sitting there listening but unfortunately no one is showing up to its party just yet.
 
+You can actually connect to it with netcat if you are on Linux. If you are on Windows don't lose sleep because we are about to code the client.
+
 
 Scene 7
-Let's make some guests show up. In the client directory, make a Client class. This host, port and socket initialisation should look familiar.
+Let's make some guests show up. In the client directory, create a new file called client.py make a Client class. 
+
+This host, port and socket initialisation should feel like deja vu.
+
+Over in our main function, when you start the client program let's give the user the ability to input the server IP address. Because the server could be run on any machine - yours, mine, that one guy in your discord chat - we want to connect to them all. Then the port is 5050.
+
+Once again we need a start function. But this time instead of calling listen like the chill guy server, the client is a bit more proactive and will connect to the server host and port. He's like your extraverted friend.
+
+Then we also want a close method. Again let's just close the socket for now, but in the future we will include other cleanup in here. I like to pass a message into here just to print to the screen why we closed it. 
+
+Now back in our start method, if the connect raised an exception, we'll catch it and call our close method with the message we couldn't connect to the server. Otherwise (or else) let's print that we connected to the server.
+
+Let's give this a whirl.
+
+Firstly, if I try connecting with the client and the server isn't running, it says hey couldn't connect.
+
+Now when we run the server, you can see the server accepted the connection from the client, and the client shows successfully connected.
+
+But the client quits immediately. Why? Because we are doing nothing once connected, so the program just ends. There's no loop, no sending or receiving data, it's like the client shows up, rings the doorbell then goes home.
+
+Secondly, you might be wondering why all these clients are coming from different ports. Remember how earlier in the video I said for our server port it needed to be in the registered port range? That is because the ports above this are ephemeral ports. So my OS is actually assigning the client socket a random port from the ephemeral zone, we don't need to choose it.
+
+
+Scene 8
+Anyway, back in server.py you see we get conn, which from earlier (quick refresher) is our new socket object for communicating with the client. Give yourself a pat on the back because you've essentially finished the initial set up!
+
+But how can we communicate with this client, whilst still accepting new connections in the while loop?
+
+The answer is we actually handle reading and writing to conn on a separate thread. But what is a thread? I'm glad you asked.
+
+A thread is an execution unit within a process. Think of each thread as a worker with their own task to complete. If I spin up a new thread, I can give it its own set of instructions. But the key thing is it still shares memory and CPU time with the other threads in that process. 
+
+As an analogy, it's like the threads are cutting different veggies but adding to the same salad. They have their own task, but are working with the same set of ingredients and equipment.
+
+The CPU switches really quickly between these threads, giving the appearance that they are running at the same time.
+
+This helps us immensely because when the server accepts a new client, we can start a new thread just for sending and receiving data for that connection. 
+
+Meanwhile the main thread is still listening for and accepting new clients at the same time!
+
+
+Scene 9
+Let's do it. 
+
+Firstly, let's create a new Connection class to manage our client connections on the server side. I see a lot of tutorials put all this stuff in the one server file. But trust me, future you will thank you for having clean code - debugging messy socket code with threads is one way to speedrun wanting to quit programming.
+
+In connection.py, pass in that conn socket and the client's address. In the near future the user will send across their username too so let's get ready for that.
+
+Guess what method we want - that's right, close. Again just close the socket. But in the Connection class, remember we are only closing the socket associated with communicating with this particular client (conn). The server still has its listener socket open.
+
+In server.py let's initialise that new connection object.
+
+Now here is where the magic happens. We are going to start new_conn.handle - but in a separate thread. target= tells the thread which function to run when it starts. Then use daemon=True - This essentially makes it a background thread. So when the main program ends, these threads won't hang around to keep finishing their tasks, they'll automatically shut down with the program.
+
+Then of course back in our connection class we need to actually make that handle method. In the future it will receive messages from the user. But for now, let's just log a debug message to the screen.
+
+
+Scene 10
+At the moment handle is empty, but that's about to change. When a client first connects, they should send across their username! Let's do it.
+
+In client.py, we want to make a send method for sending a message to the server. sendall() will ensure the full message is sent. And we need to convert the message to bytes - we can do this with encode. Finally, I finish the message with the newline character to denote the end of the message.
+
+If we couldn't send the message let's close the socket.
+
+Now we can send the username. So when the user first joins the server and the client connects, they should be prompted to enter their username. Then we will send over this username as a dictionary. 
+
+This is because the server will be receiving many messages from many clients. So when you send across SnakeKing as your username, you need to actually tell the server that this is a username so it can handle it accordingly.
+
+Over in Connection, in our handle method, the first thing this Connection object will do is receive the username.
+
+Then we will read 1024 bytes from the socket. Convert these bytes to a string with decode. And remove that newline char with strip.
+
+Raise an exception if we received nothing - that probably means the client closed their program before sending a username. Otherwise let's print out the message. 
+
+Let's take a look - Yep, the server has received our new username!
+
+
+Scene 11
+Remember this message has come in this JSON format. We can create a new method for converting these messages to an object with json_loads.
+
+But what do we want to do with these message objects that come in? Well we want the server to handle them. The clients are basically yelling things like "Here is my username!", "I moved my snake!", "I quit the game!" and so the server needs to update the game state accordingly.
+
+To manage all this yelling we are going to create a message queue. Think of it like a waiting room. Every time a connection reads a message from a client, it turns it into a json object and drops it into the queue. 
+
+At the moment the server is chilling and accepting connections. So we need to run a loop on a separate thread to continually poll the queue and process the messages!

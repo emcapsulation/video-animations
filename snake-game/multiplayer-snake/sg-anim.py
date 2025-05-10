@@ -1,4 +1,5 @@
 from manim import *
+import random
 
 
 config.background_color = "#15131c"
@@ -372,4 +373,209 @@ class Socket2(Scene):
 		close_text_2 = Text("close socket", font_size=24, color=MAROON).scale(0.75).move_to(sock_box.get_center()+DOWN)
 		
 		self.play(Write(close_text_1), Write(close_text_2))
+		self.wait(2)
+
+
+
+class Threads(Scene):
+	def add_thread(self, title, color, pos, shared_text_line):
+		thread_1_title = Text(title, font_size=20, color=color)
+		thread_1_resource = Text("Stack\nRegisters", font_size=20).next_to(thread_1_title, DOWN)
+		thread_1_curve = ParametricFunction(lambda t: [t, np.sin(t), 0], t_range=[-PI, PI, 0.01], color=color).scale(0.25).move_to(pos)
+		thread_1 = VGroup(thread_1_title, thread_1_resource).next_to(shared_text_line, DOWN).shift(pos)
+		self.play(Create(thread_1))
+		self.play(Create(thread_1_curve))
+
+		return thread_1_curve
+
+
+	def add_code(self, code, pos):
+		background_rect = Rectangle(
+			width=2.5, 
+			height=1, 
+			fill_color="#2c2336",
+			stroke_width=0.5
+		).next_to(pos, DOWN*1.3).set_opacity(0.3)	
+		code = Text(code, font_size=14).move_to(background_rect.get_center())
+		return VGroup(background_rect, code)
+
+
+	def make_vegetable(self, color, pos, size):
+		lettuce = Dot(radius=size, color=color).next_to(pos, RIGHT*0.25)
+		self.play(Create(lettuce), run_time=0.2)
+		left_rand, down_rand = random.uniform(-1.5, 1.5), random.uniform(2, 2.5)
+		self.play(lettuce.animate.move_to(ORIGIN + LEFT*left_rand + DOWN*down_rand), run_time=0.2)
+
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		process_box = RoundedRectangle(
+			width=12, height=6,
+			corner_radius=[0.25, 0.25, 0.25, 0.25],
+			stroke_color="WHITE"
+		).move_to(ORIGIN+DOWN*0.5)
+		self.play(Create(process_box))
+
+		process_title = Text("Multithreaded Process").move_to(process_box.get_top()+UP*0.5)
+		self.play(Write(process_title))
+		
+		shared_text_1 = Text("Heap", font_size=24)
+		shared_text_2 = Text("Data", font_size=24)
+		shared_text_3 = Text("Code", font_size=24)
+		shared_text = VGroup(shared_text_1, shared_text_2, shared_text_3).arrange(RIGHT, buff=2).move_to(process_box.get_top()+DOWN*0.5)
+		shared_text_line = Line(LEFT*6, RIGHT*6).next_to(shared_text, DOWN)
+
+		self.play(Write(shared_text), Create(shared_text_line))
+
+		thread_1 = self.add_thread("Thread 1", RED, LEFT*4.5, shared_text_line)
+		thread_2 = self.add_thread("Thread 2", ORANGE, LEFT*1.5, shared_text_line)
+		thread_3 = self.add_thread("Thread 3", YELLOW, RIGHT*1.5, shared_text_line)
+		thread_4 = self.add_thread("Thread 4", GREEN, RIGHT*4.5, shared_text_line)
+		
+		code_1 = self.add_code("lettuce.chop()\nsalad.push(lettuce)", thread_1.get_center())
+		code_2 = self.add_code("tomato.chop()\nsalad.push(tomato)", thread_2.get_center())
+		code_3 = self.add_code("onion.chop()\nsalad.push(onion)", thread_3.get_center())
+		code_4 = self.add_code("carrot.chop()\nsalad.push(carrot)", thread_4.get_center())
+		self.play(Create(code_1), Create(code_2), Create(code_3), Create(code_4))
+
+		bowl = ParametricFunction(lambda t: [t, 0.25*t**2, 0], t_range=[-2, 2, 0.01]).move_to(ORIGIN+DOWN*2.5)
+		self.play(Create(bowl))
+
+		self.wait(2)
+		cpu = Text("CPU", font_size=24, color=TEAL).next_to(code_1, DOWN)
+		self.play(Write(cpu))
+
+		self.make_vegetable(GREEN, code_1, 0.25)		
+
+		for i in range(0, 4):
+			self.play(cpu.animate.next_to(code_2, DOWN), run_time=0.2)
+			self.make_vegetable(RED, code_2, 0.1)	
+
+			self.play(cpu.animate.next_to(code_3, DOWN), run_time=0.2)
+			self.make_vegetable(PURPLE, code_3, 0.15)	
+
+			self.play(cpu.animate.next_to(code_4, DOWN), run_time=0.2)
+			self.make_vegetable(ORANGE, code_4, 0.2)	
+
+			self.play(cpu.animate.next_to(code_1, DOWN), run_time=0.2)
+			self.make_vegetable(GREEN, code_1, 0.25)		
+
+		self.wait(2)
+
+
+
+class MessageQueue(Scene):
+	def add_thread(self, title, color, pos):
+		thread_1_title = Text(title, font_size=20, color=color).move_to(pos)
+		thread_1_curve = ParametricFunction(lambda t: [t, np.sin(t), 0], t_range=[-PI, PI, 0.01], color=color).scale(0.25).next_to(thread_1_title, DOWN)
+		self.play(Create(thread_1_title), Create(thread_1_curve))
+
+		return thread_1_title, thread_1_curve
+
+
+	def add_code(self, code, pos):
+		background_rect = Rectangle(
+			width=2.5, 
+			height=1, 
+			fill_color="#2c2336",
+			stroke_width=0.5
+		).next_to(pos, DOWN*1.3).set_opacity(0.3)	
+		code = Text(code, font_size=14).move_to(background_rect.get_center())
+
+		return VGroup(background_rect, code)
+
+
+	def add_thread_code(self, thread_title, box_title, color, position, code_text):
+		server_title, server_thread = self.add_thread(thread_title, color, position)
+		server_box = self.create_box(box_title, color, server_thread.get_center() + DOWN*1.5, code_text)
+		server = VGroup(server_title, server_thread, server_box)
+		return server
+
+
+	def create_box(self, box_title, color, pos, code_text, scale=1, pos2=0):
+		server_box = RoundedRectangle(
+			width=4, height=3,
+			corner_radius=[0.25, 0.25, 0.25, 0.25]
+		).move_to(pos)
+		server_text = Text(box_title, font_size=24, color=color).move_to(server_box.get_top()+DOWN*0.5)
+		server_group = VGroup(server_box, server_text).scale(0.75).scale(scale)
+		self.play(Create(server_group))
+
+		server_code = self.add_code(code_text, server_text.get_bottom()+UP*pos2).scale(scale)
+		self.play(Create(server_code))
+
+		box = VGroup(server_group, server_code)
+		return box	
+
+
+	def send_msg(self, message, color, start, end):
+		username_text = Text(message, font_size=16)
+		username_box = SurroundingRectangle(username_text, corner_radius=0.2, stroke_width=0, fill_color=color, fill_opacity=0.75)
+		username = VGroup(username_box, username_text).move_to(start)
+		self.play(username.animate.move_to(end))
+
+		return username
+
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		self.add_thread_code("Main Thread", "Server", LIGHT_PINK, UP*2+LEFT*5, "self.socket.accept()")
+		conn_1 = self.add_thread_code("Conn 1 Thread", "Connection 1", BLUE, UP*2+LEFT*1.5, "handle:\n\tself.socket.recv()")
+		conn_2 = self.add_thread_code("Conn 2 Thread", "Connection 2", TEAL, UP*2+RIGHT*1.5, "handle:\n\tself.socket.recv()")
+		conn_3 = self.add_thread_code("Conn 3 Thread", "Connection 3", GREEN, UP*2+RIGHT*4.5, "handle:\n\tself.socket.recv()")
+
+		client_1 = self.create_box("Client 1", BLUE, LEFT*1.5+DOWN*2.5, "self.socket.send(msg)", scale=0.7, pos2=0.25)
+		client_2 = self.create_box("Client 2", TEAL, RIGHT*1.5+DOWN*2.5, "self.socket.send(msg)", scale=0.7, pos2=0.25)
+		client_3 = self.create_box("Client 3", GREEN, RIGHT*4.5+DOWN*2.5, "self.socket.send(msg)", scale=0.7, pos2=0.25)
+
+		username = self.send_msg("\"{'username': 'Sn4keK1ng'}\"", BLUE, client_1.get_center(), conn_1.get_center())
+		self.play(FadeOut(username))
+		direction = self.send_msg("\"{'direction': 'W'}\"", TEAL, client_2.get_center(), conn_2.get_center())
+		self.play(FadeOut(direction))
+		
+		remove_connection = self.send_msg("\"{'remove_connection': 'g4mer'}\"", GREEN, client_3.get_center(), conn_3.get_center())
+		self.play(FadeOut(remove_connection))
+
+		message_queue = Text("Message Queue: ", font_size=24).move_to(UP*3+LEFT*5)
+		self.play(Write(message_queue))
+
+		username = self.send_msg("\"{'username': 'Sn4keK1ng'}\"", BLUE, client_1.get_center(), conn_1.get_center())
+		self.play(Transform(username[1], Text("{'username': 'Sn4keK1ng'}", font_size=16).move_to(username[0].get_center())))
+		self.play(username.animate.move_to(message_queue.get_right()+RIGHT*2.5))
+
+		self.play(
+			conn_1.animate.shift(RIGHT*3),
+			conn_2.animate.shift(RIGHT*3),
+			conn_3.animate.shift(RIGHT*3),
+			client_1.animate.shift(RIGHT*3),
+			client_2.animate.shift(RIGHT*3),
+			client_3.animate.shift(RIGHT*3)
+		)
+
+		process = self.add_thread_code("Process Thread", "Server", PURPLE, UP*2+LEFT*2, "self.message_queue.get()")
+
+		direction = self.send_msg("\"{'direction': 'W'}\"", TEAL, client_2.get_center(), conn_2.get_center())
+		self.play(Transform(direction[1], Text("{'direction': 'W'}", font_size=16).move_to(direction[0].get_center())))
+		self.play(direction.animate.move_to(username.get_right()+RIGHT*2))
+
+		self.play(
+			username.animate.move_to(process.get_center()),
+			direction.animate.shift(LEFT*4.5)
+		)
+		self.play(FadeOut(username))
+
+		remove_connection = self.send_msg("\"{'remove_connection': 'g4mer'}\"", GREEN, client_3.get_center(), conn_3.get_center())
+		self.play(Transform(remove_connection[1], Text("{'remove_connection': 'g4mer'}", font_size=16).move_to(remove_connection[0].get_center())))
+		self.play(remove_connection.animate.move_to(direction.get_right()+RIGHT*3))
+
+		self.play(
+			direction.animate.move_to(process.get_center()),
+			remove_connection.animate.shift(LEFT*4)
+		)
+		self.play(FadeOut(direction))
+
+		self.play(remove_connection.animate.move_to(process.get_center()))
+		self.play(FadeOut(remove_connection))
 		self.wait(2)
