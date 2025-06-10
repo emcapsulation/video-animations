@@ -1321,3 +1321,157 @@ class ClientPrediction(Scene):
 		note = Text("Prediction gives instant response | Server ensures consistency", font_size=24).to_edge(DOWN)
 		self.play(Write(note))
 		self.wait(2)
+
+
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")		
+
+
+		socket_scene = VGroup()
+
+		server_box = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=[0.25, 0.25, 0.25, 0.25],
+			stroke_color="GRAY_C",
+			fill_color="BLACK",
+			fill_opacity=1
+		).move_to(ORIGIN+LEFT*4.75+DOWN*0.25)
+		server_text = Text("Server", font_size=24, color=MAROON).move_to(server_box.get_center())
+		server_group = VGroup(server_box, server_text).scale(0.75)
+
+		client_box = RoundedRectangle(
+			width=4, height=2,
+			corner_radius=[0.25, 0.25, 0.25, 0.25],
+			stroke_color="GRAY_C",
+			fill_color="BLACK",
+			fill_opacity=1
+		).move_to(ORIGIN+RIGHT*4.75+DOWN*0.25)
+		client_text = Text("Client", font_size=24, color=TEAL).move_to(client_box.get_center())
+		client_group = VGroup(client_box, client_text).scale(0.75)
+
+		server_client = VGroup(server_group, client_group).shift(UP*2.75)
+		socket_scene.add(server_client)
+
+
+		socket_text = Text("create socket", font_size=24, color=RED).scale(0.75).move_to(server_box.get_center()+DOWN)
+		socket_scene.add(socket_text)
+
+		bind_text = Text("bind to (host, port)", font_size=24, color=ORANGE).scale(0.75).move_to(socket_text.get_center()+DOWN)
+		socket_scene.add(bind_text)
+
+		listen_text = Text("socket.listen()", font_size=24, color=GOLD).scale(0.75).move_to(bind_text.get_center()+DOWN)
+		socket_scene.add(listen_text)
+
+		socket_text_2 = Text("create socket", font_size=24, color=BLUE).scale(0.75).move_to(client_box.get_center()+DOWN)
+		socket_scene.add(socket_text_2)
+
+		connect_text = Text("connect to server (host, port)", font_size=24, color=PURPLE).scale(0.75).move_to(socket_text_2.get_center()+DOWN*3)
+		socket_scene.add(connect_text)
+
+		accept_text = Text("accept connection", font_size=24, color=YELLOW).scale(0.75).move_to(listen_text.get_center()+DOWN)
+		socket_scene.add(accept_text)
+
+
+		conn_box = RoundedRectangle(
+			width=3, height=1.5,
+			corner_radius=[0.25, 0.25, 0.25, 0.25],
+			stroke_color="WHITE"
+		).move_to(accept_text.get_center()+DOWN)
+		conn_text = Text("conn", font_size=24, color=GREEN).move_to(conn_box.get_center())
+		conn = VGroup(conn_box, conn_text).scale(0.75)
+		socket_scene.add(conn)
+
+
+		sock_box = RoundedRectangle(
+			width=3, height=1.5,
+			corner_radius=[0.25, 0.25, 0.25, 0.25],
+			stroke_color="WHITE"
+		).move_to(connect_text.get_center()+DOWN)
+		sock_text = Text("socket", font_size=24, color=LIGHT_PINK).move_to(sock_box.get_center())
+		sock = VGroup(sock_box, sock_text).scale(0.75)
+		socket_scene.add(sock)
+
+
+		send_arrow = Arrow(start=conn_box.get_right(), end=sock_box.get_left()).shift(UP*0.5)
+		recv_arrow = Arrow(start=sock_box.get_left(), end=conn_box.get_right()).shift(DOWN*0.5)
+		
+		socket_scene.add(send_arrow)
+		socket_scene.add(recv_arrow)
+
+
+		close_text_1 = Text("close conn", font_size=24, color=TEAL).scale(0.75).move_to(conn_box.get_center()+DOWN)
+		close_text_2 = Text("close socket", font_size=24, color=MAROON).scale(0.75).move_to(sock_box.get_center()+DOWN)		
+		socket_scene.add(close_text_1, close_text_2)
+
+		self.add(socket_scene)
+
+
+
+		title_text = Text("Python Multiplayer Snake").shift(UP*3)
+		self.add(title_text)
+
+		question_text = Text("Learn sockets and threads", color="WHITE", font_size=24)
+		question_group = VGroup(question_text).arrange(buff=0.5).shift(UP*2)
+		self.add(question_group)
+
+
+
+		snakey_bois = VGroup()
+
+		segments = [[0, -1], [0, 0], [0, 1], [0, 2], [0, 3]]
+		squares = VGroup()
+		
+		colours = ["#306998", "#FFD43B"]
+		count = 0
+		for piece in segments:
+			i, j = piece[0], piece[1]
+
+			snake_piece = Rectangle(
+				width=1, height=1, 
+				color=colours[count%2], 
+				fill_opacity=1,
+				stroke_width=0
+			).move_to(ORIGIN + DOWN*i + RIGHT*j)
+			snake_coords = Text('('+str(i)+','+str(j)+')', font_size=16).move_to(snake_piece.get_center())
+			scale = VGroup(snake_piece, snake_coords)
+
+			squares.add(scale)
+			count += 1
+
+		squares.move_to(ORIGIN+RIGHT+UP*2)
+		snakey_bois.add(squares)
+
+		dir_text = Text("new_snake['segments']", font_size=24).next_to(squares, UP)
+		snakey_bois.add(dir_text)
+
+
+
+		segments2 = [[0, -3], [0, -2], [0, -1], [0, 0], [0, 1]]
+		squares2 = VGroup()
+		
+		count = 0
+		for piece in segments2:
+			i, j = piece[0], piece[1]
+
+			snake_piece = Rectangle(
+				width=1, height=1, 
+				color=colours[count%2], 
+				fill_opacity=1,
+				stroke_width=0
+			).move_to(ORIGIN + DOWN*i + RIGHT*j)
+			snake_coords = Text('('+str(i)+','+str(j)+')', font_size=16).move_to(snake_piece.get_center())
+			scale = VGroup(snake_piece, snake_coords)
+
+			squares2.add(scale)
+			count += 1
+
+		squares2.move_to(ORIGIN+LEFT)
+		snakey_bois.add(squares2)
+
+		dir_text2 = Text("current_snake['segments']", font_size=24).next_to(squares2, UP)
+		snakey_bois.add(dir_text2)
+
+
+		self.add(snakey_bois.scale(0.5).shift(DOWN*1.25+RIGHT*4))
