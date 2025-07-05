@@ -1509,3 +1509,810 @@ class AlgebraAgain(Scene):
 		rect = BackgroundRectangle(ahhh, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
 		self.play(FadeIn(rect), Write(ahhh))
 		self.wait(2)
+
+
+
+config.background_color = "#000000"
+
+class ParabolaYay(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		axes = Axes(
+			x_range=[-1, 10, 1],
+			y_range=[-4, 8, 1],
+			tips=False,
+			axis_config={"include_numbers": True, "font_size": 18},
+		).move_to(DOWN*0.75)
+		labels = axes.get_axis_labels(x_label="x", y_label="y")
+
+		point = Dot(axes.coords_to_point(1, 2), color=RED)
+		point_label = MathTex("(1, 2)", font_size=24).next_to(point, RIGHT, buff=0.2)
+
+		point_2 = Dot(axes.coords_to_point(2, 6), color=ORANGE)
+		point_label_2 = MathTex("(2, 6)", font_size=24).next_to(point_2, RIGHT, buff=0.2)
+
+		self.add(axes, labels, point, point_label, point_2, point_label_2)
+		self.wait(2)
+
+		question = Text("How many parabolas can we draw through (1, 2) and (2, 6)?", 
+			font_size=24, t2c={"(1, 2)": RED, "(2, 6)": ORANGE}).move_to(UP*3)
+		self.play(Write(question))
+		self.play(Flash(point, color=RED))
+		self.play(Flash(point_2, color=ORANGE))
+		self.wait(2)
+
+
+		# y = ((c-2)/2 + 2) x^2 - (3c-2)/2 x + c 
+		a_start, a_end = -50, 60
+
+		def get_line_colour(a):
+			a_range, gradient_steps = a_end - a_start, 100
+
+			return color_gradient(
+				[RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK], gradient_steps
+			)[int((a + 50)/a_range * (gradient_steps-1))]
+
+
+		y_x_1 = axes.plot(lambda x: 1.5*x*x - 0.5*x + 1, x_range=[-1, 2.3], color=get_line_colour(1))
+		y_x_1_label = MathTex("y = 1.5x^{2} - 0.5x + 1", font_size=24, color=get_line_colour(1)).next_to(axes.coords_to_point(2.5, 7), RIGHT)
+		self.play(Create(y_x_1), Write(y_x_1_label))
+		self.bring_to_front(point, point_label, point_2, point_label_2)		
+		self.wait(2)
+
+		y_3x_m1 = axes.plot(lambda x: 6*x*x - 14*x + 10, x_range=[0.16, 2.18], color=get_line_colour(10))
+		y_3x_m1_label = MathTex("y = 6x^{2} - 14x + 10", font_size=24, color=get_line_colour(10)).next_to(axes.coords_to_point(2, 5), RIGHT)
+		self.play(Create(y_3x_m1), Write(y_3x_m1_label))
+		self.bring_to_front(point, point_label, point_2, point_label_2)
+		self.wait(2)
+
+		y_m2x_4 = axes.plot(lambda x: -2*x*x + 10*x - 6, x_range=[0.2, 4.79], color=get_line_colour(-6))
+		y_m2x_4_label = MathTex("y = -2x^{2} + 10x - 6", font_size=24, color=get_line_colour(-6)).next_to(axes.coords_to_point(4, 2), RIGHT)
+		self.play(Create(y_m2x_4), Write(y_m2x_4_label))
+		self.bring_to_front(point, point_label, point_2, point_label_2)
+		self.wait(2)
+
+		self.play(FadeOut(y_x_1), FadeOut(y_x_1_label),
+			FadeOut(y_3x_m1), FadeOut(y_3x_m1_label),
+			FadeOut(y_m2x_4), FadeOut(y_m2x_4_label)
+		)
+		self.wait(2)
+
+
+		question_2 = MathTex("\\infty").move_to(UP*3)
+		self.play(Transform(question, question_2))
+		self.wait(2)
+
+
+		# This is a new thing for me - this tracks the value of a				
+		a_tracker = ValueTracker(a_start)
+
+		def get_line():
+			a = a_tracker.get_value()
+			colour = get_line_colour(a)
+
+			return axes.plot(
+				lambda x: ((a-2)/2 + 2)*x*x - ((3*a-2)/2)*x + a,
+				x_range=[-1, 10],
+				color=colour,
+				stroke_width=4
+			)
+
+		# Each frame it redraws the line
+		line = always_redraw(get_line)
+		self.add(line)
+		self.bring_to_front(point, point_label, point_2, point_label_2)
+
+
+		def get_equation():
+			a = a_tracker.get_value()
+
+			eq = MathTex(
+			    "y = ", f"{((a-2)/2 + 2):.2f}", "x^{2} + ", f"{(-1*(3*a-2)/2):.2f}", "x + ", f"{a:.2f}",
+			    color=get_line_colour(a),
+			    font_size=24
+			)
+			eq.move_to(UP*2 + RIGHT*4)
+			return eq
+
+		equation = always_redraw(get_equation)
+		self.add(equation)
+
+
+		self.play(a_tracker.animate.set_value(a_end), run_time=6, rate_func=linear)
+		self.wait(2)	
+
+
+
+config.background_color = "#15131c"
+
+class DoublePointParabolaNoGo(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		general = MathTex("y = ax^{2} + bx + c").move_to(UP*3)
+		self.play(Write(general))
+		self.wait(2)
+
+		point_text = Text("We want the curve to pass through (1, 2) and (2, 6)", 
+			font_size=24, t2c={"(1, 2)": RED, "(2, 6)": ORANGE}).next_to(general, DOWN, buff=1)
+		self.play(Write(point_text))
+		self.wait(2)
+
+		sub_eq = MathTex("2", "=", "a", "\\cdot", "1", "^{2}", "+", "b", "\\cdot", "1", "+", "c", "\\quad", "(1)")
+		sub_eq.set_color_by_tex("2", RED)
+		sub_eq.set_color_by_tex("1", RED)
+		sub_eq.next_to(point_text, DOWN).shift(LEFT*3)
+		self.play(Write(sub_eq))
+		self.wait(2)
+
+		sub_eq_2 = MathTex("6", "=", "a", "\\cdot", "2", "^{2}", "+", "b", "\\cdot", "2", "+", "c", "\\quad", "(2)")
+		sub_eq_2.set_color_by_tex("2", ORANGE)
+		sub_eq_2.set_color_by_tex("6", ORANGE)
+		sub_eq_2.next_to(point_text, DOWN).shift(RIGHT*3)
+		self.play(Write(sub_eq_2))
+		self.wait(2)
+
+		simplified = MathTex("a", "+", "b", "+", "c", "=", "2", "\\quad", "(1)").next_to(sub_eq, DOWN)
+		simplified_2 = MathTex("4a", "+", "2b", "+", "c", "=", "6", "\\quad", "(2)").next_to(sub_eq_2, DOWN)
+		self.play(
+			TransformMatchingTex(sub_eq.copy(), simplified),
+			TransformMatchingTex(sub_eq_2.copy(), simplified_2)
+		)
+		self.wait(2)
+
+		underline = Underline(simplified, color=MAROON)
+		underline_2 = Underline(simplified_2, color=MAROON)
+
+		explain = Text("2 equations, 3 unknowns", font_size=20, color=MAROON).move_to(DOWN*0.5)
+		self.play(Create(underline), Create(underline_2), FadeIn(explain))
+		self.wait(2)
+
+		conclusion = Text("Infinitely many solutions.", font_size=28).next_to(explain, DOWN, buff=0.5).shift(DOWN)
+		self.play(Write(conclusion))
+		self.wait(2)
+
+
+
+config.background_color = "#000000"
+
+class ParabolaIsSoBack(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		axes = Axes(
+			x_range=[-1, 10, 1],
+			y_range=[-4, 8, 1],
+			tips=False,
+			axis_config={"include_numbers": True, "font_size": 18},
+		).move_to(DOWN*0.75)
+		labels = axes.get_axis_labels(x_label="x", y_label="y")
+
+		point = Dot(axes.coords_to_point(1, 2), color=RED)
+		point_label = MathTex("(1, 2)", font_size=24).next_to(point, RIGHT, buff=0.2)
+
+		point_2 = Dot(axes.coords_to_point(2, 6), color=ORANGE)
+		point_label_2 = MathTex("(2, 6)", font_size=24).next_to(point_2, RIGHT, buff=0.2)
+
+		self.add(axes, labels, point, point_label, point_2, point_label_2)
+		self.wait(2)
+
+		point_3 = Dot(axes.coords_to_point(3, 4), color=GOLD)
+		point_label_3 = MathTex("(3, 4)", font_size=24).next_to(point_3, RIGHT, buff=0.2)
+		self.play(Create(point_3), Write(point_label_3))		
+		self.wait(2)
+
+		question = Text("How many parabolas can we draw through (1, 2), (2, 6) and (3, 4)?", 
+			font_size=24, t2c={"(1, 2)": RED, "(2, 6)": ORANGE, "(3, 4)": GOLD}).move_to(UP*3)
+		self.play(Write(question))
+		self.play(Flash(point, color=RED))
+		self.play(Flash(point_2, color=ORANGE))
+		self.play(Flash(point_3, color=GOLD))
+		self.wait(2)
+
+
+		# y = ax + 2 - a
+		a_start, a_end = -50, 60
+
+		def get_line_colour(a):
+			a_range, gradient_steps = a_end - a_start, 100
+
+			return color_gradient(
+				[RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK], gradient_steps
+			)[int((a + 50)/a_range * (gradient_steps-1))]
+
+
+		question_2 = Text("Only 1", font_size=24).move_to(UP*3)
+		self.play(Transform(question, question_2))
+		self.wait(2)
+
+
+		y_4x_m2 = axes.plot(lambda x: -3*x*x + 13*x - 8, x_range=[-1, 10], color=get_line_colour(8))
+		y_4x_m2_label = MathTex("y = -3x^{2} + 13x - 8", font_size=24, color=get_line_colour(8)).next_to(axes.coords_to_point(3.5, 2), RIGHT)
+		self.play(Create(y_4x_m2), Write(y_4x_m2_label))
+		self.bring_to_front(point, point_label, point_2, point_label_2, point_3, point_label_3)		
+		self.wait(2)
+
+
+		deg2 = Text("A degree-2 polynomial is uniquely defined by 3 points.", 
+			font_size=20, color=BLACK, t2c={"1": MAROON, "2": MAROON, "3": MAROON})
+		rect = BackgroundRectangle(deg2, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
+		self.play(FadeIn(rect), Write(deg2))
+		self.wait(2)
+
+		deg1 = Text("A degree-1 polynomial is uniquely defined by 2 points.", 
+			font_size=20, color=BLACK, t2c={"1": MAROON, "2": MAROON, "3": MAROON})
+		self.play(Transform(deg2, deg1))
+		self.wait(2)
+
+		degd = Text("A degree-d polynomial is uniquely defined by d+1 points.", font_size=20, color=BLACK)
+		self.play(Transform(deg2, degd))
+		self.wait(2)
+
+
+
+config.background_color = "#000000"
+
+class CubicWoo(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		axes = Axes(
+			x_range=[-1, 10, 1],
+			y_range=[-4, 8, 1],
+			tips=False,
+			axis_config={"include_numbers": True, "font_size": 18},
+		).move_to(DOWN*0.75)
+		labels = axes.get_axis_labels(x_label="x", y_label="y")
+
+		point = Dot(axes.coords_to_point(1, 2), color=RED)
+		point_label = MathTex("(1, 2)", font_size=24).next_to(point, RIGHT, buff=0.2)
+
+		point_2 = Dot(axes.coords_to_point(2, 6), color=ORANGE)
+		point_label_2 = MathTex("(2, 6)", font_size=24).next_to(point_2, RIGHT, buff=0.2)
+
+		point_3 = Dot(axes.coords_to_point(3, 4), color=GOLD)
+		point_label_3 = MathTex("(3, 4)", font_size=24).next_to(point_3, RIGHT, buff=0.2)
+
+		self.add(axes, labels, point, point_label, point_2, point_label_2, point_3, point_label_3)
+		self.wait(2)
+
+
+		a_start, a_end = -110, 170
+
+		def get_line_colour(a):
+			a_range, gradient_steps = a_end - a_start, 100
+
+			return color_gradient(
+				[RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK], gradient_steps
+			)[int((a + 110)/a_range * (gradient_steps-1))]
+
+
+		# This is a new thing for me - this tracks the value of a				
+		a_tracker = ValueTracker(a_start)
+
+		def get_line():
+			a = a_tracker.get_value()
+			colour = get_line_colour(a)
+
+			return axes.plot(
+				lambda x: ((a-13)/11)*x*x*x - (3*(2*a-15)/11)*x*x + a*x - (6*a+32)/11 + 2,
+				x_range=[-1, 10],
+				color=colour,
+				stroke_width=4
+			)
+
+		# Each frame it redraws the line
+		line = always_redraw(get_line)
+		self.add(line)
+		self.bring_to_front(point, point_label, point_2, point_label_2, point_3, point_label_3)
+
+
+		def get_equation():
+			a = a_tracker.get_value()
+
+			eq = MathTex(
+			    "y = ", f"{((a-13)/11):.2f}", "x^{3} + ", f"{-1*(3*(2*a-15)/11):.2f}", "x^{2} + ", f"{a:.2f}", "x + ", f"{-1*(6*a+32)/11 + 2:.2f}",
+			    color=get_line_colour(a),
+			    font_size=24
+			)
+			eq.move_to(UP*2 + RIGHT*4)
+			return eq
+
+		equation = always_redraw(get_equation)
+		self.add(equation)
+
+
+		self.play(a_tracker.animate.set_value(a_end), run_time=6, rate_func=linear)
+		self.wait(2)	
+
+
+		point_4 = Dot(axes.coords_to_point(4, 2), color=GREEN)
+		point_label_4 = MathTex("(4, 2)", font_size=24).next_to(point_4, RIGHT, buff=0.2)
+		self.play(Create(point_4), Write(point_label_4))	
+		self.play(Flash(point_4, color=GREEN))	
+		self.wait(2)
+
+		self.play(a_tracker.animate.set_value(24), run_time=1, rate_func=linear)
+		self.bring_to_front(point, point_label, point_2, point_label_2, point_3, point_label_3, point_4, point_label_4)	
+		self.wait(2)
+
+
+
+config.background_color = "#ffffff"
+
+class ShamirExplained(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		title = Text("Shamir's Secret Sharing", gradient=(ORANGE, GREEN, PURPLE)).move_to(UP*3)
+		self.play(Write(title))
+		self.wait(2)
+
+
+		n_shares = make_speech_bubble([GREEN, ORANGE], UP*2 + LEFT*4, 3.5, 1)
+		n_shares_text = Text("Split a secret\ninto n shares.", color=BLACK, font_size=20).move_to(n_shares.get_center())
+		self.play(FadeIn(n_shares), Write(n_shares_text))
+
+		k_shares = make_speech_bubble([PURPLE, GREEN, ORANGE], UP*2, 3.5, 1)
+		k_shares_text = Text("≥ k shares can\nrecover the secret.", color=BLACK, font_size=20).move_to(k_shares.get_center())
+		self.play(FadeIn(k_shares), Write(k_shares_text))
+
+		less_k_shares = make_speech_bubble([PURPLE, GREEN], UP*2 + RIGHT*4, 3.5, 1)
+		less_k_shares_text = Text("< k shares are\ncompletely useless.", color=BLACK, font_size=20).move_to(less_k_shares.get_center())
+		self.play(FadeIn(less_k_shares), Write(less_k_shares_text))
+		self.wait(2)
+
+		self.play(FadeOut(n_shares), FadeOut(n_shares_text), FadeOut(k_shares), FadeOut(k_shares_text), FadeOut(less_k_shares), FadeOut(less_k_shares_text))
+
+
+		poly_fact = Text("A polynomial of degree d is uniquely determined by d+1 distinct points.", color=BLACK, weight=BOLD, font_size=20).move_to(UP*2)
+		self.play(Write(poly_fact))
+		self.wait(2)
+
+
+		line = Line(start=UP*1.5+LEFT*0.8, end=DOWN*4+LEFT*0.8)
+		line.set_color_by_gradient(ORANGE, GREEN, PURPLE)
+		self.play(Create(line))
+
+
+		select_polynomial = Text("Choose a degree k-1 polynomial.", color=BLACK, font_size=16).move_to(LEFT*4 + UP)
+		self.play(Write(select_polynomial))
+
+		polynomial = MathTex("P(x) = a_{k-1} x^{k-1} + a_{k-2} x^{k-2} + ... + a_{1} x^{1} + a_{0}", color=BLACK, font_size=24).next_to(select_polynomial, DOWN)
+		self.play(Write(polynomial))
+		self.wait(2)
+
+
+		axes = Axes(
+			x_range=[-2, 6, 1],
+			y_range=[-10, 20, 5],
+			x_length=7,
+			y_length=5,
+			axis_config={
+				"include_numbers": False, 
+				"color": BLACK,
+				"include_tip": False
+			}
+		)
+
+		def cubic(x):
+			return 0.5 * x**3 - 3 * x**2 + 2 * x + 5
+
+		curve = axes.plot(cubic, x_range=[-1.7, 6], use_smoothing=True, color=BLACK)
+
+		graph_group = VGroup(axes, curve)
+		graph_group.to_corner(DOWN + RIGHT, buff=0.5)
+
+		self.play(Create(axes))
+		self.play(Create(curve), run_time=2)
+		self.wait(2)
+
+
+		secret_key = Text("Secret key (S) is the y-intercept.", color=BLACK, font_size=16).next_to(polynomial, DOWN, buff=0.5)
+		self.play(Write(secret_key))
+
+		secret_key_2 = MathTex("S = P(0) = a_{0}", color=BLACK, font_size=24).next_to(secret_key, DOWN)
+		self.play(Write(secret_key_2))
+		self.wait(2)
+
+		colors = color_gradient([ORANGE, GREEN, PURPLE], 7)
+
+
+		x0 = 0
+		y0 = cubic(x0)
+		dot = Dot(axes.c2p(x0, y0), color=colors[0], radius=0.08)
+		label = Text(f"Secret = {str(int(y0))}", font_size=16, color=colors[0]).next_to(dot, UP + LEFT, buff=0.2)
+
+		graph_group.add(dot, label)
+		self.play(Create(dot), Write(label))
+		self.wait(2)
+
+
+		n_shares = Text("Select n distinct points.", color=BLACK, font_size=16).next_to(secret_key_2, DOWN, buff=0.5)
+		self.play(Write(n_shares))
+
+		n_points = MathTex("\\forall (x_{i}, y_{i}) \\in \\{(x_{1}, y_{1}), (x_{2}, y_{2}), ..., (x_{n}, y_{n})\\}, P(x_{i}) = y_{i}", color=BLACK, font_size=24).next_to(n_shares, DOWN)
+		self.play(Write(n_points))
+		self.wait(2)
+
+
+		dots = VGroup()
+		labels = VGroup()
+		for i in range(1, 7):
+			x0 = i
+			y0 = cubic(x0)
+			dot_2 = Dot(axes.c2p(x0, y0), color=colors[i], radius=0.08)
+			label_2 = MathTex(f"({x0}, {y0})", font_size=20, color=colors[i]).next_to(dot_2, LEFT+DOWN)
+
+			graph_group.add(dot_2, label_2)
+			dots.add(dot_2)
+			labels.add(label_2)
+			self.play(Create(dot_2), Write(label_2))
+		self.wait(2)
+
+
+		recover = Text("S is recoverable if ≥ k points are known.", color=BLACK, font_size=16).next_to(n_points, DOWN, buff=0.5)
+		self.play(Write(recover))
+		self.wait(2)
+
+
+		self.play(FadeOut(curve), FadeOut(dots), FadeOut(labels), FadeOut(dot), FadeOut(label))
+
+		subset = [0, 3, 4, 5]
+		self.play(*[FadeIn(dots[i]) for i in subset], *[FadeIn(labels[i]) for i in subset])
+		self.play(Create(curve))
+		self.play(FadeIn(dot), FadeIn(label))
+		self.play(FadeOut(curve), *[FadeOut(dots[i]) for i in subset], *[FadeOut(labels[i]) for i in subset], FadeOut(dot), FadeOut(label))
+
+		subset = [1, 2, 3, 4]
+		self.play(*[FadeIn(dots[i]) for i in subset], *[FadeIn(labels[i]) for i in subset])
+		self.play(Create(curve))
+		self.play(FadeIn(dot), FadeIn(label))
+		self.play(FadeOut(curve), *[FadeOut(dots[i]) for i in subset], *[FadeOut(labels[i]) for i in subset], FadeOut(dot), FadeOut(label))
+
+		subset = [0, 1, 3, 5]
+		self.play(*[FadeIn(dots[i]) for i in subset], *[FadeIn(labels[i]) for i in subset])
+		self.play(Create(curve))
+		self.play(FadeIn(dot), FadeIn(label))
+		self.play(FadeOut(curve), *[FadeOut(dots[i]) for i in subset], *[FadeOut(labels[i]) for i in subset], FadeOut(dot), FadeOut(label))
+
+
+
+config.background_color = "#000000"
+
+class FamilyPolynomial(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		grandpa = make_hooman_with_label(ORANGE, "Grandpa", 0.25, LEFT*5+DOWN*3.5)
+		uncle = make_hooman_with_label(GOLD, "Uncle", 0.25, LEFT*3+DOWN*3.5)
+		dad = make_hooman_with_label(GREEN, "Dad", 0.25, LEFT*1+DOWN*3.5)
+		mum = make_hooman_with_label(TEAL, "Mum", 0.25, RIGHT*1+DOWN*3.5)
+		brother = make_hooman_with_label(BLUE, "Brother", 0.25, RIGHT*3+DOWN*3.5)
+		you = make_hooman_with_label(PURPLE, "You", 0.25, RIGHT*5+DOWN*3.5)
+
+		fam_bam = VGroup(grandpa, uncle, dad, mum, brother, you)
+		self.play(Create(fam_bam))
+		self.wait(2)
+
+
+		n_text = Text("n = 6").move_to(UP)
+		self.play(Write(n_text))
+		self.wait(2)
+
+		k_text = Text("k = 4").next_to(n_text, DOWN)
+		self.play(Write(k_text))
+		self.wait(2)
+
+		self.play(FadeOut(n_text), FadeOut(k_text))
+
+
+		axes = Axes(
+			x_range=[-1, 7, 1],
+			y_range=[-50, 170, 10],
+			y_length=6,
+			tips=False,
+			axis_config={"include_numbers": True, "font_size": 18},
+		).move_to(UP*0.75)
+		labels = axes.get_axis_labels(x_label="x", y_label="y")
+
+		self.play(Create(axes), Write(labels))
+		self.wait(2)
+
+
+		fam_cubic = axes.plot(lambda x: x*x*x - 2*x*x - 20*x + 64, x_range=[-1, 7], color=WHITE)
+		fam_cubic_label = MathTex("P(x) = x^{3} - 2x^{2} - 20x + 64", font_size=36, color=WHITE).move_to(UP*3)
+		self.play(Write(fam_cubic_label))
+		self.play(Create(fam_cubic))
+		self.wait(2)
+
+
+		y_int_maths = MathTex("P(0) = 0^{3} - 2 \\cdot 0^{2} - 20 \\cdot 0 + 64", font_size=24).next_to(fam_cubic_label, DOWN)
+		self.play(Write(y_int_maths))
+		self.wait(2)
+
+		y_int_maths_2 = MathTex("S = 64", font_size=24).next_to(fam_cubic_label, DOWN)
+		self.play(Transform(y_int_maths, y_int_maths_2))
+
+
+		y_int = Dot(axes.coords_to_point(0, 64), color=RED)
+		y_int_label = MathTex("(0, 64)", font_size=24, color=RED).next_to(y_int, LEFT, buff=1)
+		self.play(Create(y_int), Write(y_int_label), FadeOut(y_int_maths))
+		self.wait(2)
+
+
+
+		fam_points = [(1, 43), (2, 24), (3, 13), (4, 16), (5, 39), (6, 88)]
+		colours = [ORANGE, GOLD, GREEN, TEAL, BLUE, PURPLE]
+		point_group = VGroup()
+		label_group = VGroup()
+
+		i = 0
+		for point in fam_points:
+			dot = Dot(axes.coords_to_point(*point), color=colours[i])
+
+			pos = RIGHT+UP
+			if i >= 4:
+				pos = RIGHT+DOWN
+			lbl = MathTex(f"{point}", font_size=24, color=colours[i]).next_to(dot, pos, buff=0.2)
+
+			point_group.add(dot)
+			label_group.add(lbl)
+
+			self.play(Create(dot), Write(lbl))
+
+			i += 1
+		self.wait(2)
+
+
+		move_point_anim = []
+		for i in range(0, len(label_group)):
+			move_point_anim.append(label_group[i].animate.next_to(fam_bam[i], UP))
+		self.play(*move_point_anim)
+		self.wait(2)
+
+
+		self.play(
+			FadeOut(point_group),
+			FadeOut(y_int), FadeOut(y_int_label),
+			FadeOut(fam_cubic), FadeOut(fam_cubic_label)
+		)
+
+
+		fam_indexes = [0, 1, 2, 3, 4, 5]
+
+		for count in range(0, 3):
+			index_sample = random.sample(fam_indexes, 4)
+
+			point_subset = VGroup()
+			label_subset = VGroup()
+			for i in index_sample:		
+
+				pos = RIGHT+UP
+				if i >= 4:
+					pos = RIGHT+DOWN
+
+				self.play(Create(point_group[i]), label_group[i].animate.next_to(point_group[i], pos, buff=0.2))
+
+				point_subset.add(point_group[i])
+				label_subset.add(label_group[i])
+
+			self.wait(2)
+
+			self.play(Create(fam_cubic))
+			self.bring_to_front(point_subset)
+			self.play(Write(fam_cubic_label))
+			self.wait(2)
+
+			self.play(Create(y_int))
+			self.play(Write(y_int_label))
+			self.wait(2)
+
+			self.play(
+				FadeOut(point_subset),
+				FadeOut(y_int), FadeOut(y_int_label),
+				FadeOut(fam_cubic), FadeOut(fam_cubic_label),
+				*[label_group[i].animate.next_to(fam_bam[i], UP) for i in range(0, len(fam_bam))]
+			)
+			self.wait(2)
+
+
+		index_sample = [0, 3, 4]
+
+		point_subset = VGroup()
+		label_subset = VGroup()
+		for i in index_sample:		
+
+			pos = RIGHT+UP
+			if i >= 4:
+				pos = RIGHT+DOWN
+
+			self.play(Create(point_group[i]), label_group[i].animate.next_to(point_group[i], pos, buff=0.2))
+
+			point_subset.add(point_group[i])
+			label_subset.add(label_group[i])
+
+		self.wait(2)
+
+
+		a_start, a_end = -170, 140
+
+		def get_line_colour(a):
+			a_range, gradient_steps = a_end - a_start, 100
+
+			return color_gradient(
+				[RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK], gradient_steps
+			)[int((a + 170)/a_range * (gradient_steps-1))]
+
+		
+		a_tracker = ValueTracker(a_start)
+
+		def get_cubic(a, x):
+			return ((a+49)/29)*x*x*x - (2*(5*a+129)/29)*x*x + a*x + (-20*a+209)/29 + 43
+
+
+		def get_line():
+			a = a_tracker.get_value()
+			colour = get_line_colour(a)
+
+			return axes.plot(
+				lambda x: get_cubic(a, x),
+				x_range=[-0.5, 7],
+				color=colour,
+				stroke_width=4
+			)
+
+		line = always_redraw(get_line)
+		self.add(line)
+		self.bring_to_front(point_subset, label_subset)
+
+
+		def get_y_int():
+			a = a_tracker.get_value()
+			colour = get_line_colour(a)
+
+			y_int = Dot(axes.coords_to_point(0, get_cubic(a, 0)), color=RED)
+			y_int_label = MathTex(f"(0, {get_cubic(a, 0):.2f})", font_size=24, color=RED).next_to(y_int, LEFT, buff=1)
+			dot_label = VGroup(y_int, y_int_label)
+
+			return dot_label
+
+		y_int_group = always_redraw(get_y_int)
+		self.add(y_int_group)
+
+
+		def get_equation():
+			a = a_tracker.get_value()
+
+			eq = MathTex(
+			    "P(x) = ", f"{((a+49)/29):.2f}", "x^{3} + ", f"{-1*(2*(5*a+129)/29):.2f}", "x^{2} + ", f"{a:.2f}", "x + ", f"{(-20*a+209)/29 + 43:.2f}",
+			    color=get_line_colour(a),
+			    font_size=36
+			)
+			eq.move_to(UP*3)
+			return eq
+
+		equation = always_redraw(get_equation)
+		self.add(equation)
+
+
+		self.play(a_tracker.animate.set_value(a_end), run_time=6, rate_func=linear)
+		self.wait(2)	
+
+
+
+
+config.background_color = "#090f1a"
+
+class PrecisionSucks(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		bro = make_hooman_with_label(BLUE, "Brother", 0.4, LEFT*5+UP*2.5)
+		self.play(Create(bro))
+
+		speech_bubble = make_speech_bubble([TEAL, BLUE], RIGHT*1.75+UP*2.5, 9, 1.5)
+		self.play(Create(speech_bubble))
+
+		speech1 = Text("Let's randomly create a degree-3 polynomial!", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(speech1))
+
+
+		axes = Axes(
+			x_range=[-1, 3, 1],
+			y_range=[-1, 4, 1],
+			y_length=6,
+			tips=False,
+			axis_config={"include_numbers": True, "font_size": 18},
+		).scale(0.75).shift(DOWN*1.5)
+		labels = axes.get_axis_labels(x_label="x", y_label="y")
+
+		self.play(Create(axes), Write(labels))
+		self.wait(2)
+
+
+		round_cubic = axes.plot(lambda x: 1/3 * x*x*x - 5/7 * x*x + 2/9 * x + 2/5, x_range=[-1, 3], color=WHITE)
+		round_cubic_label = MathTex("P(x) = \\frac{1}{3} x^{3} - \\frac{5}{7} x^{2} + \\frac{2}{9} x + \\frac{2}{5}", font_size=36, color=WHITE).move_to(UP*1.25 + RIGHT)
+		self.play(Write(round_cubic_label))
+		self.play(Create(round_cubic))
+
+		y_int = Dot(axes.coords_to_point(0, 0.4), color=RED)
+		y_int_label = MathTex("(0, \\frac{2}{5})", font_size=24, color=RED).next_to(y_int, LEFT+UP*0.5, buff=1)
+		self.play(Create(y_int), Write(y_int_label))
+		self.wait(2)
+
+
+		speech2 = Text("How can we ensure the computer is precise enough?", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Transform(speech1, speech2))
+		self.wait(2)
+
+		self.play(FadeOut(bro), FadeOut(speech_bubble), FadeOut(speech1))		
+
+
+		colours = [ORANGE, GOLD, GREEN, TEAL, BLUE, PURPLE]
+		fam_points = [(1/2, 943/2520), (3/4, 2053/6720), (1, 76/315), (7/5, 254/1125), (3/2, 211/840), (11/4, 51239/20160)]
+		fam_labels = [
+			MathTex("(\\frac{1}{2}, \\frac{943}{2520})", font_size=24, color=colours[0]),
+			MathTex("(\\frac{3}{4}, \\frac{2053}{6720})", font_size=24, color=colours[1]),
+			MathTex("(1, \\frac{76}{315})", font_size=24, color=colours[2]),
+			MathTex("(\\frac{7}{5}, \\frac{254}{1125})", font_size=24, color=colours[3]),
+			MathTex("(\\frac{3}{2}, \\frac{211}{840})", font_size=24, color=colours[4]),
+			MathTex("(\\frac{11}{4}, \\frac{51239}{20160})", font_size=24, color=colours[5]),
+		]		
+		point_group = VGroup()
+		label_group = VGroup()
+
+		i = 0
+		for point in fam_points:
+			dot = Dot(axes.coords_to_point(*point), color=colours[i])
+			lbl = fam_labels[i].move_to(UP*3 + LEFT*(2.5 - i)*2)
+
+			point_group.add(dot)
+			label_group.add(lbl)
+
+			self.play(Create(dot), Write(lbl))
+
+			i += 1
+		self.wait(2)
+
+
+		i = 0
+		for point in fam_points:
+			lbl_2 = MathTex(f"{point}", font_size=24, color=colours[i]).move_to(UP*(2.5+i%2) + LEFT*(2.5 - i)*2)
+			self.play(Transform(label_group[i], lbl_2))
+			i += 1
+
+		self.wait(2)
+
+
+		def whacky_rounding(x):
+			ret = 0
+
+			for i in range(0, 4):
+				top = 1
+				bottom = 1
+
+				for j in range(0, 4):
+					if j != i:
+						top *= (x - fam_points[j][0])
+						bottom *= (fam_points[i][0] - fam_points[j][0])
+
+				ret += (top/bottom)*fam_points[i][1]
+
+			return ret
+
+
+
+		farked_cubic = axes.plot(
+			lambda x: whacky_rounding(x), x_range=[-1, 3], color=MAROON
+		)
+		self.play(Create(farked_cubic))
+		self.wait(2)
+
+		y_int_2 = Dot(axes.coords_to_point(0, whacky_rounding(0)), color=MAROON)
+		y_int_label_2 = MathTex(f"(0, {whacky_rounding(0)})", font_size=24, color=MAROON).next_to(y_int_2, LEFT, buff=1)
+		self.play(Create(y_int_2), Write(y_int_label_2))
+		self.wait(2)
+
