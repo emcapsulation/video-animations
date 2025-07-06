@@ -2316,3 +2316,332 @@ class PrecisionSucks(Scene):
 		self.play(Create(y_int_2), Write(y_int_label_2))
 		self.wait(2)
 
+
+
+config.background_color = "#0d0702"
+
+class UseIntegers(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		polynomial = MathTex("P(x) = a_{k-1} x^{k-1} + a_{k-2} x^{k-2} + ... + a_{1} x^{1} + a_{0}")
+		self.play(Write(polynomial))
+
+		n_points = MathTex("\\forall (x_{i}, y_{i}) \\in \\{(x_{1}, y_{1}), (x_{2}, y_{2}), ..., (x_{n}, y_{n})\\}, P(x_{i}) = y_{i}").move_to(DOWN*2)
+		self.play(Write(n_points))
+		self.wait(2)
+
+
+		integer_coefficients = MathTex("{a_{k-1}, a_{k-2}, ..., a_{1}, a_{0}} \\in \\mathbb{Z}", font_size=30).next_to(polynomial, DOWN)
+		integer_shares = MathTex("{x_{1}, x_{2}, ..., x_{n}} \\in \\mathbb{Z}", font_size=30).next_to(n_points, DOWN)
+
+		self.play(Write(integer_coefficients))
+		self.wait(1)
+		self.play(Write(integer_shares))
+		self.wait(1)
+
+
+		woo = Text("☑", color=GREEN, font_size=96).move_to(UP*2)
+		self.play(SpinInFromNothing(woo))
+		self.wait(2)
+
+
+		self.play(FadeOut(woo))
+
+
+		grandpa = make_hooman_with_label(ORANGE, "Grandpa", 0.4, RIGHT*5+UP*2.5)
+		self.play(Create(grandpa))
+
+		speech_bubble = make_speech_bubble([ORANGE, GOLD], LEFT*1.75+UP*2.5, 9, 1.5)
+		self.play(Create(speech_bubble))
+
+		speech1 = Text("Each possible value of the key should be equally likely.", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(speech1))
+		self.wait(2)
+
+
+		speech2 = Text("Could some information about the secret key be leaked?", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Transform(speech1, speech2))
+		self.wait(2)
+
+
+		self.play(FadeOut(polynomial), FadeOut(n_points), FadeOut(integer_coefficients), FadeOut(integer_shares))
+
+
+		axes = Axes(
+			x_range=[-1, 7, 1],
+			y_range=[-50, 170, 20],
+			y_length=6,
+			tips=False,
+			axis_config={"include_numbers": True, "font_size": 18},
+		).scale(0.75).move_to(DOWN)
+		labels = axes.get_axis_labels(x_label="x", y_label="y")
+
+		self.play(Create(axes), Write(labels))
+		self.wait(2)
+
+
+		fam_cubic = axes.plot(lambda x: x*x*x - 2*x*x - 20*x + 64, x_range=[-1, 7], color=WHITE)
+		fam_cubic_label = MathTex("P(x) = x^{3} - 2x^{2} - 20x + 64", color=WHITE, font_size=24).move_to(UP+RIGHT)
+		self.play(Write(fam_cubic_label))
+		self.play(Create(fam_cubic))
+		self.wait(2)
+
+		y_int = Dot(axes.coords_to_point(0, 64), color=RED)
+		y_int_label = MathTex("(0, 64)", font_size=24, color=RED).next_to(y_int, LEFT, buff=1)
+		self.play(Create(y_int), Write(y_int_label))
+		self.wait(2)
+
+		self.play(FadeOut(fam_cubic), FadeOut(fam_cubic_label), FadeOut(y_int), FadeOut(y_int_label))
+
+
+
+		fam_points = [(1, 43), (2, 24), (3, 13)]
+		colours = [ORANGE, GOLD, GREEN, TEAL, BLUE, PURPLE]
+		point_group = VGroup()
+		label_group = VGroup()
+
+		i = 0
+		for point in fam_points:
+			dot = Dot(axes.coords_to_point(*point), color=colours[i])
+
+			pos = RIGHT+UP
+			if i >= 4:
+				pos = RIGHT+DOWN
+			lbl = MathTex(f"{point}", font_size=24, color=colours[i]).next_to(dot, pos, buff=0.2)
+
+			point_group.add(dot)
+			label_group.add(lbl)
+
+			self.play(Create(dot), Write(lbl))
+
+			i += 1
+		self.wait(2)
+
+
+		a_start, a_end = -170, 140
+
+		def get_line_colour(a, a_end=140, a_start=-170):
+			a_range, gradient_steps = a_end - a_start, 100
+
+			return color_gradient(
+				[RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK], gradient_steps
+			)[int((a - a_start)/a_range * (gradient_steps-1))]
+
+		
+		a_tracker = ValueTracker(a_start)
+
+
+		def get_cubic(a, x):
+			return ((a+31)/11)*x*x*x - (2*(3*a+71)/11)*x*x + a*x + (-6*a+111)/11 + 43
+
+
+		def get_line():
+			a = a_tracker.get_value()
+			colour = get_line_colour(a)
+
+			return axes.plot(
+				lambda x: get_cubic(a, x),
+				x_range=[-0.5, 7],
+				color=colour,
+				stroke_width=4
+			)
+
+		line = always_redraw(get_line)
+		self.add(line)
+		self.bring_to_front(point_group, label_group)
+
+
+		def get_y_int():
+			a = a_tracker.get_value()
+			colour = get_line_colour(a)
+
+			y_int = Dot(axes.coords_to_point(0, get_cubic(a, 0)), color=RED)
+			y_int_label = MathTex(f"(0, {get_cubic(a, 0):.2f})", font_size=24, color=RED).next_to(y_int, LEFT, buff=1)
+			dot_label = VGroup(y_int, y_int_label)
+
+			return dot_label
+
+		y_int_group = always_redraw(get_y_int)
+		self.add(y_int_group)
+
+
+		def get_equation():
+			a = a_tracker.get_value()
+
+			eq = MathTex(
+			    "P(x) = ", f"{((a+31)/11):.2f}", "x^{3} + ", f"{-1*(2*(3*a+71)/11):.2f}", "x^{2} + ", f"{a:.2f}", "x + ", f"{(-6*a+111)/11 + 43:.2f}",
+			    color=get_line_colour(a),
+			    font_size=24
+			)
+			eq.move_to(UP+RIGHT)
+			return eq
+
+		equation = always_redraw(get_equation)
+		self.add(equation)
+
+
+		self.play(a_tracker.animate.set_value(a_end), run_time=6, rate_func=linear)
+		self.wait(2)	
+
+		self.remove(equation, line)
+
+
+		a_start, a_end = -50, 50
+
+		def get_line_2():
+			a = a_tracker.get_value()
+
+			colour = GRAY
+			if ((a+31)/11).is_integer() and (-1*(2*(3*a+71)/11)).is_integer() and ((-6*a+111)/11 + 43).is_integer():
+				colour = get_line_colour(a, a_end=a_end, a_start=a_start)
+
+			return axes.plot(
+				lambda x: get_cubic(a, x),
+				x_range=[-0.5, 7],
+				color=colour,
+				stroke_width=4
+			)
+
+
+		line_2 = always_redraw(get_line_2)
+		self.add(line_2)
+		self.bring_to_front(point_group, label_group)
+
+
+		def get_y_int_2():
+			a = a_tracker.get_value()
+
+			colour = GRAY
+			if ((a+31)/11).is_integer() and (-1*(2*(3*a+71)/11)).is_integer() and ((-6*a+111)/11 + 43).is_integer():
+				colour = RED
+
+			y_int = Dot(axes.coords_to_point(0, get_cubic(a, 0)), color=colour)
+			y_int_label = MathTex(f"(0, {get_cubic(a, 0):.2f})", font_size=24, color=colour).next_to(y_int, LEFT, buff=1)
+			dot_label = VGroup(y_int, y_int_label)
+
+			return dot_label
+
+
+		y_int_group_2 = always_redraw(get_y_int_2)
+		self.add(y_int_group_2)
+
+
+		def get_equation_2():
+			a = a_tracker.get_value()
+
+			colour = GRAY
+			if ((a+31)/11).is_integer() and (-1*(2*(3*a+71)/11)).is_integer() and a.is_integer() and ((-6*a+111)/11 + 43).is_integer():
+				colour = get_line_colour(a, a_end=a_end, a_start=a_start)
+
+			eq = MathTex(
+			    "P(x) = ", f"{((a+31)/11):.2f}", "x^{3} + ", f"{-1*(2*(3*a+71)/11):.2f}", "x^{2} + ", f"{a:.2f}", "x + ", f"{(-6*a+111)/11 + 43:.2f}",
+			    color=colour,
+			    font_size=24
+			)
+			eq.move_to(UP+RIGHT)
+			return eq
+
+
+		equation_2 = always_redraw(get_equation_2)
+		self.add(equation_2)
+
+		
+		a_tracker.set_value(a_start)
+
+		step = 1
+		pause_time = 0.5
+		frame_time = 0.02
+
+		a = a_start
+		while a <= a_end:
+			self.play(a_tracker.animate.set_value(a), run_time=frame_time, rate_func=linear)
+
+			if ((a+31)/11).is_integer() and (-1*(2*(3*a+71)/11)).is_integer() and ((-6*a+111)/11 + 43).is_integer():
+				self.wait(pause_time)
+
+			a += step
+
+
+		self.wait(2)
+
+
+
+config.background_color = "#15131c"
+
+class CubicAlgebra(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		general = MathTex("y = ax^{3} + bx^{2} + cx + d").move_to(UP*3)
+		self.play(Write(general))
+		self.wait(2)
+
+		point_text = Text("We want the curve to pass through (1, 43), (2, 24) and (3, 13)", 
+			font_size=24, t2c={"(1, 43)": ORANGE, "(2, 24)": GOLD, "(3, 13)": GREEN}).next_to(general, DOWN, buff=1)
+		self.play(Write(point_text))
+		self.wait(2)
+
+		sub_eq = MathTex("43", "=", "a", "\\cdot", "1", "^{3}", "+", "b", "\\cdot", "1", "^{2}", "+", "c", "\\cdot", "1", "+", "d", "\\quad", "(1)", font_size=36)
+		sub_eq.set_color_by_tex("43", ORANGE)
+		sub_eq.set_color_by_tex("1", ORANGE)
+		sub_eq.next_to(point_text, DOWN)
+		self.play(Write(sub_eq))
+
+		sub_eq_2 = MathTex("24", "=", "a", "\\cdot", "2", "^{3}", "+", "b", "\\cdot", "2", "^{2}", "+", "c", "\\cdot", "2", "+", "d", "\\quad", "(2)", font_size=36)
+		sub_eq_2.set_color_by_tex("24", GOLD)
+		sub_eq_2.set_color_by_tex("2", GOLD)
+		sub_eq_2.next_to(sub_eq, DOWN)
+		self.play(Write(sub_eq_2))
+
+		sub_eq_3 = MathTex("13", "=", "a", "\\cdot", "3", "^{3}", "+", "b", "\\cdot", "3", "^{2}", "+", "c", "\\cdot", "3", "+", "d", "\\quad", "(3)", font_size=36)
+		sub_eq_3.set_color_by_tex("13", GREEN)
+		sub_eq_3.set_color_by_tex("3", GREEN)
+		sub_eq_3.next_to(sub_eq_2, DOWN)
+		self.play(Write(sub_eq_3))
+		self.wait(2)
+
+		simplified = MathTex("43", "=", "a", "+", "b", "+", "c", "+", "d", "\\quad", "(1)", font_size=36).next_to(point_text, DOWN)
+		simplified_2 = MathTex("24", "=", "8", "a", "+", "4", "b", "+", "2", "c", "+", "d", "\\quad", "(2)", font_size=36).next_to(sub_eq, DOWN)
+		simplified_3 = MathTex("13", "=", "27", "a", "+", "9", "b", "+", "3", "c", "+", "d", "\\quad", "(3)", font_size=36).next_to(sub_eq_2, DOWN)
+
+		self.play(TransformMatchingTex(sub_eq, simplified))
+		self.play(TransformMatchingTex(sub_eq_2, simplified_2))
+		self.play(TransformMatchingTex(sub_eq_3, simplified_3))
+		self.wait(2)
+
+
+		solve = Text("(1) - (2) + 1/3 * (3)", font_size=24, 
+			t2c={"(1)": ORANGE, "(2)": GOLD, "(3)": GREEN}).next_to(sub_eq_3, DOWN, buff=1)
+		self.play(Write(solve))
+		self.wait(2)
+
+		big_boi = MathTex("a - 8a + 9a + b - 4b + 3b + c - 2c + c + d - d + \\frac{1}{3} d = 43 - 24 + \\frac{13}{3}", font_size=36).next_to(solve, DOWN)
+		self.play(Write(big_boi))
+		self.wait(2)
+
+		big_boi_simp = MathTex("2a + \\frac{1}{3} d", "=", "\\frac{70}{3}", font_size=36).next_to(solve, DOWN)
+		self.play(Transform(big_boi, big_boi_simp))
+		self.wait(2)
+
+		big_boi_simp_2 = MathTex("6a + d", "=", "70", font_size=36).next_to(solve, DOWN)
+		self.play(Transform(big_boi, big_boi_simp_2))
+		self.wait(2)
+
+		big_boi_simp_3 = MathTex("d", "=", "70 - 6a", font_size=36).next_to(solve, DOWN)
+		self.play(Transform(big_boi, big_boi_simp_3))
+		self.wait(2)
+
+
+		oh_no = MathTex("d", "=", "70", "-", "6", "\\cdot", "a").next_to(solve, DOWN)
+		self.play(oh_no.animate.shift(DOWN))
+		self.wait(2)
+
+
+		for a in range(-10, 10):
+			oh_no_2 = MathTex("d", "=", "70", "-", "6", "\\cdot", str(a), "=", str(70-6*a)).next_to(solve, DOWN).shift(DOWN)
+			oh_no_2[6].set_color(RED)
+			self.play(Transform(oh_no, oh_no_2))
+
+		self.wait(2)
