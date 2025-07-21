@@ -57,8 +57,8 @@ class Plane:
 		return self.points
 
 
-	def add_point(self, coordinates, colour, label_position, label_colour, label_text=None, label_font_size=24):
-		point = Dot(self.axes.coords_to_point(*coordinates), color=colour)
+	def add_point(self, coordinates, colour, label_position, label_colour, label_text=None, label_font_size=24, radius=0.08):
+		point = Dot(self.axes.coords_to_point(*coordinates), color=colour, radius=radius)
 
 		if label_text == None:
 			label_text = str(coordinates)
@@ -194,13 +194,28 @@ class Polynomial:
 		return self.polynomial_and_label
 
 
-	def draw_polynomial(self, x_range, label_text, label_position, colour, label_font_size=24):
-		curve = self.axes.plot(self.equation, x_range=x_range, color=colour)
-		curve_label = MathTex(label_text, font_size=label_font_size, color=colour).move_to(label_position)
-		curve_group = VGroup(curve, curve_label)
+	def draw_polynomial(self, x_range, label_text, label_position, colour, label_font_size=24, stroke_width=4):
+		self.polynomial = self.axes.plot(self.equation, x_range=x_range, color=colour, use_smoothing=True, stroke_width=stroke_width)
+		self.polynomial_label = MathTex(label_text, font_size=label_font_size, color=colour).move_to(label_position)
+		self.polynomial_and_label = VGroup(self.polynomial, self.polynomial_label)
 
+		return self.polynomial_and_label
+
+
+	def morph_polynomial(self, scene, new_equation, x_range, colour):
+		t = ValueTracker(0)
+
+		def get_morphed_graph():
+			return self.axes.plot(
+				lambda x: interpolate(self.equation(x), new_equation(x), t.get_value()),
+				x_range=x_range,
+				color=colour
+			)
+
+		curve = always_redraw(get_morphed_graph)
+		scene.add(curve)
+
+		scene.play(t.animate.set_value(1), run_time=6)
+
+		curve.clear_updaters()
 		self.polynomial = curve
-		self.polynomial_label = curve_label
-		self.polynomial_and_label = curve_group
-
-		return curve_group
