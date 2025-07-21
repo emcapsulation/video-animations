@@ -100,12 +100,12 @@ Each family member gets some kind\n
 of piece of the key. But not the\n
 whole key - just a piece which is\n
 useless on its own.\n\n
-The original key should be recoverable\n
-if ANY four family members bring their\n
-parts together.\n\n
-But, no subset of family members less\n
-than size four can reconstruct the key,\n
-or even learn any information.
+The original key is recoverable if\n
+ANY four family members unite their\n
+key pieces.\n\n
+But, a group of fewer than four\n
+family members cannot recover the\n
+original key, or even learn anything.
 """, 
 			font_size=18, color=BLACK).move_to(DOWN*0.6+LEFT*4)
 		self.play(Write(text), run_time=20)

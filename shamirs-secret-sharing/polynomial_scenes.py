@@ -39,7 +39,7 @@ class StraightLineOnePoint(Scene):
 		self.bring_to_front(plane.get_points())	
 		self.wait(2)
 
-		y_3x_m1, y_3x_m1_label = polynomial_set.draw_polynomial(3, [-1, 3], "y = 3x - 1", polynomial_set.axes.coords_to_point(2, 5) + RIGHT*1.5)
+		y_3x_m1, y_3x_m1_label = polynomial_set.draw_polynomial(3, [-1, 3], "y = 3x - 1", polynomial_set.axes.coords_to_point(2, 5) + RIGHT*1.25)
 		self.play(Create(y_3x_m1), Write(y_3x_m1_label))
 		self.bring_to_front(plane.get_points())	
 		self.wait(2)
@@ -240,18 +240,18 @@ class ParabolaThreePoints(Scene):
 
 
 		# Introduce the fact that a degree d polynomial is uniquely defined by d+1 points
-		deg2 = Text("A degree-2 polynomial is uniquely defined by 3 points.", 
+		deg2 = Text("A degree-2 polynomial is uniquely determined by 3 points.", 
 			font_size=20, color=BLACK, t2c={"1": MAROON, "2": MAROON, "3": MAROON})
 		rect = BackgroundRectangle(deg2, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
 		self.play(FadeIn(rect), Write(deg2))
 		self.wait(2)
 
-		deg1 = Text("A degree-1 polynomial is uniquely defined by 2 points.", 
+		deg1 = Text("A degree-1 polynomial is uniquely determined by 2 points.", 
 			font_size=20, color=BLACK, t2c={"1": MAROON, "2": MAROON, "3": MAROON})
 		self.play(Transform(deg2, deg1))
 		self.wait(2)
 
-		degd = Text("A degree-d polynomial is uniquely defined by d+1 points.", font_size=20, color=BLACK)
+		degd = Text("A degree-d polynomial is uniquely determined by d+1 points.", font_size=20, color=BLACK)
 		self.play(Transform(deg2, degd))
 		self.wait(2)
 

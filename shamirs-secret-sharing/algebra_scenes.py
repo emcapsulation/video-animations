@@ -113,7 +113,7 @@ class StraightLineTwoPointsAlgebra(Scene):
 		self.play(Transform(again, again_simp))
 		self.wait(2)
 
-		final_guy = MathTex("y = 4x + -2").next_to(again_simp, DOWN).shift(DOWN*0.5)
+		final_guy = MathTex("y = 4x - 2").next_to(again_simp, DOWN).shift(DOWN*0.5)
 		self.play(Write(final_guy))
 		self.play(Circumscribe(final_guy, color=MAROON))
 		self.wait(2)

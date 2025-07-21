@@ -6,7 +6,7 @@ import random
 import math
 
 
-config.background_color = "#3273a8"
+config.background_color = "#5574c2"
 
 
 class FiniteField(Scene):
@@ -279,3 +279,118 @@ class FiniteField(Scene):
 		div = Text("÷", color=LIGHT_PINK).move_to(DOWN*2 + RIGHT*4 + DOWN*0.5)
 		self.play(Write(div))
 		self.wait(1)
+
+
+
+class FiniteFieldReasons(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		
+		# Everything is an integer
+		speech_bubble = SpeechBubble([LIGHT_PINK, PURPLE, BLUE, TEAL], 8, 1).get_speech_bubble().move_to(UP*3)
+		self.play(Create(speech_bubble))
+
+		speech1 = Text("Everything is an integer.", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(speech1))
+		self.wait(2)
+
+
+		plane = Plane(([0, 10], [0, 10]), xy_length=[9, 5])
+		plane.get_axes().shift(DOWN*0.5)
+		self.play(Create(plane.get_axes()))
+
+
+		# Plot integer points
+		colours = color_gradient([TEAL, BLUE, PURPLE, LIGHT_PINK], 11)
+		for x in range(0, 11):
+			point = (x, (5*x*x + 2*x + 9) % 11)
+			plotted_point = plane.add_point(point, colours[x], ORIGIN, colours[x], label_text="")
+			self.play(Create(plotted_point))
+		self.wait(2)
+
+
+		green_check = Text("☑", font_size=100, color=GREEN)
+		self.play(SpinInFromNothing(green_check))
+		self.wait(2)
+
+		self.play(
+			FadeOut(green_check),
+			FadeOut(plane.get_axes()),
+			FadeOut(plane.get_points())
+		)
+
+
+		# Everything is in the range 0 to p-1
+		speech2 = Text("Everything is in the range 0 to p-1.", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Transform(speech1, speech2))
+		self.wait(2)
+
+
+		plane = Plane(([0, 6, 1], [0, 1000, 100]), xy_length=[9, 5], include_numbers=False)
+		plane.get_axes().shift(DOWN*0.5)
+		self.play(Create(plane.get_axes()))
+
+
+		big_polynomial = Polynomial(plane.get_axes(), lambda x: x**10 + 5)
+		curve, curve_label = big_polynomial.draw_polynomial([0, 2.5], "P(x) = x^{100} + 5", UP, WHITE)
+		self.play(Write(curve_label))
+		self.wait(2)
+		self.play(Create(curve), run_time=6)
+
+
+		self.remove(
+			big_polynomial.get_polynomial(),
+			big_polynomial.get_label(),
+			plane.get_axes(), 
+			speech1,
+			speech_bubble
+		)
+
+		sad_face = Text(":(", font_size=64)
+		self.add(sad_face)		
+		self.wait(2)
+
+
+		# Information theoretic security
+		speech_bubble = SpeechBubble([LIGHT_PINK, PURPLE, BLUE, TEAL], 8, 1).get_speech_bubble().move_to(UP*3)
+		self.remove(sad_face)
+		self.play(Create(speech_bubble))
+
+		speech1 = Text("Guarantees information theoretic security.", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(speech1))
+		self.wait(2)
+
+
+		# Show the plane and shares
+		plane = Plane(([0, 10], [0, 10]), xy_length=[9, 5])
+		plane.get_axes().shift(DOWN*0.5)
+		self.play(Create(plane.get_axes()))
+
+
+		competitor = Human(MAROON_D, 0.8).get_human().scale(0.3).move_to(RIGHT*4)
+		self.play(Create(competitor))
+
+
+		# Plot integer points
+		for x in range(1, 11, 3):
+			point = (x, (5*x*x + 2*x + 9) % 11)
+			plotted_point = plane.add_point(point, colours[x], ORIGIN, colours[x], label_text="")
+			self.play(Create(plotted_point))
+		self.wait(2)
+
+
+		# Show all y intercepts being equally likely
+		this_point = None
+		for y in range(0, 11):
+			if this_point is not None:
+				self.play(FadeOut(this_point))
+
+			this_point = plane.add_point((0, y), colours[0], ORIGIN, colours[0], label_text="")
+			self.play(FadeIn(this_point))
+
+
+		question_mark = Text("?", color=MAROON_D).move_to(RIGHT*4)
+		self.play(Transform(competitor, question_mark))
+		self.wait(2)

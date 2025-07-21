@@ -297,3 +297,188 @@ class FamilyPolynomial(Scene):
 
 		polynomial_set.animate_a_tracker(self, 6)	
 		self.wait(2)
+
+
+
+class ModuloPolynomial(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		# Draw in each member of the family and the SSS parameters
+		y_pos = DOWN*3.5
+		positions = [*[LEFT*x+y_pos for x in range(5, -7, -2)]]
+
+		family = Family(0.8, 0.25, 1, positions)
+		family.set_label_colour(BLACK)
+		family_group = family.get_family_group()
+
+		self.play(Create(family_group))
+		self.wait(2)
+
+
+		n_text = Text("n = 6", color=ORANGE).move_to(UP)
+		self.play(Write(n_text))
+		self.wait(2)
+
+		k_text = Text("k = 4", color=GREEN).next_to(n_text, DOWN)
+		self.play(Write(k_text))
+		self.wait(2)
+
+		p_text = Text("p = 7", color=PURPLE).next_to(n_text, UP)
+		self.play(Write(p_text))
+		self.wait(2)
+
+		self.play(FadeOut(n_text), FadeOut(k_text), FadeOut(p_text))
+
+
+		# Draw in axes and polynomial
+		plane = Plane(([-1, 7, 1], [-40, 230, 10]))
+		plane.set_colour(BLACK)
+		plane.get_axes().move_to(UP*0.75)
+		self.play(Create(plane.get_axes()), Write(plane.get_axis_labels()))
+
+		polynomial = Polynomial(plane.get_axes(), lambda x: 8*x*x*x - 65*x*x + 135*x + 10)
+		
+		curve, curve_label = polynomial.draw_polynomial([-1, 7], "P(x) = 8x^{3} - 65x^{2} + 135x + 10", UP*3, BLACK, label_font_size=36)
+		self.play(Write(curve_label))
+		self.play(Create(curve))
+		self.wait(2)
+
+
+		# Calculate the secret key
+		y_int_maths = MathTex("P(0) = 8 \\cdot 0^{3} - 65 \\cdot 0^{2} + 135 \\cdot 0 + 10", font_size=24, color=BLACK).next_to(curve_label, DOWN)
+		self.play(Write(y_int_maths))
+		self.wait(2)
+
+		y_int_maths_2 = MathTex("S = 10", font_size=24, color=BLACK).next_to(curve_label, DOWN)
+		self.play(Transform(y_int_maths, y_int_maths_2))
+
+		yint_and_label = plane.add_point((0, 10), RED, plane.get_axes().coords_to_point(0, 10) + LEFT*1.5, RED)
+		self.play(Create(yint_and_label[0]), Write(yint_and_label[1]), FadeOut(y_int_maths))
+		self.wait(2)
+
+
+		# Create 6 points
+		fam_points = [(1, 88), (2, 84), (3, 46), (4, 22), (5, 60), (6, 208)]
+		colours = [ORANGE, GOLD, GREEN, TEAL, BLUE, PURPLE]
+		point_group, label_group = VGroup(), VGroup()
+
+		i = 0
+		for point in fam_points:
+			pos = RIGHT+UP
+			if i >= 4:
+				pos = RIGHT+DOWN
+
+			point_and_label = plane.add_point(point, colours[i], plane.get_axes().coords_to_point(*point) + pos*0.5, colours[i])
+
+			point_group.add(point_and_label[0])
+			label_group.add(point_and_label[1])
+			self.play(Create(point_and_label[0]), Write(point_and_label[1]))
+
+			i += 1
+		self.wait(2)
+
+
+		# Calculate the new graph mod 7
+		new_label = MathTex("P(x) = 8x^{3} - 65x^{2} + 135x + 10 \\pmod{7}", font_size=36, color=BLACK).move_to(UP*3)
+		self.play(Transform(curve_label, new_label))
+		self.wait(2)
+
+
+		new_label_2 = MathTex("P(x) = x^{3} + 5x^{2} + 2x + 3 \\pmod{7}", font_size=24, color=BLACK).next_to(curve_label, DOWN)
+		self.play(Write(new_label_2))
+		self.wait(2)
+
+
+		polynomial_2 = Polynomial(plane.get_axes(), lambda x: x*x*x + 5*x*x + 2*x + 3)
+
+		curve_2, curve_label_2 = polynomial_2.draw_polynomial([-1, 7], "P(x) = x^{3} + 5x^{2} + 2x + 3 \\pmod{7}", UP*3, BLACK, label_font_size=36)
+		self.play(
+			Transform(curve, curve_2), 
+			Transform(curve_label, curve_label_2), 
+			FadeOut(new_label_2),
+			FadeOut(plane.get_points())
+		)
+		self.wait(2)
+
+
+		# Morph the new graph into the mod 7 version
+		plane_2 = Plane(([-1, 7, 1], [0, 10, 1]))
+		plane_2.set_colour(BLACK)
+		plane_2.get_axes().move_to(UP*0.75)
+
+
+		# Morph it into the mod 7 version
+		polynomial_3 = Polynomial(plane.get_axes(), lambda x: x*x*x + 5*x*x + 2*x + 3)
+		curve_3, curve_label_3 = polynomial_3.draw_polynomial([-1, 7], "", UP*3, BLACK, label_font_size=36)
+		polynomial_3.morph_polynomial(self, lambda x: (x*x*x + 5*x*x + 2*x + 3) % 7, [0, 6, 0.001], BLACK)
+
+
+		# Change the scale
+		polynomial_4 = Polynomial(plane_2.get_axes(), lambda x: (x*x*x + 5*x*x + 2*x + 3) % 7)
+		curve_4, curve_label_4 = polynomial_4.draw_polynomial([0, 6, 0.001], "", UP*3, BLACK, label_font_size=36, stroke_width=1)
+		self.play(
+			FadeOut(curve),
+			Transform(plane.get_axes(), plane_2.get_axes()),
+			Transform(polynomial_3.get_polynomial(), polynomial_4.get_polynomial()),
+			run_time=2
+		)
+		self.wait(2)
+
+
+		# Fade in the dots
+		for i in range(0, 7):
+			plane_2.add_point((i, (i*i*i + 5*i*i + 2*i + 3) % 7), BLACK, ORIGIN, WHITE, label_text="", radius=0.04)
+		self.play(FadeIn(plane_2.get_points()))
+		self.play(polynomial_3.get_polynomial().animate.set_color(GRAY_A))
+		self.wait(2)
+
+
+		yint_and_label = plane_2.add_point((0, 3), RED, plane_2.get_axes().coords_to_point(0, 3) + LEFT*1.5, RED)
+		self.play(Create(yint_and_label[0]), Write(yint_and_label[1]))
+		self.wait(2)
+
+
+		# Calculate share 1
+		share_1_maths = MathTex("P(1) = 1^{3} + 5 \\cdot 1^{2} + 2 \\cdot 1 + 3", " = 11", font_size=24, color=BLACK).next_to(curve_label, DOWN)
+		self.play(Write(share_1_maths))
+		self.wait(2)
+
+		share_1_maths_mod = MathTex("P(1) = 1^{3} + 5 \\cdot 1^{2} + 2 \\cdot 1 + 3", "\\equiv 4 \\pmod{7}", font_size=24, color=BLACK).next_to(curve_label, DOWN)
+		self.play(TransformMatchingTex(share_1_maths, share_1_maths_mod))
+		self.wait(2)
+
+		point_group, label_group = VGroup(), VGroup()
+		point_and_label = plane_2.add_point((1, 4), ORANGE, plane_2.get_axes().coords_to_point(*(1, 4)) + (RIGHT+UP)*0.5, ORANGE)
+		
+		point_group.add(point_and_label[0])
+		label_group.add(point_and_label[1])
+		self.play(Create(point_and_label[0]), Write(point_and_label[1]))	
+		self.play(FadeOut(share_1_maths_mod))	
+		self.wait(2)
+
+
+		# Create remaining 5 points
+		fam_points = [(2, 0), (3, 4), (4, 1), (5, 4), (6, 5)]
+		colours = [GOLD, GREEN, TEAL, BLUE, PURPLE]		
+
+		i = 0
+		for point in fam_points:
+			pos = RIGHT+UP
+			point_and_label = plane_2.add_point(point, colours[i], plane_2.get_axes().coords_to_point(*point) + pos*0.5, colours[i])
+
+			point_group.add(point_and_label[0])
+			label_group.add(point_and_label[1])
+			self.play(Create(point_and_label[0]), Write(point_and_label[1]))
+
+			i += 1
+		self.wait(2)
+
+
+		# Move the points to the family members
+		move_point_anim = []
+		for i in range(0, len(label_group)):
+			move_point_anim.append(label_group[i].animate.next_to(family_group[i], UP))
+		self.play(*move_point_anim)
+		self.wait(2)
