@@ -213,5 +213,7 @@ class SimultaneousEquations(Scene):
 		simplify_eq_47 = MathTex("d", "\\equiv", "3", "\\pmod{7}", "\\quad", "(4)", font_size=24).move_to(simplify_eq_4.get_center())
 		self.play(TransformMatchingTex(simplify_eq_46, simplify_eq_47))
 
-
+		self.wait(2)
 		self.play(*[FadeOut(mob)for mob in self.mobjects])
+
+

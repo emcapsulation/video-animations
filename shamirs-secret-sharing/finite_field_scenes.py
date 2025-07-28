@@ -389,8 +389,151 @@ class FiniteFieldReasons(Scene):
 
 			this_point = plane.add_point((0, y), colours[0], ORIGIN, colours[0], label_text="")
 			self.play(FadeIn(this_point))
+			self.play(Indicate(this_point))
 
 
 		question_mark = Text("?", color=MAROON_D).move_to(RIGHT*4)
 		self.play(Transform(competitor, question_mark))
 		self.wait(2)
+
+
+
+class ModularDivision(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		fz = 64
+		dividing = MathTex("6", "\\div", "3", "=", "2", font_size=fz)
+		self.play(Write(dividing))
+		self.wait(2)
+
+		multiplying = MathTex("6", "\\times", "\\frac{1}{3}", "=", "2", font_size=fz)
+		self.play(TransformMatchingTex(dividing, multiplying))
+		self.wait(2)
+
+		self.play(FadeOut(multiplying))
+
+
+		dividing = MathTex("64", "\\div", "5", font_size=fz)
+		self.play(Write(dividing))
+		self.wait(2)
+
+		multiplying = MathTex("64", "\\times", "\\frac{1}{5}", font_size=fz)
+		self.play(TransformMatchingTex(dividing, multiplying))
+		self.wait(2)
+
+		reciprocal = MathTex("5", "\\times", "\\frac{1}{5}", font_size=fz)
+		self.play(TransformMatchingTex(multiplying, reciprocal))
+		self.wait(2)
+
+		reciprocal_2 = MathTex("5", "\\times", "\\frac{1}{5}", "=", "1", font_size=fz)
+		self.play(TransformMatchingTex(reciprocal, reciprocal_2))
+		self.wait(2)
+
+		self.play(FadeOut(reciprocal_2))
+
+
+		dividing = MathTex("a", "\\div", "b", "\\pmod{m}", font_size=fz)
+		self.play(Write(dividing))
+		self.wait(2)
+
+		multiplying = MathTex("a", "\\times", "b^{-1}", "\\pmod{m}", font_size=fz)
+		self.play(TransformMatchingTex(dividing, multiplying))
+		self.wait(2)
+
+		inverse = MathTex("b", "\\times", "b^{-1}", "\\equiv 1", "\\pmod{m}", font_size=fz)
+		self.play(TransformMatchingTex(multiplying, inverse))
+		self.wait(2)
+
+		self.play(FadeOut(inverse))
+		
+
+
+		def solve_fraction(numerator, denominator):
+			dividing = MathTex("\\frac{%d}{%d}" % (numerator, denominator), "\\pmod{7}", font_size=fz)
+			self.play(Write(dividing))
+			self.wait(2)
+
+			multiplying = MathTex("\\frac{%d}{%d}" % (numerator, denominator), "\\equiv", f"{numerator}", "\\times", "{%d}^{-1}" % (denominator), "\\pmod{7}", font_size=fz)
+			self.play(TransformMatchingTex(dividing, multiplying))
+			self.wait(2)
+
+			self.play(multiplying.animate.shift(UP*3))
+
+
+			inverse_group = VGroup()
+			pos = 0
+			res, cur = 0, 1
+			while res != 1:
+				res = (denominator*cur)%7
+				colour = RED if res != 1 else GREEN
+
+				inverse = MathTex(f"{denominator} \\cdot {cur} = {2*cur} \\equiv {res} \\pmod{7}", color=colour).move_to(DOWN*pos)
+				self.play(Write(inverse))
+				self.wait(1)
+
+				inverse_group.add(inverse)
+				pos += 1
+				cur += 1
+			self.wait(2)
+			cur -= 1
+
+
+			mult_copy = multiplying.copy()
+			self.play(mult_copy.animate.shift(DOWN))
+
+			answer = MathTex("\\equiv", f"{numerator}", "\\times", f"{cur}", "\\pmod{7}", font_size=fz).move_to(mult_copy.get_center() + RIGHT*1.5)
+			self.play(TransformMatchingTex(mult_copy, answer))
+			self.wait(2)
+
+			answer_2 = MathTex("\\equiv", f"{numerator}", "\\times", f"{cur}", f"= {numerator*cur}", f"\\equiv {(numerator*cur)%7}", "\\pmod{7}", font_size=fz).move_to(mult_copy.get_center() + RIGHT*1.5)
+			self.play(TransformMatchingTex(answer, answer_2))
+			self.wait(2)
+
+
+			self.play(FadeOut(inverse_group), 
+				*[FadeOut(mob) for mob in self.mobjects])
+			self.wait(2)
+
+		solve_fraction(3, 2)
+		solve_fraction(64, 5)
+
+
+
+		finite_field = MathTex("\\mathbb{F}_p", font_size=64)
+		self.play(Write(finite_field))
+
+		finite_field_2 = MathTex("\\mathbb{F}_7", font_size=64)
+		self.play(Transform(finite_field, finite_field_2))
+
+		self.play(finite_field.animate.shift(UP*2))
+		self.wait(2)
+
+
+		table = [
+			["a ", 0, 1, 2, 3, 4, 5, 6],
+			["a^{-1}", "X", 1, 4, 5, 2, 3, 6]
+		]
+
+		table_group = VGroup()
+		for i in range(0, len(table)):
+			row = VGroup()
+
+			for j in range(0, len(table[i])):
+				cell = Text(str(table[i][j]))
+				if j == 0:
+					cell = MathTex(table[i][j], color=LIGHT_PINK, font_size=64)				
+				row.add(cell)
+
+			row.arrange(RIGHT, buff=1)
+			table_group.add(row)
+
+		table_group.arrange(DOWN, buff=1)
+		table_group[1].shift(LEFT*0.4)
+
+		for i in range(0, len(table_group)):
+			for j in range(0, len(table_group[i])):
+				self.play(Write(table_group[i][j]))
+		self.wait(2)
+

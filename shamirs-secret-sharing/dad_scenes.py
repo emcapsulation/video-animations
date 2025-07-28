@@ -112,3 +112,126 @@ class SplitKeyIdea(Scene):
 
 		self.play(*part_of_key_anim)
 		self.wait(2)
+
+
+
+class LagrangeGetSecret(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		# Draw in dad and speech bubble
+		dad = Human(GREEN, 0.8).add_label("Dad", WHITE).get_human().scale(0.4).move_to(LEFT*5+UP*2.5)
+		self.play(Create(dad))
+
+		speech_bubble = SpeechBubble([GREEN_B, GREEN], 9, 1.5).get_speech_bubble().move_to(RIGHT*1.75+UP*2.5)
+		self.play(Create(speech_bubble))
+
+		speech1 = Text("We plug in x = 0 to recover the key.", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(speech1))
+
+
+		points = [(1, 4), (2, 0), (4, 1), (6, 5)]
+		colours = [ORANGE, GOLD, TEAL, PURPLE]
+
+
+		polynomial_terms = VGroup()
+		font_size, end = 24, 4
+
+
+		def create_full_term(i, plug_in=False):
+			box_num = 2*i + 1
+			
+			text = "\\frac{"
+			for j in range(0, end):
+				if j != i:
+					if plug_in == False:
+						text += f"(x-{points[j][0]})"
+					else:
+						text += f"({plug_in}-{points[j][0]})"
+			text += "}{"
+			for j in range(0, end):
+				if j != i:
+					text += f"({points[i][0]}-{points[j][0]})"
+			text += "}"
+
+			text += f"\\cdot {points[i][1]}"
+
+			if len(polynomial_terms) > box_num:
+				this_term = MathTex(text, font_size=font_size, color=colours[i]).move_to(polynomial_terms[box_num].get_center())
+				self.play(Transform(polynomial_terms[box_num], this_term))
+			else:
+				this_term = MathTex(text, font_size=font_size, color=colours[i])
+				polynomial_terms.add(this_term)
+
+			self.wait(2)
+
+
+		# Draw the polynomial
+		px = MathTex("P(x) = ", font_size=font_size)
+		polynomial_terms.add(px)
+
+		for i in range(0, 4):
+			create_full_term(i, plug_in=False)
+
+			if i != 3:
+				plus = MathTex("+", font_size=font_size)
+				polynomial_terms.add(plus)
+
+		polynomial_terms.arrange(RIGHT)
+
+		for i in range(0, len(polynomial_terms)):
+			self.play(Write(polynomial_terms[i]))
+
+
+		# Plug in 0
+		p0 = MathTex("P(0) = ", font_size=font_size).move_to(polynomial_terms[0].get_center())
+		self.play(Transform(polynomial_terms[0], p0))
+
+		for i in range(0, 4):
+			box_num = 2*i + 1
+
+			plug_in = 0
+			create_full_term(i, plug_in=str(plug_in))
+
+			numerator, denominator = 1, 1
+
+			text = "\\frac{"
+			for j in range(0, end):
+				if j != i:
+					numerator *= (plug_in-points[j][0])			
+					text += f"({plug_in-points[j][0]})"
+			text += "}{"
+			for j in range(0, end):
+				if j != i:
+					denominator *= (points[i][0]-points[j][0])
+					text += f"({points[i][0]-points[j][0]})"
+			text += "}"
+
+			text += f"\\cdot {points[i][1]}"
+
+			this_term = MathTex(text, font_size=font_size, color=colours[i]).move_to(polynomial_terms[box_num].get_center())
+			self.play(Transform(polynomial_terms[box_num], this_term))
+			self.play(polynomial_terms.animate.arrange(RIGHT))
+
+
+			text = "\\frac{%d}{%d}" % (numerator, denominator)
+			text += f"\\cdot {points[i][1]}"
+
+			this_term = MathTex(text, font_size=36, color=colours[i]).move_to(polynomial_terms[box_num].get_center())
+			self.play(Transform(polynomial_terms[box_num], this_term))
+			self.play(polynomial_terms.animate.arrange(RIGHT))
+
+
+			this_term = MathTex("\\frac{%d}{%d}" % (numerator*points[i][1], denominator), font_size=36, color=colours[i]).move_to(polynomial_terms[box_num].get_center())
+			self.play(Transform(polynomial_terms[box_num], this_term))
+			self.play(polynomial_terms.animate.arrange(RIGHT))
+
+
+		polynomial_ans = MathTex("P(0) = \\frac{64}{5}", font_size=36)
+		self.play(Transform(polynomial_terms, polynomial_ans))
+		self.wait(2)
+			
+		speech2 = Text("But our secret key is 3?", font_size=20).move_to(speech_bubble.get_center())
+		self.play(Transform(speech1, speech2))
+		self.wait(2)
