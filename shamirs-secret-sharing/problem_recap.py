@@ -98,14 +98,14 @@ class Recap2(Scene):
 		text = Text("""
 Each family member gets some kind\n
 of piece of the key. But not the\n
-whole key - just a piece which is\n
-useless on its own.\n\n
+whole key - just a piece which can't\n
+decrypt anything on its own.\n\n
 The original key is recoverable if\n
 ANY four family members unite their\n
 key pieces.\n\n
 But, a group of fewer than four\n
-family members cannot recover the\n
-original key, or even learn anything.
+can't recover the original key, or\n
+even gain any information.
 """, 
 			font_size=18, color=BLACK).move_to(DOWN*0.6+LEFT*4)
 		self.play(Write(text), run_time=20)

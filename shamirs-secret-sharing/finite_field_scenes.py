@@ -469,7 +469,7 @@ class ModularDivision(Scene):
 				res = (denominator*cur)%7
 				colour = RED if res != 1 else GREEN
 
-				inverse = MathTex(f"{denominator} \\cdot {cur} = {2*cur} \\equiv {res} \\pmod{7}", color=colour).move_to(DOWN*pos)
+				inverse = MathTex(f"{denominator} \\cdot {cur} = {denominator*cur} \\equiv {res} \\pmod{7}", color=colour).move_to(DOWN*pos)
 				self.play(Write(inverse))
 				self.wait(1)
 
