@@ -13,17 +13,16 @@ class Shamir(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
-		# Draw in Shamir and speech bubble
-		shamir = Human(LIGHT_PINK, 0.8).add_label("Shamir", WHITE).get_human().scale(0.4).move_to(LEFT*5+UP*2.5)
-		self.play(Create(shamir))
-
-		speech_bubble = SpeechBubble([PINK, LIGHT_PINK], 9, 1.5).get_speech_bubble().move_to(RIGHT*1.75+UP*2.5)
+		# Draw in speech bubble
+		speech_bubble = SpeechBubble([PINK, LIGHT_PINK], 9, 1.5).get_speech_bubble().move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
 		speech1 = Text("This is Shamir's Secret Sharing.", font_size=20).move_to(speech_bubble.get_center())
 		self.play(Write(speech1))
-		self.wait(2)
 
+		credit = Text("Devised by Adi Shamir in 1979", color=LIGHT_PINK, font_size=20).move_to(DOWN)
+		self.play(Write(credit))
+		self.wait(2)
 
 		# Descriptions
 		text_1 = Text("Splits any secret into n parts called shares.", font_size=20).move_to(UP)
@@ -39,7 +38,7 @@ class Shamir(Scene):
 		top_rect = SpeechBubble(GREEN, 10, 1.5).get_speech_bubble().move_to(DOWN)
 		top_text = Text("≥ k shares reconstructs the secret.", font_size=20).move_to(top_rect.get_center())
 		top = VGroup(top_rect, top_text)
-		self.play(Create(top_rect), Write(top_text))
+		self.play(FadeOut(credit), Create(top_rect), Write(top_text))
 		self.wait(2)
 
 		bot_rect = SpeechBubble(RED, 10, 1.5).get_speech_bubble().move_to(DOWN*3)
