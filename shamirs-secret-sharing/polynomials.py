@@ -69,6 +69,20 @@ class Plane:
 
 		return point_and_label
 
+	def draw_polynomial_as_dots(self, x_range, y_range, polynomial, colour, step=0.001):
+		points = VGroup()
+
+		i = x_range[0]
+		while i <= x_range[1]:
+			coordinates = (i, polynomial(i))
+			if polynomial(i) >= y_range[0] and polynomial(i) <= y_range[1]:
+				point = Dot(self.axes.coords_to_point(*coordinates), color=colour, radius=0.02)
+				points.add(point)
+
+			i += step
+
+		return points
+
 
 
 class PolynomialSet:
@@ -219,3 +233,24 @@ class Polynomial:
 
 		curve.clear_updaters()
 		self.polynomial = curve
+
+
+	@staticmethod
+	def lagrange_interpolation(x, points):
+		ret = 0
+
+		for i in range(0, len(points)):
+			top, bottom = 1, 1
+
+			for j in range(0, len(points)):
+				if j != i:
+					# Numerator = (x - x1)...(x - x{i-1})(x - x{i+1})...(x - xk)
+					top *= (x - points[j][0])
+
+					# Denominator = (xi - x1)...(xi - x{i-1})(xi - x{i+1})...(xi - xk)
+					bottom *= (points[i][0] - points[j][0])
+
+			# Term is multiplied by yi
+			ret += (top/bottom)*points[i][1]
+
+		return ret

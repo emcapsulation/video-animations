@@ -174,26 +174,6 @@ class EachKeepACopyOfTheKey(Scene):
 
 class LossOfPrecision(Scene):
 
-	def lagrange_interpolation(self, x, fam_points):
-		ret = 0
-
-		for i in range(0, 4):
-			top, bottom = 1, 1
-
-			for j in range(0, 4):
-				if j != i:
-					# Numerator = (x - x1)...(x - x{i-1})(x - x{i+1})...(x - xk)
-					top *= (x - fam_points[j][0])
-
-					# Denominator = (xi - x1)...(xi - x{i-1})(xi - x{i+1})...(xi - xk)
-					bottom *= (fam_points[i][0] - fam_points[j][0])
-
-			# Term is multiplied by yi
-			ret += (top/bottom)*fam_points[i][1]
-
-		return ret
-
-
 	def construct(self):
 		Text.set_default(font="Monospace")
 
@@ -276,14 +256,14 @@ class LossOfPrecision(Scene):
 
 
 		# Draw the less accurate polynomial
-		polynomial = Polynomial(plane.get_axes(), lambda x: self.lagrange_interpolation(x, fam_points))
+		polynomial = Polynomial(plane.get_axes(), lambda x: Polynomial.lagrange_interpolation(x, fam_points))
 		
 		rounded_curve, rounded_curve_label = polynomial.draw_polynomial([-1, 3], "", ORIGIN, MAROON)
 		self.play(Create(rounded_curve))
 		self.wait(2)
 
-		yint_and_label_2 = plane.add_point((0, self.lagrange_interpolation(0, fam_points)), 
-			MAROON, plane.get_axes().coords_to_point(0, self.lagrange_interpolation(0, fam_points)) + LEFT*2, 
-			MAROON, label_text=f"(0, {self.lagrange_interpolation(0, fam_points)})")
+		yint_and_label_2 = plane.add_point((0, Polynomial.lagrange_interpolation(0, fam_points)), 
+			MAROON, plane.get_axes().coords_to_point(0, Polynomial.lagrange_interpolation(0, fam_points)) + LEFT*2, 
+			MAROON, label_text=f"(0, {Polynomial.lagrange_interpolation(0, fam_points)})")
 		self.play(Create(yint_and_label_2[0]), Write(yint_and_label_2[1]))
 		self.wait(2)

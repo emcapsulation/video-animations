@@ -416,12 +416,12 @@ class ModuloPolynomial(Scene):
 
 
 		# Change the scale
-		polynomial_4 = Polynomial(plane_2.get_axes(), lambda x: (x*x*x + 5*x*x + 2*x + 3) % 7)
-		curve_4, curve_label_4 = polynomial_4.draw_polynomial([0, 6, 0.001], "", UP*3, BLACK, label_font_size=36, stroke_width=1)
+		polynomial_4 = plane_2.draw_polynomial_as_dots([0, 6], [0, 6], lambda x: (x*x*x + 5*x*x + 2*x + 3) % 7, BLACK)
 		self.play(
 			FadeOut(curve),
 			Transform(plane.get_axes(), plane_2.get_axes()),
-			Transform(polynomial_3.get_polynomial(), polynomial_4.get_polynomial()),
+			FadeOut(polynomial_3.get_polynomial()),
+			FadeIn(polynomial_4),
 			run_time=2
 		)
 		self.wait(2)
@@ -431,7 +431,7 @@ class ModuloPolynomial(Scene):
 		for i in range(0, 7):
 			plane_2.add_point((i, (i*i*i + 5*i*i + 2*i + 3) % 7), BLACK, ORIGIN, WHITE, label_text="", radius=0.04)
 		self.play(FadeIn(plane_2.get_points()))
-		self.play(polynomial_3.get_polynomial().animate.set_color(GRAY_A))
+		self.play(polynomial_4.animate.set_color(GRAY_A))
 		self.wait(2)
 
 

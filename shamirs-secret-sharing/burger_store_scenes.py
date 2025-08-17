@@ -221,3 +221,100 @@ class KeySplitCounterArgument2(Scene):
 
 
 		self.play(FadeOut(burger_store.get_burger_store()))
+
+
+
+class Conclusion(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		# Store contains (wall, poster, counter)
+		burger_store = BurgerStore()
+		self.add(burger_store.get_burger_store())
+
+
+		# Draw in each member of the family
+		y_pos = DOWN*0.37
+		positions = [*[LEFT*x+y_pos for x in range(5, -7, -2)]]
+
+		family = Family(0.8, 0.4, 1, positions)
+		tmp_group = family.get_family_group()
+		family_group = tmp_group[2:len(tmp_group)]
+		self.play(Create(family_group))
+
+
+		points = [(3, 4), (4, 1), (5, 4), (6, 5)]
+		colours = [GREEN, TEAL, BLUE, PURPLE]
+
+		i = 0
+		for point in points:
+			point_text = Text(str(point), font_size=24, color=colours[i]).move_to(family_group[i].get_center()+DOWN*1.1)
+			i += 1
+			self.play(Write(point_text))
+		self.wait(2)
+
+
+		# Show the lagrange formula
+		def get_lagrange_text(sub):
+			lagrange = f"P({sub}) = "
+
+			for i in range(0, len(points)):
+				cur_term = "\\frac{"
+
+				for j in range(0, len(points)):
+					if j != i:
+						cur_term += f"({sub}-{points[j][0]})"
+
+				cur_term += "}{"
+
+				for j in range(0, len(points)):
+					if j != i:
+						cur_term += f"({points[i][0]}-{points[j][0]})"
+
+				cur_term += "}"
+				cur_term += f"\\cdot {points[i][1]}"
+
+				if i < len(points)-1:
+					cur_term += "+"
+
+				lagrange += cur_term
+
+			return lagrange
+
+
+		lagrange_text = MathTex(get_lagrange_text("x"), font_size=24, color=BLACK)
+		rect = BackgroundRectangle(lagrange_text, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
+		self.play(FadeIn(rect), Write(lagrange_text))
+		self.wait(2)
+
+		lagrange_text_2 = MathTex(get_lagrange_text("0"), font_size=24, color=BLACK)
+		rect_2 = BackgroundRectangle(lagrange_text_2, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
+		self.play(Transform(lagrange_text, lagrange_text_2), Transform(rect, rect_2))
+		self.wait(2)
+
+		lagrange_text_3 = MathTex("P(x) = 80 - 45 + 144 - 50", font_size=24, color=BLACK)
+		rect_3 = BackgroundRectangle(lagrange_text_3, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
+		self.play(Transform(lagrange_text, lagrange_text_3), Transform(rect, rect_3))
+		self.wait(2)
+
+		lagrange_text_4 = MathTex("P(x) = 129", font_size=24, color=BLACK)
+		rect_4 = BackgroundRectangle(lagrange_text_4, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
+		self.play(Transform(lagrange_text, lagrange_text_4), Transform(rect, rect_4))
+		self.wait(2)
+
+		lagrange_text_5 = MathTex("P(x) \\equiv 3 \\pmod{7}", font_size=24, color=BLACK)
+		rect_5 = BackgroundRectangle(lagrange_text_5, buff=0.5, stroke_width=0, color=WHITE, fill_opacity=1, corner_radius=0.2)
+		self.play(Transform(lagrange_text, lagrange_text_5), Transform(rect, rect_5))
+		self.wait(2)
+
+		self.play(FadeOut(lagrange_text), FadeOut(rect))
+
+
+		# Make the secret sauce
+		secret_sauce = SecretSauce("text")
+		self.play(Create(secret_sauce.get_background()))
+		self.play(Create(secret_sauce.get_paper()))
+		self.play(Write(secret_sauce.get_title()), Create(secret_sauce.get_lines()))
+		self.wait(2)
+
