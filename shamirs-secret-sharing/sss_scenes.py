@@ -482,3 +482,26 @@ class ModuloPolynomial(Scene):
 			move_point_anim.append(label_group[i].animate.next_to(family_group[i], UP))
 		self.play(*move_point_anim)
 		self.wait(2)
+
+
+
+class RandomText(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		random = Text("You would now randomly select k-1 coefficients from your finite field", font_size=20, color=BLACK)
+		self.play(Write(random))
+		random_2 = Text("{ Integers in the range [0, p-1] }", font_size=20, color=BLACK).next_to(random, DOWN)
+		self.play(Write(random_2))
+		self.wait(5)
+
+
+class RandomText2(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+		
+		random = Text("In this example, let's use 3 as the secret key", font_size=20, color=BLACK)
+		self.play(Write(random))
+		self.wait(5)

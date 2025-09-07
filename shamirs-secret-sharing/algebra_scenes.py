@@ -250,3 +250,85 @@ class UseIntegersAlgebra(Scene):
 			self.play(Transform(simple_equation, simple_equation_2))
 
 		self.wait(2)
+
+
+
+class Thumbnail(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title = Text("Shamir's Secret Sharing").move_to(UP*3)
+		title.set_color(WHITE)
+		self.add(title)
+
+
+		# Family at the bottom
+		y_pos = DOWN*3.5
+		positions = [*[LEFT*x+y_pos for x in range(5, -7, -2)]]
+
+		family = Family(0.8, 0.25, 1, positions)
+		family.set_label_colour(BLACK)
+		family_group = family.get_family_group()
+
+		self.add(family_group)
+
+
+		# Draw in axes and polynomial
+		plane = Plane(([-1, 7, 1], [-20, 130, 10]), xy_length=(12, 4.5), include_numbers=False)
+		plane.set_colour(WHITE)
+		plane.get_axes()
+		self.add(plane.get_axes())
+
+		polynomial = Polynomial(plane.get_axes(), lambda x: x*x*x - 2*x*x - 20*x + 64)
+		
+		curve, curve_label = polynomial.draw_polynomial([-1, 7], "P(x) \\equiv a_{k-1}x^{k-1} + a_{k-2}x^{k-2} + ... + a_{1}x + a_0 \\pmod{p}", UP*2, WHITE, label_font_size=30)
+		self.add(curve_label)
+		self.add(curve)
+
+
+		# Be a bit mysterious
+		y_int_maths_2 = Text("Secret = ?", font_size=24, color=RED).next_to(curve_label, DOWN)
+		self.add(y_int_maths_2)
+
+
+		# Give the points to each person
+		fam_points = [(1, 43), (2, 24), (3, 13), (4, 16), (5, 39), (6, 88)]
+		colours = [ORANGE, GOLD, GREEN, TEAL, BLUE, PURPLE]
+		point_group, label_group = VGroup(), VGroup()
+
+		i = 0
+		for point in fam_points:
+			pos = RIGHT+UP
+			if i >= 4:
+				pos = RIGHT+DOWN
+
+			point_and_label = plane.add_point(point, colours[i], family_group[i].get_center() + UP*0.75, colours[i], label_text=f"(x_{i}, y_{i})")
+
+			point_group.add(point_and_label[0])
+			label_group.add(point_and_label[1])			
+
+			i += 1
+
+
+		# Randomly sample 4 points and draw the polynomial through it
+		fam_indexes = [0, 1, 2, 3, 4, 5]
+		index_sample = random.sample([0, 1, 2, 4, 5], 4)
+
+		point_subset, label_subset = VGroup(), VGroup()
+		for i in range(0, len(fam_indexes)):
+			if i in index_sample:
+				pos = RIGHT+UP
+				if i >= 4:
+					pos = RIGHT+DOWN
+
+				label_group[i].next_to(point_group[i], pos, buff=0.2)
+				self.add(point_group[i])
+
+				point_subset.add(point_group[i])
+				label_subset.add(label_group[i])
+
+		self.add(label_group)
+		self.add(polynomial.get_polynomial())
+		self.bring_to_front(point_subset)
+		self.add(polynomial.get_label())
