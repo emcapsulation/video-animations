@@ -1,10 +1,14 @@
 from manim import *
 
+import math
+
 config.background_color = "#15131c"
 
 
-VALUE_COLOUR = GOLD
+VALUE_COLOUR = YELLOW
+ITEM_WEIGHT_COLOUR = MAROON
 WEIGHT_LIMIT_COLOUR = PINK
+MAX_VALUE_COLOUR = GOLD
 
 
 def fade_out_scene(scene):
@@ -91,6 +95,14 @@ def make_headphones():
 	return headphones
 
 
+def get_value_colour(min_val, max_val, val):
+	val_range, gradient_steps = max_val-min_val, 100
+
+	return color_gradient(
+		[RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK], 
+		gradient_steps
+	)[int((val - min_val)/val_range * (gradient_steps-1))]
+
 
 
 class Introduction(Scene):
@@ -133,7 +145,7 @@ class Introduction(Scene):
 
 
 		for i in range(0, len(items)):
-			item_text = Text(f"w = {weights[i]}kg", font_size=20).next_to(items[i], DOWN)
+			item_text = Text(f"w = {weights[i]}kg", font_size=20, color=ITEM_WEIGHT_COLOUR).next_to(items[i], DOWN)
 			item_texts.add(item_text)
 			self.play(Create(items[i]), Write(item_texts[i]))
 		self.wait(2)
@@ -192,9 +204,9 @@ class BruteForce(Scene):
 		weights = [2, 1, 3, 1, 4]
 		values = [25, 10, 40, 20, 45]
 
-		weight_texts, value_texts = VGroup(Text("w", font_size=24)), VGroup(Text("v", font_size=24, color=VALUE_COLOUR))
+		weight_texts, value_texts = VGroup(Text("w", font_size=24)), VGroup(Text("v", font_size=24))
 		for i in range(0, n):
-			weight_texts.add(Text(f"{weights[i]}", font_size=24))
+			weight_texts.add(Text(f"{weights[i]}", font_size=24, color=ITEM_WEIGHT_COLOUR))
 			value_texts.add(Text(f"{values[i]}", font_size=24, color=VALUE_COLOUR))
 		weight_texts.arrange(RIGHT, buff=2).move_to(UP*2.5)
 		value_texts.arrange(RIGHT, buff=1.8).move_to(UP*2)
@@ -214,7 +226,7 @@ class BruteForce(Scene):
 		capacity = Text("W = 5kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).move_to(item_table.get_left() + LEFT*3)
 		self.play(Write(capacity))
 		
-		max_value_text = Text("max = 0", font_size=24, color=GREEN).move_to(capacity.get_center() + DOWN*0.5)
+		max_value_text = Text("max = 0", font_size=24, color=MAX_VALUE_COLOUR).move_to(capacity.get_center() + DOWN*0.5)
 		max_value = 0
 		self.play(Write(max_value_text))
 		self.wait(2)
@@ -234,11 +246,11 @@ class BruteForce(Scene):
 
 		# First item
 		take_item = Text(f"[{i}]", font_size=24).move_to(LEFT*3.2 + UP)
-		take_weight = Text(f"current weight = {weights[i-1]}", font_size=16).next_to(take_item, DOWN)
+		take_weight = Text(f"current weight = {weights[i-1]}", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(take_item, DOWN)
 		take_value = Text(f"current value = {values[i-1]}", color=VALUE_COLOUR, font_size=16).next_to(take_weight, DOWN)
 
 		leave_item = Text(f"[]", font_size=24).move_to(RIGHT*3.2 + UP)
-		leave_weight = Text(f"current weight = 0", font_size=16).next_to(leave_item, DOWN)
+		leave_weight = Text(f"current weight = 0", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(leave_item, DOWN)
 		leave_value = Text(f"current value = 0", color=VALUE_COLOUR, font_size=16).next_to(leave_weight, DOWN)
 
 		current_row = [
@@ -254,7 +266,7 @@ class BruteForce(Scene):
 		self.play(Write(take_value))
 
 		max_value = values[i-1]
-		self.play(Transform(max_value_text, Text(f"max = {max_value}", font_size=24, color=GREEN).move_to(capacity.get_center() + DOWN*0.5)))
+		self.play(Transform(max_value_text, Text(f"max = {max_value}", font_size=24, color=MAX_VALUE_COLOUR).move_to(capacity.get_center() + DOWN*0.5)))
 		self.play(Indicate(max_value_text))
 		self.wait(2)
 
@@ -294,7 +306,7 @@ class BruteForce(Scene):
 					font_size=24).move_to(LEFT*3 + UP)
 
 				cur_weight = item[1].text[len(item[1])-1]
-				take_weight = Text(f"current weight = {int(cur_weight) + weights[i-1]}", font_size=16).next_to(take_item, DOWN)
+				take_weight = Text(f"current weight = {int(cur_weight) + weights[i-1]}", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(take_item, DOWN)
 
 				cur_value = item[2].text[len(item[2])-2:len(item[2])]
 				if not cur_value.isnumeric():
@@ -329,7 +341,7 @@ class BruteForce(Scene):
 					# Replace max value
 					if int(cur_value) + values[i-1] > max_value:
 						max_value = int(cur_value) + values[i-1]
-						self.play(Transform(max_value_text, Text(f"max = {max_value}", font_size=24, color=GREEN).move_to(capacity.get_center() + DOWN*0.5)))
+						self.play(Transform(max_value_text, Text(f"max = {max_value}", font_size=24, color=MAX_VALUE_COLOUR).move_to(capacity.get_center() + DOWN*0.5)))
 						self.play(Indicate(max_value_text))
 
 
@@ -381,9 +393,9 @@ class SortByValue(Scene):
 		item_numbers, weights, values = ["#", 1, 2, 3], ["w", 10, 5, 5], ["v", 100, 80, 70]
 		objects = [
 			Dot(radius=0.1), 
-			Dot(radius=0.02*weights[1], color=ORANGE),
-			Dot(radius=0.02*weights[2], color=YELLOW),
-			Dot(radius=0.02*weights[3], color=GOLD)
+			Dot(radius=0.02*weights[1], color=get_value_colour(70, 100, values[1])),
+			Dot(radius=0.02*weights[2], color=get_value_colour(70, 100, values[2])),
+			Dot(radius=0.02*weights[3], color=get_value_colour(70, 100, values[3]))
 		]
 
 		table = VGroup()
@@ -395,9 +407,17 @@ class SortByValue(Scene):
 
 			row.add(objects[i].move_to(DOWN*(i-1) + LEFT*4))
 
-			weight = Text(str(weights[i]), font_size=24).move_to(DOWN*(i-1) + LEFT*3)
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = ITEM_WEIGHT_COLOUR
+			weight = Text(str(weights[i]), font_size=24, color=colour).move_to(DOWN*(i-1) + LEFT*3)
 			row.add(weight)
 
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = VALUE_COLOUR
 			value = Text(str(values[i]), font_size=24, color=VALUE_COLOUR).move_to(DOWN*(i-1) + LEFT*2)
 			row.add(value)
 
@@ -420,7 +440,7 @@ class SortByValue(Scene):
 		self.play(objects[1].animate.scale(5).move_to(suitcase.get_center()))
 
 		suitcase_weight_2 = Text(f"W = {weights[1]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value = Text(f"V = {values[1]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value = Text(f"V = {values[1]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		
 		self.play(
 			Write(max_value),
@@ -450,7 +470,7 @@ class SortByValue(Scene):
 		self.play(objects[2].animate.scale(5).move_to(suitcase.get_center() + DOWN + LEFT*0.5))
 
 		suitcase_weight_2 = Text(f"W = {weights[2]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value = Text(f"V = {values[2]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value = Text(f"V = {values[2]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		self.play(
 			Write(max_value),
 			Transform(suitcase_weight, suitcase_weight_2)
@@ -460,7 +480,7 @@ class SortByValue(Scene):
 		self.play(objects[3].animate.scale(5).move_to(suitcase.get_center() + UP + RIGHT*0.5))
 		
 		suitcase_weight_2 = Text(f"W = {weights[2]+weights[3]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value_2 = Text(f"V = {values[2]+values[3]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value_2 = Text(f"V = {values[2]+values[3]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		self.play(
 			Transform(max_value, max_value_2),
 			Transform(suitcase_weight, suitcase_weight_2)
@@ -490,18 +510,27 @@ class SortByValueWeightRatio(Scene):
 		item_numbers, weights, values = ["#", 1, 2, 3], ["w", 10, 5, 5], ["v", 100, 80, 70]
 		objects = [
 			Dot(radius=0.1), 
-			Dot(radius=0.02*weights[1], color=ORANGE),
-			Dot(radius=0.02*weights[2], color=YELLOW),
-			Dot(radius=0.02*weights[3], color=GOLD)
+			Dot(radius=0.02*weights[1], color=get_value_colour(70, 100, values[1])),
+			Dot(radius=0.02*weights[2], color=get_value_colour(70, 100, values[2])),
+			Dot(radius=0.02*weights[3], color=get_value_colour(70, 100, values[3]))
 		]
 
 		table = VGroup()
 		for i in range(0, len(objects)):
 			item_number = Text(str(item_numbers[i]), font_size=24).move_to(DOWN*(i-1) + LEFT*5)
-			self.add(item_number)			
+			self.add(item_number)
 
-			weight = Text(str(weights[i]), font_size=24).move_to(DOWN*(i-1) + LEFT*3)
-			value = Text(str(values[i]), font_size=24, color=VALUE_COLOUR).move_to(DOWN*(i-1) + LEFT*2)
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = ITEM_WEIGHT_COLOUR			
+			weight = Text(str(weights[i]), font_size=24, color=colour).move_to(DOWN*(i-1) + LEFT*3)
+
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = VALUE_COLOUR	
+			value = Text(str(values[i]), font_size=24, color=colour).move_to(DOWN*(i-1) + LEFT*2)
 
 			if i > 0:
 				table.add(
@@ -535,7 +564,7 @@ class SortByValueWeightRatio(Scene):
 
 		# Write the idea
 		idea_2 = Text("Idea #2: Pack the items in descending order of their value:weight ratio.", 
-			font_size=20, t2c={"Idea #2:": RED, "value": VALUE_COLOUR, "weight": WEIGHT_LIMIT_COLOUR}).move_to(UP*3)
+			font_size=20, t2c={"Idea #2:": RED, "value": VALUE_COLOUR, "weight": ITEM_WEIGHT_COLOUR}).move_to(UP*3)
 		
 		self.play(Write(idea_2))
 		self.wait(2)
@@ -603,7 +632,7 @@ class SortByValueWeightRatio(Scene):
 		self.play(objects[2].animate.scale(5).move_to(suitcase.get_center() + DOWN + LEFT*0.5))
 
 		suitcase_weight_2 = Text(f"W = {weights[2]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value = Text(f"V = {values[2]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value = Text(f"V = {values[2]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		self.play(
 			Write(max_value),
 			Transform(suitcase_weight, suitcase_weight_2)
@@ -614,7 +643,7 @@ class SortByValueWeightRatio(Scene):
 		self.play(objects[3].animate.scale(5).move_to(suitcase.get_center() + UP + RIGHT*0.5))
 		
 		suitcase_weight_2 = Text(f"W = {weights[2]+weights[3]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value_2 = Text(f"V = {values[2]+values[3]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value_2 = Text(f"V = {values[2]+values[3]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		self.play(
 			Transform(max_value, max_value_2),
 			Transform(suitcase_weight, suitcase_weight_2)
@@ -637,6 +666,13 @@ class SortByValueWeightCounterExample(Scene):
 		Text.set_default(font="Monospace")
 
 
+		# Write the idea
+		idea_2 = Text("Idea #2: Pack the items in descending order of their value:weight ratio.", 
+			font_size=20, t2c={"Idea #2:": RED, "value": VALUE_COLOUR, "weight": ITEM_WEIGHT_COLOUR}).move_to(UP*3)
+		
+		self.add(idea_2)
+
+
 		# Create the suitcase
 		suitcase = RoundedRectangle(
 			width=3, height=4,
@@ -656,9 +692,9 @@ class SortByValueWeightCounterExample(Scene):
 		weights, values = ["w", 7, 5, 5], ["v", 70, 40, 40]
 		objects = [
 			Dot(radius=0.1), 
-			Dot(radius=0.02*weights[1], color=GREEN),
-			Dot(radius=0.02*weights[2], color=TEAL),
-			Dot(radius=0.02*weights[3], color=TEAL)
+			Dot(radius=0.02*weights[1], color=get_value_colour(40, 70, values[1])),
+			Dot(radius=0.02*weights[2], color=get_value_colour(40, 70, values[2])),
+			Dot(radius=0.02*weights[3], color=get_value_colour(40, 70, values[3]))
 		]
 		ratio = ["v/w"] + [values[i]/weights[i] for i in range(1, len(values))]
 
@@ -671,8 +707,8 @@ class SortByValueWeightCounterExample(Scene):
 
 			if i == 0:
 				self.add(
-					Text(str(weights[i]), font_size=24).move_to(DOWN*(i-1) + LEFT*4),
-					objects[i].move_to(DOWN*(i-1) + LEFT*3),
+					objects[i].move_to(DOWN*(i-1) + LEFT*4),
+					Text(str(weights[i]), font_size=24).move_to(DOWN*(i-1) + LEFT*3),					
 					Text(str(values[i]), font_size=24).move_to(DOWN*(i-1) + LEFT*2),
 					Text(str(ratio[i]), font_size=24).move_to(DOWN*(i-1) + LEFT)
 				)
@@ -681,7 +717,7 @@ class SortByValueWeightCounterExample(Scene):
 		for i in range(1, len(objects)):
 			self.play(Create(objects[i].move_to(DOWN*(i-1) + LEFT*4)))
 
-			weight = Text(str(weights[i]), font_size=24).move_to(DOWN*(i-1) + LEFT*3)
+			weight = Text(str(weights[i]), font_size=24, color=ITEM_WEIGHT_COLOUR).move_to(DOWN*(i-1) + LEFT*3)
 			self.play(Write(weight))
 
 			value = Text(str(values[i]), font_size=24, color=VALUE_COLOUR).move_to(DOWN*(i-1) + LEFT*2)
@@ -713,7 +749,7 @@ class SortByValueWeightCounterExample(Scene):
 		self.play(objects[1].animate.scale(5).move_to(suitcase.get_center()))
 
 		suitcase_weight_2 = Text(f"W = {weights[1]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value = Text(f"V = {values[1]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value = Text(f"V = {values[1]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		
 		self.play(
 			Write(max_value),
@@ -740,7 +776,7 @@ class SortByValueWeightCounterExample(Scene):
 		self.play(objects[2].animate.scale(5).move_to(suitcase.get_center() + DOWN + LEFT*0.5))
 
 		suitcase_weight_2 = Text(f"W = {weights[2]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value = Text(f"V = {values[2]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value = Text(f"V = {values[2]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		self.play(
 			Write(max_value),
 			Transform(suitcase_weight, suitcase_weight_2)
@@ -751,9 +787,169 @@ class SortByValueWeightCounterExample(Scene):
 		self.play(objects[3].animate.scale(5).move_to(suitcase.get_center() + UP + RIGHT*0.5))
 		
 		suitcase_weight_2 = Text(f"W = {weights[2]+weights[3]}/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
-		max_value_2 = Text(f"V = {values[2]+values[3]}", font_size=24, color=GREEN).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		max_value_2 = Text(f"V = {values[2]+values[3]}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
 		self.play(
 			Transform(max_value, max_value_2),
 			Transform(suitcase_weight, suitcase_weight_2)
 		)
 		self.wait(5)
+
+
+
+
+class KnapsackIntroduction(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		# Title
+		title = Text("0/1 Knapsack Problem").move_to(UP*3)
+		self.play(Write(title))
+		self.wait(2)
+
+
+		# Given a list of items
+		items, weight_texts, value_texts = VGroup(), VGroup(), VGroup()
+		weights = [2, 1, 3, 1, 4]
+		values = [25, 10, 40, 20, 45]
+
+
+		camera = make_camera().move_to(RIGHT*3)
+		pen = make_pen().move_to(LEFT*5 + UP*2)
+		sneakers = make_sneakers().move_to(UP*2 + RIGHT*5)
+		toothbrush = make_toothbrush().move_to(LEFT*3)
+		headphones = make_headphones().move_to(UP*2)
+
+		items.add(camera, pen, sneakers, toothbrush, headphones)
+		items.shift(DOWN)		
+
+
+		for i in range(0, len(items)):	
+			self.play(Create(items[i]))
+		self.wait(2)
+
+
+		# Each item has a weight
+		for i in range(0, len(items)):
+			weight_text = Text(f"w = {weights[i]}kg", font_size=20, color=ITEM_WEIGHT_COLOUR).next_to(items[i], DOWN)
+			weight_texts.add(weight_text)
+			self.play(Write(weight_text))
+		self.wait(2)
+
+
+		complete_items = VGroup()
+
+
+		# And a value
+		for i in range(len(items)):
+			value_text = Text(f"v = {values[i]}", font_size=20, color=VALUE_COLOUR).next_to(weight_texts[i], DOWN)
+			value_texts.add(value_text)
+			self.play(Write(value_text))
+
+			complete_items.add(VGroup(items[i], weight_texts[i], value_texts[i]))
+
+		self.wait(2)
+
+
+		# You are also given a capacity
+		suitcase = RoundedRectangle(
+			width=2, height=2,
+			corner_radius=0.2,
+			color=GRAY,
+			fill_opacity=0.5
+		).scale(0.8).shift(UP*0.2+RIGHT*0.3)
+
+
+		# Move each object around the suitcase
+		bag_radius = 2.5
+		bag_centre = DOWN*0.5
+
+		move_around_bag = []
+		i = 0
+		while i < len(complete_items):
+			up = bag_radius*math.sin(i*2*PI/len(complete_items))
+			right = bag_radius*math.cos(i*2*PI/len(complete_items))
+			position = UP*up + RIGHT*right
+
+			move_around_bag.append(complete_items[i].animate.move_to(position+bag_centre).scale(0.8))
+			i += 1
+
+
+		self.play(
+			Create(suitcase),
+			*move_around_bag
+		)
+		self.wait(2)
+
+		suitcase_weight = Text("W = 5kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN)
+		self.play(Write(suitcase_weight))
+		self.wait(2)
+
+
+		suitcase_weight_2 = Text("W = 0/5 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN)
+		self.play(Transform(suitcase_weight, suitcase_weight_2))
+		self.wait(2)
+
+
+		# Goal 1: Total weight doesn't go over limit
+		cur_weight = 0
+		for i in [2, 4]:
+			self.play(
+				items[i].animate.move_to(suitcase.get_center())
+			)
+
+			cur_weight += weights[i]
+			self.play(
+				FadeOut(items[i]),
+				Transform(suitcase_weight, Text(f"W = {cur_weight}/5 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN))
+			)
+
+
+		red_x = Text("X", color=RED).shift(UP*0.2+RIGHT*0.3)
+		self.play(Indicate(suitcase_weight, color=RED), SpinInFromNothing(red_x))
+		self.play(FadeOut(red_x))
+
+
+		move_back = []
+		for i in [2, 4]:
+			up = bag_radius*math.sin(i*2*PI/len(items))
+			right = bag_radius*math.cos(i*2*PI/len(items))
+			position = UP*up + RIGHT*right
+
+			move_back.append(items[i].animate.move_to(position+bag_centre+UP*0.5))
+			i += 1
+
+		self.play(
+			*move_back,
+			Transform(suitcase_weight, Text(f"W = 0/5 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN))
+		)
+		self.wait(2)
+
+
+		# Goal 2: Value is as high as possible
+		max_value_text = Text("V = 0", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5)
+		self.play(Write(max_value_text))
+
+
+		cur_weight, cur_val = 0, 0
+		for i in [1,2,3]:
+			self.play(
+				items[i].animate.move_to(suitcase.get_center())
+			)
+
+			cur_weight += weights[i]
+			cur_val += values[i]
+			self.play(
+				FadeOut(items[i]),
+				Transform(suitcase_weight, Text(f"W = {cur_weight}/5 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN)),
+				Transform(max_value_text, Text(f"V = {cur_val}", font_size=24, color=MAX_VALUE_COLOUR).move_to(suitcase_weight.get_center() + DOWN*0.5))
+			)
+
+
+		self.play(
+			Indicate(max_value_text, color=GREEN)
+		)
+		self.wait(2)
+
+		fade_out_scene(self)
+
