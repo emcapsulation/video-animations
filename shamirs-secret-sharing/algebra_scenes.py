@@ -288,7 +288,7 @@ class Thumbnail(Scene):
 
 
 		# Be a bit mysterious
-		y_int_maths_2 = Text("Secret = ?", font_size=24, color=RED).next_to(curve_label, DOWN)
+		y_int_maths_2 = Text("Secret = ?", font_size=30, color=RED).next_to(curve_label, DOWN)
 		self.add(y_int_maths_2)
 
 
@@ -303,7 +303,7 @@ class Thumbnail(Scene):
 			if i >= 4:
 				pos = RIGHT+DOWN
 
-			point_and_label = plane.add_point(point, colours[i], family_group[i].get_center() + UP*0.75, colours[i], label_text=f"(x_{i}, y_{i})")
+			point_and_label = plane.add_point(point, colours[i], family_group[i].get_center() + UP*0.75, colours[i], label_text=f"(x_{i}, y_{i})", label_font_size=36, radius=0.2)
 
 			point_group.add(point_and_label[0])
 			label_group.add(point_and_label[1])			
