@@ -5,8 +5,8 @@ import math
 config.background_color = "#15131c"
 
 
-VALUE_COLOUR = YELLOW
-ITEM_WEIGHT_COLOUR = MAROON
+VALUE_COLOUR = GOLD
+ITEM_WEIGHT_COLOUR = ORANGE
 WEIGHT_LIMIT_COLOUR = PINK
 MAX_VALUE_COLOUR = GOLD
 
@@ -14,6 +14,15 @@ MAX_VALUE_COLOUR = GOLD
 def fade_out_scene(scene):
 	scene.play(
 		*[FadeOut(mob)for mob in scene.mobjects]
+	)
+
+
+def make_suitcase():
+	return RoundedRectangle(
+		width=3, height=4,
+		corner_radius=0.2,
+		color=GRAY,
+		fill_opacity=0.5
 	)
 
 
@@ -111,12 +120,7 @@ class Introduction(Scene):
 
 
 		# Create the suitcase
-		suitcase = RoundedRectangle(
-			width=3, height=4,
-			corner_radius=0.2,
-			color=GRAY,
-			fill_opacity=0.5
-		).move_to(RIGHT*4)
+		suitcase = make_suitcase().move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 
 		self.play(Create(suitcase))
@@ -377,12 +381,7 @@ class SortByValue(Scene):
 
 
 		# Create the suitcase
-		suitcase = RoundedRectangle(
-			width=3, height=4,
-			corner_radius=0.2,
-			color=GRAY,
-			fill_opacity=0.5
-		).move_to(RIGHT*4)
+		suitcase = make_suitcase().move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 		suitcase_weight = Text("W = 0/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
 		self.play(Create(suitcase), Write(suitcase_text), Write(suitcase_weight))
@@ -550,12 +549,7 @@ class SortByValueWeightRatio(Scene):
 
 
 		# Create the suitcase
-		suitcase = RoundedRectangle(
-			width=3, height=4,
-			corner_radius=0.2,
-			color=GRAY,
-			fill_opacity=0.5
-		).move_to(RIGHT*4)
+		suitcase = make_suitcase().move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 		suitcase_weight = Text("W = 0/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
 		self.add(suitcase, suitcase_text, suitcase_weight)
@@ -674,12 +668,7 @@ class SortByValueWeightCounterExample(Scene):
 
 
 		# Create the suitcase
-		suitcase = RoundedRectangle(
-			width=3, height=4,
-			corner_radius=0.2,
-			color=GRAY,
-			fill_opacity=0.5
-		).move_to(RIGHT*4)
+		suitcase = make_suitcase().move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 		suitcase_weight = Text("W = 0/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
 		self.add(suitcase, suitcase_text, suitcase_weight)
@@ -953,3 +942,557 @@ class KnapsackIntroduction(Scene):
 
 		fade_out_scene(self)
 
+
+
+
+class DynamicProgramming(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		# Title
+		title = Text("Dynamic Programming").move_to(UP*3)
+		self.play(Write(title))
+		self.wait(2)
+
+
+		# Show grid turning into squares
+		grid = VGroup()
+		left, up = 2.5, 1.5
+
+		for r in range(0, 4):
+			row = VGroup()
+			left = 2.5			
+
+			for c in range(0, 6):
+				square = Square(
+					side_length=1,
+					fill_color=WHITE,
+					stroke_color=WHITE,
+					stroke_width=0.5,
+					fill_opacity=1
+				).move_to(LEFT*left + UP*up)
+				row.add(square.scale(1.2))
+
+				left -= 1
+
+			grid.add(row)
+			up -= 1
+
+		self.play(FadeIn(grid))
+		self.wait(2)
+
+
+		# Show the "subproblems"
+		for row in grid:
+			for cell in row:
+				self.play(cell.animate.set_fill(opacity=0), run_time=0.1)
+		self.wait(2)
+
+
+		# Merge subproblems
+		count = 0
+		for i in range(0, len(grid)):
+			for j in range(0, len(grid[0])):
+				if i == 0:
+					self.play(grid[i][j].animate.set_fill(
+							get_value_colour(0, len(grid[0])-1, j),
+							opacity=0.2
+						)						
+					)
+
+				elif j == 0:
+					self.play(grid[i][j].animate.set_fill(
+							get_value_colour(0, len(grid)-1, i),
+							opacity=0.2
+						)						
+					)
+
+				else:
+					combo = VGroup()
+					combo_anim = []
+
+					left_square = grid[i][j-1].copy()
+					combo_anim.append(left_square.animate.shift(RIGHT))
+
+					top_square = grid[i-1][j].copy()
+					combo_anim.append(top_square.animate.shift(DOWN))
+
+					self.play(*combo_anim)
+					combo = VGroup(left_square, top_square)
+
+					grid[i][j] = combo
+
+		self.wait(2)
+
+		fade_out_scene(self)
+
+
+
+
+class SmallExample(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		# Suitcase shrinks to 1kg
+		suitcase = make_suitcase()
+		suitcase_weight = Text("W = 5kg", font_size=30, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN)
+		suitcase_group = VGroup(suitcase, suitcase_weight)
+		self.play(Create(suitcase_group))
+		self.wait(2)
+		
+		self.play(
+			suitcase_group.animate.scale(0.4)			
+		)
+
+		suitcase_weight_2 = Text(
+			"W = 1kg", font_size=30, color=WEIGHT_LIMIT_COLOUR
+		).move_to(suitcase_weight.get_center()).scale(0.4)
+		self.play(
+			Transform(suitcase_weight, suitcase_weight_2)			
+		)
+
+		self.play(suitcase_group.animate.shift(RIGHT*5))
+		
+
+
+		# Add all the items
+		item_numbers = ["#", 0, 1, 2, 3, 4, 5]
+		weights = ["w", 0, 1, 2, 3, 1, 4]
+		values = ["v", 0, 10, 25, 40, 20, 45]
+		objects = [
+			Dot(radius=0.8),	
+			Dot(radius=0.2),
+			make_pen(),
+			make_camera(),
+			make_sneakers(),
+			make_toothbrush(),
+			make_headphones()
+		]
+
+
+		table_ul = DOWN*-2.5 + LEFT*6.5
+		table = VGroup()
+
+		for i in range(0, len(objects)):
+			RT = 0.2
+
+			item_number = Text(str(item_numbers[i]), font_size=24).move_to(table_ul + DOWN*i + RIGHT*0)
+			self.play(Write(item_number), run_time=RT)
+
+			obj = objects[i].move_to(table_ul + DOWN*i + RIGHT*1).scale(0.2)
+			self.play(Create(obj), run_time=RT)
+
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = ITEM_WEIGHT_COLOUR			
+			weight = Text(str(weights[i]), font_size=24, color=colour).move_to(table_ul + DOWN*i + RIGHT*2)
+			self.play(Write(weight), run_time=RT)			
+
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = VALUE_COLOUR	
+			value = Text(str(values[i]), font_size=24, color=colour).move_to(table_ul + DOWN*i + RIGHT*3)
+			self.play(Write(value), run_time=RT)
+
+			table.add(
+				VGroup(
+					item_number,
+					obj,
+					weight,
+					value
+				)
+			)
+
+		self.add(table)
+		self.wait(2)
+
+
+
+		# Add the weight heading
+		w = Text("W", color=PINK, font_size=24).move_to(table_ul + UP + RIGHT*4)
+
+		for weight in range(0, 6):
+			weight_text = Text(f"{weight}", font_size=24).move_to(table_ul + RIGHT*(weight+4))
+			self.play(Write(weight_text))
+			table[0].add(weight_text)
+
+		self.play(Write(w))
+		self.wait(2)
+
+
+
+		# Explain the meaning of cell (i, j)
+		cell_explain = Text(
+			"cell (i, j) = The best value we can pack into\na bag of capacity j, using the first i items.", 
+			font_size=18
+		).move_to(UP*3.5 + RIGHT*3.5)
+		self.play(Write(cell_explain))
+		self.wait(2)
+
+
+		# Explain the meaning of the rows
+		i, j = 3+1, 1+4
+		arrow = Arrow(
+			start=table[i][0].get_right()+RIGHT*(j+1.5), 
+			end=table[i][0].get_right()+RIGHT*(j+0.25)
+		)
+		box = Rectangle(
+			width=1, height=0.75, 
+			fill_color=WHITE, 
+			fill_opacity=0.2,
+			stroke_width=0
+		).next_to(arrow, LEFT, buff=0)
+		arrow_box = VGroup(arrow, box)
+		self.play(Create(arrow_box))
+
+
+		# (3, 1)
+		explain_row = Text(
+			"Max value we can pack\ninto a 1kg bag using\nthe first 3 items.", 
+			font_size=18
+		).next_to(arrow_box.get_right())
+		self.play(Write(explain_row))
+
+		item_brace = BraceBetweenPoints(table[1][3].get_top(), table[i][3].get_bottom(), direction=RIGHT)
+		self.play(Create(item_brace))
+		self.wait(2)
+
+
+		# (4, 3)
+		i, j = 4+1, 3+4
+		item_brace_2 = BraceBetweenPoints(table[1][3].get_top(), table[i][3].get_bottom(), direction=RIGHT)
+		self.play(
+			arrow_box.animate.shift(DOWN + RIGHT*2),
+			explain_row.animate.shift(DOWN + RIGHT*2),
+			Transform(item_brace, item_brace_2)
+		)
+
+		explain_row_2 = Text(
+			"Max value we can pack\ninto a 3kg bag using\nthe first 4 items.", 
+			font_size=18
+		).next_to(arrow_box.get_right())
+		self.play(Transform(explain_row, explain_row_2))
+		self.play(Flash(explain_row.get_center()+DOWN*0.25))
+		self.wait(2)
+
+
+		self.play(
+			FadeOut(arrow_box),
+			FadeOut(item_brace),
+			FadeOut(explain_row)
+		)
+
+
+		# Highlight the zero item
+		item_rect = Rectangle(
+			width=4, height=1
+		).move_to(table.get_center()+UP*2+LEFT*3)
+		self.play(Create(item_rect))
+		self.wait(2)
+
+
+		# Value of zero item is 0
+		for cur_weight in range(0, 6):
+			zero_val = Text("0", font_size=24).move_to(table[1][cur_weight+3].get_center()+RIGHT)
+			table[1].add(zero_val)
+			self.play(Write(zero_val))
+		self.wait(2)
+
+
+		# Highlight the zero column
+		self.play(FadeOut(item_rect))
+		item_rect = Rectangle(
+			width=1, height=1
+		).move_to(table.get_center()+LEFT*0.5+UP*3)
+		self.play(Create(item_rect))
+		self.wait(2)
+
+
+		# Value of zero capacity is 0		
+		for cur_item in range(1, 6):
+			zero_val = Text("0", font_size=24).move_to(table[cur_item][4].get_center()+DOWN)
+			table[cur_item+1].add(zero_val)
+			self.play(Write(zero_val))
+		self.play(FadeOut(item_rect))
+		self.wait(2)
+
+
+
+		# Algorithm time!
+		for cur_weight in range(1, 6):
+			j = cur_weight+4
+			bag_items = VGroup().move_to(suitcase.get_center())
+
+
+			# Border around current item
+			item_rect = Rectangle(
+				width=4, height=1
+			).move_to(table.get_center()+UP*1+LEFT*3)
+			self.play(Create(item_rect))
+			self.wait(2)
+
+
+			for cur_item in range(1, 6):
+				i, vi, wi = cur_item+1, 3, 2
+				new_val = None
+				fade_out_anim = []
+
+
+				# This item's value and weight
+				cur_item_val = int(table[i][vi].text)
+				cur_item_weight = int(table[i][wi].text)
+
+
+				# Border around current item
+				if cur_item > 1:
+					self.play(item_rect.animate.shift(DOWN))
+					self.wait(2)
+				
+
+				# Emphasise the weight of the current item
+				weight_rect = Rectangle(
+					width=1, height=0.75,
+					color=ORANGE, 
+					stroke_width=0,
+					fill_opacity=0.2
+				).move_to(table[i][wi])
+
+				too_heavy = True
+				if cur_item_weight <= cur_weight:
+					too_heavy = False
+
+				self.play(FadeIn(weight_rect))
+				self.wait(1)
+				self.play(Indicate(weight_rect, color=(RED if too_heavy else GREEN)))
+				self.wait(1)
+				self.play(FadeOut(weight_rect))
+
+
+				if not too_heavy:
+
+					# Previous best value
+					prev_val = 0
+					prev_val_rect = Rectangle(
+						width=1, height=0.75,
+						color=PINK, 
+						stroke_width=0,
+						fill_opacity=0.2
+					).move_to(table[i-1][j].get_center())
+					
+					self.play(FadeIn(prev_val_rect))
+					fade_out_anim.append(FadeOut(prev_val_rect))
+					self.wait(2)
+
+					prev_val = int(table[i-1][j].text)
+
+
+					# Value of the current item
+					cur_val_rect = Rectangle(
+						width=1, height=0.75,
+						color=GOLD, 
+						stroke_width=0,
+						fill_opacity=0.2
+					).move_to(table[i][vi])
+
+					self.play(FadeIn(cur_val_rect))
+					fade_out_anim.append(FadeOut(cur_val_rect))
+					self.wait(2)
+
+
+					# Value of the optimal previous bag
+					best_bag_rect = None
+					best_bag_val = 0
+					if cur_item_weight <= cur_weight:
+						best_bag_rect = Rectangle(
+							width=1, height=0.75,
+							color=GOLD, 
+							stroke_width=0,
+							fill_opacity=0.2
+						).move_to(table[i-1][j-cur_item_weight])
+						
+						self.play(FadeIn(best_bag_rect))
+						fade_out_anim.append(FadeOut(best_bag_rect))
+						self.wait(2)
+
+						if cur_weight == 2 and cur_item == 4:
+							self.play(Indicate(best_bag_rect, color=GOLD))
+							self.wait(2)
+
+						best_bag_val = int(table[i-1][j-cur_item_weight].text)
+
+
+					# Shift the correct values
+					flash_green_anim, shift_val_anim, transform_val_anim = [], [], []
+
+					new_val, new_val_3 = None, None
+					new_pos = table[i][j-1].get_center() + RIGHT
+
+					if cur_item_val + best_bag_val > prev_val:
+						flash_green_anim.append(Indicate(cur_val_rect, color=GREEN))
+						new_val = table[i][vi].copy().set_color(WHITE)					
+
+						flash_green_anim.append(Indicate(best_bag_rect, color=GREEN))
+						new_val_2 = table[i-1][j-cur_item_weight].copy()
+						shift_val_anim.append(new_val_2.set_color(WHITE).animate.move_to(new_pos))
+
+						transform_val_anim.append(FadeOut(new_val_2))
+						new_val_3 = Text(str(cur_item_val + best_bag_val), font_size=24)
+						transform_val_anim.append(Transform(new_val, new_val_3.move_to(new_pos)))							
+
+					else:
+						flash_green_anim.append(Indicate(prev_val_rect, color=GREEN))
+						new_val = table[i-1][j].copy().set_color(WHITE)
+					
+					shift_val_anim.append(new_val.animate.move_to(new_pos))
+
+
+					# Quick aside - show the items being added together
+					if cur_item == 4 and cur_weight == 2:
+						toothbrush_2 = make_toothbrush().scale(0.7)
+						toothbrush_weight = Text("w = 1kg", font_size=24, color=ITEM_WEIGHT_COLOUR).next_to(toothbrush_2, DOWN)
+						toothbrush_group = VGroup(toothbrush_2, toothbrush_weight).move_to(suitcase_group.get_center() + LEFT*4)
+						
+						self.play(Create(toothbrush_group))
+						fade_out_anim.append(FadeOut(toothbrush_group))
+
+						plus = Text("+").move_to(suitcase_group.get_center() + LEFT*4 + DOWN)
+						
+						self.play(Write(plus))
+						fade_out_anim.append(FadeOut(plus))
+
+						suitcase_2 = make_suitcase()
+						suitcase_weight_2 = Text("W = 1kg", font_size=30, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_2, DOWN)
+						suitcase_group_2 = VGroup(suitcase_2, suitcase_weight_2).scale(0.4).move_to(suitcase_group.get_center() + LEFT*4 + DOWN*2)
+						suitcase_group_2.add(table[2][1].copy().move_to(suitcase_2.get_center()))
+						
+						self.play(Create(suitcase_group_2))
+						fade_out_anim.append(FadeOut(suitcase_group_2))
+						
+						equals = Text("=").move_to(suitcase_group.get_center() + LEFT*2)
+						self.play(Write(equals))
+						fade_out_anim.append(FadeOut(equals))
+
+						toothbrush_copy = table[5][1].copy().move_to(suitcase.get_center() + DOWN*0.25)
+						pen_copy = table[2][1].copy().move_to(suitcase.get_center() + UP*0.25)
+						bag_contents = VGroup(toothbrush_copy, pen_copy)
+						self.play(Transform(bag_items, bag_contents))
+						self.wait(2)
+
+						self.play(Indicate(best_bag_rect, color=GOLD))
+						self.wait(2)
+
+
+					self.play(*flash_green_anim)
+					self.wait(2)
+
+					self.play(*shift_val_anim)
+					if len(transform_val_anim) > 0:
+						self.play(*transform_val_anim)
+					self.wait(2)
+
+					if new_val_3 != None:
+						new_val = new_val_3
+
+
+				else:
+					# Too heavy, keep the previous item
+					new_val = table[i-1][j].copy()
+					self.play(new_val.animate.shift(DOWN))
+					self.wait(2)
+
+
+				# Fade in the bag items
+				# This is dumb but I just found it easier to hard code this
+				new_bag_items = None
+				if cur_item == 1:
+					new_bag_items = VGroup(
+						table[2][1].copy()
+					)
+				elif cur_weight == 1 and cur_item == 4:
+					new_bag_items = VGroup(
+						table[5][1].copy()
+					)
+				elif cur_weight == 2 and cur_item == 2:
+					new_bag_items = VGroup(
+						table[3][1].copy()
+					)
+				elif cur_weight >= 3 and cur_item == 2:
+					new_bag_items = VGroup(
+						table[2][1].copy(),
+						table[3][1].copy()
+					)
+				elif cur_weight == 3 and cur_item == 3:
+					new_bag_items = VGroup(
+						table[4][1].copy()
+					)
+				elif cur_weight == 4 and cur_item == 3:
+					new_bag_items = VGroup(
+						table[2][1].copy(),
+						table[4][1].copy()
+					)
+				elif cur_weight == 3 and cur_item == 4:
+					new_bag_items = VGroup(
+						table[3][1].copy(),
+						table[5][1].copy()
+					)
+				elif cur_weight == 4 and cur_item == 4:
+					new_bag_items = VGroup(
+						table[4][1].copy(),
+						table[5][1].copy()
+					)
+				elif cur_weight == 5 and cur_item == 3:
+					new_bag_items = VGroup(
+						table[3][1].copy(),
+						table[4][1].copy()
+					)
+				elif cur_weight == 5 and cur_item == 4:
+					new_bag_items = VGroup(
+						table[2][1].copy(),
+						table[4][1].copy(),
+						table[5][1].copy()
+					)
+
+
+
+				if new_bag_items != None:
+					self.play(Transform(bag_items, new_bag_items.arrange(DOWN).move_to(suitcase.get_center())))
+
+
+				if len(fade_out_anim) > 0:
+					self.play(*fade_out_anim)
+
+
+				table[i].add(new_val)
+
+
+			# Highlight the answer
+			ans_rect = Rectangle(
+				width=1, height=0.75,
+				color=GREEN, 
+				stroke_width=0,
+				fill_opacity=0.2
+			).move_to(table[6][j])
+
+			self.play(FadeOut(item_rect))
+			self.play(FadeIn(ans_rect))
+			self.play(Flash(bag_items, color=GREEN))
+			self.play(FadeOut(ans_rect))
+			self.wait(2)		
+
+
+			if cur_weight < 5:
+				# Resize the bag
+				self.play(suitcase_group.animate.scale(1.2), FadeOut(bag_items))
+
+				suitcase_weight_2 = Text(
+					f"W = {cur_weight+1}kg", font_size=30, color=WEIGHT_LIMIT_COLOUR
+				).move_to(suitcase_weight.get_center()).scale(0.4*(1.2**cur_weight))
+				self.play(Transform(suitcase_weight, suitcase_weight_2))
+
+
+		self.wait(2)
+		fade_out_scene(self)
