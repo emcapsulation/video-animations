@@ -1603,12 +1603,6 @@ class LargeExample(Scene):
 		self.wait(2)
 
 
-		for i in range(0, len(table)):
-			for j in range(0, len(table[i])):
-				print(table[i][j])
-			print('\n')
-
-
 		# Algorithm
 		for cur_item in range(1, n-1):		
 			self.play(weight_rect.animate.move_to(table_ul + RIGHT*2 + DOWN*0))	
@@ -1757,3 +1751,207 @@ class LargeExample(Scene):
 		self.wait(2)
 
 
+
+
+class FindItemsPacked(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		# Create the table
+		item_numbers = ["#", 0, 1, 2, 3, 4, 5, 6, 7, 8]
+		weights = ["w", 0, 3, 4, 9, 2, 7, 5, 1, 8]
+		values = ["v", 0, 15, 20, 40, 10, 20, 35, 10, 25]
+		item_desc = [item_numbers, weights, values]
+		W, n = 10, len(item_numbers)
+
+
+		table_ul = UP*2 + LEFT*6.5
+		table = VGroup()
+
+		FZ = 18
+
+		d = 0
+		for i in range(0, n):
+			r = 0
+			row = VGroup()
+
+			for j in range(0, len(item_desc)):
+				if j == 0 or i == 0:
+					colour = WHITE
+				else:
+					if j == 1:
+						colour = ITEM_WEIGHT_COLOUR
+					elif j == 2:
+						colour = VALUE_COLOUR
+
+				item = Text(str(item_desc[j][i]), font_size=FZ, color=colour).move_to(table_ul + DOWN*d + RIGHT*r)
+				row.add(item)
+				r += 0.5
+
+			table.add(row)
+			d += 0.5
+
+		self.add(table)
+
+
+		# Add the weight heading
+		w = Text("W", color=PINK, font_size=24).move_to(table_ul + UP*0.5 + RIGHT*1.5)
+		r = 1.5
+		for weight in range(0, W+1):
+			weight_text = Text(f"{weight}", font_size=FZ).move_to(table_ul + RIGHT*r)
+			table[0].add(weight_text)
+			r += 0.5
+		self.add(w)
+
+
+		# Base cases
+		r, d = 1.5, 0.5
+		for i in range(0, W+1):
+			zero_text = Text("0", font_size=FZ).move_to(table_ul + RIGHT*r + DOWN*d)
+			table[1].add(zero_text)
+			r += 0.5
+
+		r, d = 1.5, 1.0
+		for i in range(2, n):
+			zero_text = Text("0", font_size=FZ).move_to(table_ul + RIGHT*r + DOWN*d)
+			table[i].add(zero_text)
+			d += 0.5
+
+
+		# Algorithm
+		for cur_item in range(1, n-1):
+			i = cur_item+1	
+			wi, vi = 1, 2
+
+			for cur_weight in range(1, W+1):
+				j = cur_weight+3
+				new_val = None
+
+				# This item's value and weight
+				cur_item_val = int(table[i][vi].text)
+				cur_item_weight = int(table[i][wi].text)
+
+				too_heavy = True
+				if cur_item_weight <= cur_weight:
+					too_heavy = False
+
+				# Find the value
+				# Previous best value
+				prev_val = int(table[i-1][j].text)
+				new_pos = table[i][j-1].get_center() + RIGHT*0.5
+
+				if not too_heavy:
+					# Value of the optimal previous bag
+					best_bag_val = 0
+					if cur_item_weight <= cur_weight:
+						best_bag_val = int(table[i-1][j-cur_item_weight].text)
+
+					if cur_item_val + best_bag_val > prev_val:
+						new_val = Text(str(cur_item_val + best_bag_val), font_size=FZ).move_to(new_pos)						
+
+					else:
+						new_val = table[i-1][j].copy().set_color(WHITE).move_to(new_pos)
+
+				else:
+					# Too heavy, keep the previous item
+					new_val = table[i-1][j].copy().move_to(new_pos)
+
+				table[i].add(new_val)		
+		self.wait(2)
+
+
+
+		# Items taken list
+		items_taken_text = Text("Items Taken: ", font_size=FZ).move_to(table.get_bottom() + DOWN + LEFT*2)
+		items_taken_pos = items_taken_text.get_right() + RIGHT
+		items_taken_list = []
+		self.play(Write(items_taken_text))
+
+
+
+		# Algorithm
+		question_rect = Rectangle(
+			width=0.5, height=0.5,
+			color=WHITE, 
+			stroke_width=0,
+			fill_opacity=0.2
+		).move_to(table[i][j])
+
+		i, j = n-1, W+3
+		wi = 1
+		while i > 1:
+			cur_val = int(table[i][j].text)			
+			if i == n-1:
+				self.play(FadeIn(question_rect))
+			self.wait(2)
+
+
+			prev_val = int(table[i-1][j].text)
+			prev_val_rect = Rectangle(
+				width=0.5, height=0.5,
+				color=PINK, 
+				stroke_width=0,
+				fill_opacity=0.2
+			).move_to(table[i-1][j].get_center())
+			
+			self.play(FadeIn(prev_val_rect))
+			self.wait(2)
+
+
+			if cur_val == prev_val:
+				self.play(Indicate(prev_val_rect, color=GREEN))
+				self.play(FadeOut(prev_val_rect))
+
+				new_pos = table[i-1][j]
+				self.play(question_rect.animate.move_to(new_pos))
+				i -= 1
+
+			else:
+				self.play(Indicate(question_rect, color=GREEN))
+				self.wait(1)
+
+				last_taken = Text(str(i-1), font_size=FZ).move_to(items_taken_pos)
+				items_taken_list.append(i-1)
+				items_taken_pos = last_taken.get_right() + RIGHT
+				self.play(Write(last_taken))
+				self.wait(1)
+
+				self.play(FadeOut(prev_val_rect))
+
+				cur_item_weight = int(table[i][wi].text)
+				weight_rect = Rectangle(
+					width=0.5, height=0.5,
+					color=ORANGE, 
+					stroke_width=0,
+					fill_opacity=0.2
+				).move_to(table[i][wi])
+				self.play(FadeIn(weight_rect))
+
+				best_bag_rect = Rectangle(
+					width=0.5, height=0.5,
+					color=GOLD, 
+					stroke_width=0,
+					fill_opacity=0.2
+				).move_to(table[i-1][j-cur_item_weight])				
+				self.play(FadeIn(best_bag_rect))
+				self.wait(1)
+
+				new_pos = table[i][j-weights[i]]
+				self.play(question_rect.animate.move_to(new_pos))
+				j -= weights[i]
+
+				new_pos = table[i-1][j]
+				self.play(question_rect.animate.move_to(new_pos))
+				i -= 1
+
+				self.play(FadeOut(weight_rect), FadeOut(best_bag_rect))
+		self.wait(2)
+
+		print(items_taken_list)
+		for item in items_taken_list:
+			item_highlight_rect = Rectangle(
+				width=1.5, height=0.5
+			).move_to(table_ul + RIGHT*0.5 + DOWN*0.5).shift(DOWN*(item*0.5))
+			self.play(Create(item_highlight_rect))
+		self.wait(2)
