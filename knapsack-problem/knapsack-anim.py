@@ -1,4 +1,5 @@
 from manim import *
+from items import *
 
 import math
 
@@ -17,93 +18,6 @@ def fade_out_scene(scene):
 	)
 
 
-def make_suitcase():
-	return RoundedRectangle(
-		width=3, height=4,
-		corner_radius=0.2,
-		color=GRAY,
-		fill_opacity=0.5
-	)
-
-
-def make_camera():
-	camera_body = RoundedRectangle(
-		width=1.2, height=0.8,
-		corner_radius=0.2,
-		color=GRAY,
-		fill_opacity=0.5
-	)
-	lens = Circle(
-		radius=0.2,
-		color=BLACK,
-		fill_opacity=0.5
-	).move_to(camera_body.get_center() + RIGHT*0.25)
-	camera = VGroup(camera_body, lens)
-
-	return camera
-
-
-def make_pen():
-	pen_body = Rectangle(
-		width=1.5, height=0.25,
-		color=BLUE,
-		fill_opacity=0.5
-	)
-	nib = Triangle(
-		color=WHITE,
-		fill_opacity=0.5
-	).scale(0.15)
-	nib.rotate(5*PI/6, about_point=nib.get_center()).move_to(pen_body.get_right() + RIGHT*0.15)
-	pen = VGroup(pen_body, nib)
-
-	return pen
-
-
-def make_sneakers():
-	shoe = RoundedRectangle(
-		width=0.5, height=0.8,
-		corner_radius=0.2,
-		color=WHITE,
-		fill_opacity=0.5
-	)
-	sneakers = VGroup(shoe, shoe.copy()).arrange(RIGHT)
-
-	return sneakers
-
-
-def make_toothbrush():
-	toothbrush_body = Rectangle(
-		width=1.9, height=0.2,
-		color=WHITE,
-		fill_opacity=0.5
-	)
-	brushes = RoundedRectangle(
-		width=0.4, height=0.25,
-		corner_radius=0.1,
-		color=RED,
-		fill_opacity=0.5
-	).move_to(toothbrush_body.get_top() + UP*0.125 + RIGHT*0.71)
-	toothbrush = VGroup(toothbrush_body, brushes)
-
-	return toothbrush
-
-
-def make_headphones():
-	headphone = RoundedRectangle(
-		width=0.4, height=0.7,
-		corner_radius=0.2,
-		color=GRAY_D,
-		fill_opacity=0.5
-	)
-	band = Arc(
-		radius=0.7, angle=PI,
-		color=GRAY_D
-	)
-	headphones = VGroup(headphone.shift(LEFT*0.4 + DOWN*0.15), band, headphone.copy().shift(RIGHT*0.8))
-
-	return headphones
-
-
 def get_value_colour(min_val, max_val, val):
 	val_range, gradient_steps = max_val-min_val, 100
 
@@ -114,13 +28,14 @@ def get_value_colour(min_val, max_val, val):
 
 
 
+
 class Introduction(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
 
 		# Create the suitcase
-		suitcase = make_suitcase().move_to(RIGHT*4)
+		suitcase = Item("suitcase", None, None).item.move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 
 		self.play(Create(suitcase))
@@ -134,31 +49,32 @@ class Introduction(Scene):
 
 		# Create the items
 		items, item_texts, value_texts = VGroup(), VGroup(), VGroup()
-		weights = [2, 1, 3, 1, 4]
-		values = [25, 10, 40, 20, 45]
+		item_list = [
+			Item("camera", 25, 2),
+			Item("pen", 10, 1),
+			Item("sneakers", 40, 3),
+			Item("toothbrush", 20, 1),
+			Item("headphones", 45, 4)
+		]
+		item_positions = [DOWN*0.5+LEFT, UP*2, UP*2.25+LEFT*5, LEFT*4, UP*2+LEFT*2.5]
 
 
-		camera = make_camera().move_to(LEFT+DOWN*0.5)
-		pen = make_pen().move_to(UP*2)
-		sneakers = make_sneakers().move_to(UP*2.25 + LEFT*5)
-		toothbrush = make_toothbrush().move_to(LEFT*4, UP*1.5)
-		headphones = make_headphones().move_to(LEFT*2.5 + UP*2)
-
-		items.add(camera, pen, sneakers, toothbrush, headphones)
+		for i in range(0, len(item_list)):
+			item_list[i].item.move_to(item_positions[i])
+			items.add(item_list[i].item)
 		items.shift(DOWN)
 
 
-		for i in range(0, len(items)):
-			item_text = Text(f"w = {weights[i]}kg", font_size=20, color=ITEM_WEIGHT_COLOUR).next_to(items[i], DOWN)
+		# Add a weight and value to each item
+		for i in range(0, len(item_list)):
+			item_text = Text(f"w = {item_list[i].weight}kg", font_size=20, color=ITEM_WEIGHT_COLOUR).next_to(items[i], DOWN)
 			item_texts.add(item_text)
 			self.play(Create(items[i]), Write(item_texts[i]))
-		self.wait(2)
 
-
-		# Add a value to each item
-		for i in range(len(items)):
-			value_text = Text(f"v = {values[i]}", font_size=20, color=VALUE_COLOUR).next_to(item_texts[i], DOWN)
+			value_text = Text(f"v = {item_list[i].value}", font_size=20, color=VALUE_COLOUR).next_to(item_texts[i], DOWN)
 			value_texts.add(value_text)
+
+		self.wait(2)			
 			
 
 		order = [2, 1, 0, 3, 4]
@@ -176,6 +92,7 @@ class Introduction(Scene):
 		self.play(Write(problem_1))
 		self.wait(5)
 
+		
 		fade_out_scene(self)
 
 
@@ -184,10 +101,10 @@ class Introduction(Scene):
 class BruteForce(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
-
-		n = 5
+		
 
 		# Create table of items
+		n = 5
 		item_numbers = VGroup(Text("#", font_size=24))
 		for i in range(1, n+1):
 			num = Text(f"{i}", font_size=24)
@@ -196,25 +113,25 @@ class BruteForce(Scene):
 
 
 		s = 0.5
-		items = VGroup(Text("i", color="#15131c", font_size=24),
-			make_camera().scale(s), 
-			make_pen().scale(s), 
-			make_sneakers().scale(s), 
-			make_toothbrush().scale(s), 
-			make_headphones().scale(s)
-		).arrange(RIGHT, buff=1.4).move_to(UP*3).shift(RIGHT*0.3)
+		item_list = [
+			Item("camera", 25, 2),
+			Item("pen", 10, 1),
+			Item("sneakers", 40, 3),
+			Item("toothbrush", 20, 1),
+			Item("headphones", 45, 4)
+		]
 
-
-		weights = [2, 1, 3, 1, 4]
-		values = [25, 10, 40, 20, 45]
+		items = VGroup(Text("i", color="#15131c", font_size=24))
+		for item in item_list:
+			items.add(item.item.scale(s))
+		items.arrange(RIGHT, buff=1.4).move_to(UP*3).shift(RIGHT*0.3)
 
 		weight_texts, value_texts = VGroup(Text("w", font_size=24)), VGroup(Text("v", font_size=24))
-		for i in range(0, n):
-			weight_texts.add(Text(f"{weights[i]}", font_size=24, color=ITEM_WEIGHT_COLOUR))
-			value_texts.add(Text(f"{values[i]}", font_size=24, color=VALUE_COLOUR))
+		for item in item_list:
+			weight_texts.add(Text(f"{item.weight}", font_size=24, color=ITEM_WEIGHT_COLOUR))
+			value_texts.add(Text(f"{item.value}", font_size=24, color=VALUE_COLOUR))
 		weight_texts.arrange(RIGHT, buff=2).move_to(UP*2.5)
 		value_texts.arrange(RIGHT, buff=1.8).move_to(UP*2)
-
 
 		for i in range(0, n+1):
 			self.play(
@@ -227,6 +144,8 @@ class BruteForce(Scene):
 		item_table = VGroup(item_numbers, items, weight_texts, value_texts)
 		self.play(item_table.animate.scale(0.8).shift(RIGHT*2))
 
+
+		# Capacity and track max value
 		capacity = Text("W = 5kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).move_to(item_table.get_left() + LEFT*3)
 		self.play(Write(capacity))
 		
@@ -250,8 +169,8 @@ class BruteForce(Scene):
 
 		# First item
 		take_item = Text(f"[{i}]", font_size=24).move_to(LEFT*3.2 + UP)
-		take_weight = Text(f"current weight = {weights[i-1]}", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(take_item, DOWN)
-		take_value = Text(f"current value = {values[i-1]}", color=VALUE_COLOUR, font_size=16).next_to(take_weight, DOWN)
+		take_weight = Text(f"current weight = {item_list[i-1].weight}", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(take_item, DOWN)
+		take_value = Text(f"current value = {item_list[i-1].value}", color=VALUE_COLOUR, font_size=16).next_to(take_weight, DOWN)
 
 		leave_item = Text(f"[]", font_size=24).move_to(RIGHT*3.2 + UP)
 		leave_weight = Text(f"current weight = 0", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(leave_item, DOWN)
@@ -269,7 +188,7 @@ class BruteForce(Scene):
 		self.play(Write(take_weight))
 		self.play(Write(take_value))
 
-		max_value = values[i-1]
+		max_value = item_list[i-1].value
 		self.play(Transform(max_value_text, Text(f"max = {max_value}", font_size=24, color=MAX_VALUE_COLOUR).move_to(capacity.get_center() + DOWN*0.5)))
 		self.play(Indicate(max_value_text))
 		self.wait(2)
@@ -310,12 +229,12 @@ class BruteForce(Scene):
 					font_size=24).move_to(LEFT*3 + UP)
 
 				cur_weight = item[1].text[len(item[1])-1]
-				take_weight = Text(f"current weight = {int(cur_weight) + weights[i-1]}", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(take_item, DOWN)
+				take_weight = Text(f"current weight = {int(cur_weight) + item_list[i-1].weight}", color=ITEM_WEIGHT_COLOUR, font_size=16).next_to(take_item, DOWN)
 
 				cur_value = item[2].text[len(item[2])-2:len(item[2])]
 				if not cur_value.isnumeric():
 					cur_value = item[2].text[len(item[2])-1]
-				take_value = Text(f"current value = {int(cur_value) + values[i-1]}", color=VALUE_COLOUR, font_size=16).next_to(take_weight, DOWN)
+				take_value = Text(f"current value = {int(cur_value) + item_list[i-1].value}", color=VALUE_COLOUR, font_size=16).next_to(take_weight, DOWN)
 
 
 				mult = (3.2/i)
@@ -335,7 +254,7 @@ class BruteForce(Scene):
 
 
 				# Fade out if exceeds weight
-				if int(cur_weight) + weights[i-1] > 5:
+				if int(cur_weight) + item_list[i-1].weight > 5:
 					red_x = Text("X", color=RED).move_to(take_group.get_center())
 					self.play(SpinInFromNothing(red_x))
 					self.play(FadeOut(take_group), FadeOut(red_x))
@@ -343,8 +262,8 @@ class BruteForce(Scene):
 					new_row.append(take_group)
 
 					# Replace max value
-					if int(cur_value) + values[i-1] > max_value:
-						max_value = int(cur_value) + values[i-1]
+					if int(cur_value) + item_list[i-1].value > max_value:
+						max_value = int(cur_value) + item_list[i-1].value
 						self.play(Transform(max_value_text, Text(f"max = {max_value}", font_size=24, color=MAX_VALUE_COLOUR).move_to(capacity.get_center() + DOWN*0.5)))
 						self.play(Indicate(max_value_text))
 
@@ -357,6 +276,7 @@ class BruteForce(Scene):
 				self.play(leave_group.animate.scale(scale).move_to(item.get_center() + RIGHT*mult + DOWN*(4/i)))
 
 				new_row.append(leave_group)
+
 
 			current_row = new_row
 			self.play(FadeOut(highlight_2))
@@ -381,7 +301,7 @@ class SortByValue(Scene):
 
 
 		# Create the suitcase
-		suitcase = make_suitcase().move_to(RIGHT*4)
+		suitcase = Item("suitcase", None, None).item.move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 		suitcase_weight = Text("W = 0/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
 		self.play(Create(suitcase), Write(suitcase_text), Write(suitcase_weight))
@@ -549,7 +469,7 @@ class SortByValueWeightRatio(Scene):
 
 
 		# Create the suitcase
-		suitcase = make_suitcase().move_to(RIGHT*4)
+		suitcase = Item("suitcase", None, None).item.move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 		suitcase_weight = Text("W = 0/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
 		self.add(suitcase, suitcase_text, suitcase_weight)
@@ -668,7 +588,7 @@ class SortByValueWeightCounterExample(Scene):
 
 
 		# Create the suitcase
-		suitcase = make_suitcase().move_to(RIGHT*4)
+		suitcase = Item("suitcase", None, None).item.move_to(RIGHT*4)
 		suitcase_text = Text("Suitcase", font_size=24).next_to(suitcase, DOWN)
 		suitcase_weight = Text("W = 0/10 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_text, DOWN)
 		self.add(suitcase, suitcase_text, suitcase_weight)
@@ -799,17 +719,18 @@ class KnapsackIntroduction(Scene):
 
 		# Given a list of items
 		items, weight_texts, value_texts = VGroup(), VGroup(), VGroup()
-		weights = [2, 1, 3, 1, 4]
-		values = [25, 10, 40, 20, 45]
+		item_list = [
+			Item("camera", 25, 2),
+			Item("pen", 10, 1),
+			Item("sneakers", 40, 3),
+			Item("toothbrush", 20, 1),
+			Item("headphones", 45, 4)
+		]
+		positions = [RIGHT*3, LEFT*5+UP*2, UP*2+RIGHT*5, LEFT*3, UP*2]
 
-
-		camera = make_camera().move_to(RIGHT*3)
-		pen = make_pen().move_to(LEFT*5 + UP*2)
-		sneakers = make_sneakers().move_to(UP*2 + RIGHT*5)
-		toothbrush = make_toothbrush().move_to(LEFT*3)
-		headphones = make_headphones().move_to(UP*2)
-
-		items.add(camera, pen, sneakers, toothbrush, headphones)
+		for i in range(0, len(positions)):
+			item_list[i].item.move_to(positions[i])
+			items.add(item_list[i].item)
 		items.shift(DOWN)		
 
 
@@ -819,19 +740,17 @@ class KnapsackIntroduction(Scene):
 
 
 		# Each item has a weight
+		complete_items = VGroup()
+
 		for i in range(0, len(items)):
-			weight_text = Text(f"w = {weights[i]}kg", font_size=20, color=ITEM_WEIGHT_COLOUR).next_to(items[i], DOWN)
+			weight_text = Text(f"w = {item_list[i].weight}kg", font_size=20, color=ITEM_WEIGHT_COLOUR).next_to(items[i], DOWN)
 			weight_texts.add(weight_text)
 			self.play(Write(weight_text))
 		self.wait(2)
 
-
-		complete_items = VGroup()
-
-
 		# And a value
 		for i in range(len(items)):
-			value_text = Text(f"v = {values[i]}", font_size=20, color=VALUE_COLOUR).next_to(weight_texts[i], DOWN)
+			value_text = Text(f"v = {item_list[i].value}", font_size=20, color=VALUE_COLOUR).next_to(weight_texts[i], DOWN)
 			value_texts.add(value_text)
 			self.play(Write(value_text))
 
@@ -887,7 +806,7 @@ class KnapsackIntroduction(Scene):
 				items[i].animate.move_to(suitcase.get_center())
 			)
 
-			cur_weight += weights[i]
+			cur_weight += item_list[i].weight
 			self.play(
 				FadeOut(items[i]),
 				Transform(suitcase_weight, Text(f"W = {cur_weight}/5 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN))
@@ -926,8 +845,8 @@ class KnapsackIntroduction(Scene):
 				items[i].animate.move_to(suitcase.get_center())
 			)
 
-			cur_weight += weights[i]
-			cur_val += values[i]
+			cur_weight += item_list[i].weight
+			cur_val += item_list[i].value
 			self.play(
 				FadeOut(items[i]),
 				Transform(suitcase_weight, Text(f"W = {cur_weight}/5 kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN)),
@@ -1036,7 +955,7 @@ class SmallExample(Scene):
 
 
 		# Suitcase shrinks to 1kg
-		suitcase = make_suitcase()
+		suitcase = Item("suitcase", None, None).item
 		suitcase_weight = Text("W = 5kg", font_size=30, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN)
 		suitcase_group = VGroup(suitcase, suitcase_weight)
 		self.play(Create(suitcase_group))
@@ -1058,18 +977,25 @@ class SmallExample(Scene):
 
 
 		# Add all the items
-		item_numbers = ["#", 0, 1, 2, 3, 4, 5]
-		weights = ["w", 0, 1, 2, 3, 1, 4]
-		values = ["v", 0, 10, 25, 40, 20, 45]
-		objects = [
-			Dot(radius=0.8),	
-			Dot(radius=0.2),
-			make_pen(),
-			make_camera(),
-			make_sneakers(),
-			make_toothbrush(),
-			make_headphones()
+		item_list = [
+			Item("dot", 0, 0),
+			Item("pen", 10, 1),
+			Item("camera", 25, 2),			
+			Item("sneakers", 40, 3),
+			Item("toothbrush", 20, 1),
+			Item("headphones", 45, 4)
 		]
+
+		item_numbers = ["#"]
+		weights = ["w"]
+		values = ["v"]
+		objects = [Dot(radius=0.8)]	
+
+		for i in range(0, len(item_list)):
+			item_numbers.append(i)
+			weights.append(item_list[i].weight)
+			values.append(item_list[i].value)
+			objects.append(item_list[i].item)
 
 
 		table_ul = DOWN*-2.5 + LEFT*6.5
@@ -1357,7 +1283,7 @@ class SmallExample(Scene):
 
 					# Quick aside - show the items being added together
 					if cur_item == 4 and cur_weight == 2:
-						toothbrush_2 = make_toothbrush().scale(0.7)
+						toothbrush_2 = Item("toothbrush", 10, 1).item.scale(0.7)
 						toothbrush_weight = Text("w = 1kg", font_size=24, color=ITEM_WEIGHT_COLOUR).next_to(toothbrush_2, DOWN)
 						toothbrush_group = VGroup(toothbrush_2, toothbrush_weight).move_to(suitcase_group.get_center() + LEFT*3 + UP*0.5)
 						
@@ -1369,7 +1295,7 @@ class SmallExample(Scene):
 						self.play(Write(plus))
 						fade_out_anim.append(FadeOut(plus))
 
-						suitcase_2 = make_suitcase()
+						suitcase_2 = Item("suitcase", None, None).item
 						suitcase_weight_2 = Text("W = 1kg", font_size=30, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase_2, DOWN)
 						suitcase_group_2 = VGroup(suitcase_2, suitcase_weight_2).scale(0.4).move_to(suitcase_group.get_center() + LEFT*3 + DOWN*2.5)
 						suitcase_group_2.add(table[2][1].copy().move_to(suitcase_2.get_center()))
@@ -1955,3 +1881,223 @@ class FindItemsPacked(Scene):
 			).move_to(table_ul + RIGHT*0.5 + DOWN*0.5).shift(DOWN*(item*0.5))
 			self.play(Create(item_highlight_rect))
 		self.wait(2)
+
+
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title_text = Text("0/1 Knapsack Problem").shift(UP*3)
+		self.add(title_text)
+
+		question_text = Text("Which items should you pack?", font_size=24).shift(UP*2)
+		self.add(question_text)
+		
+
+
+		# Add all the items
+		item_list = [
+			Item("dot", 0, 0),
+			Item("pen", 10, 1),
+			Item("camera", 25, 2),			
+			Item("sneakers", 40, 3),
+			Item("toothbrush", 20, 1),
+			Item("headphones", 45, 4)
+		]
+
+		item_numbers = ["#"]
+		weights = ["w"]
+		values = ["v"]
+		objects = [Dot(radius=0.8)]	
+
+		for i in range(0, len(item_list)):
+			item_numbers.append(i)
+			weights.append(item_list[i].weight)
+			values.append(item_list[i].value)
+			objects.append(item_list[i].item)
+
+
+		table_ul = DOWN*-2.5 + LEFT*6.5
+		table = VGroup()
+
+		for i in range(0, len(objects)):
+			RT = 0.2
+
+			item_number = Text(str(item_numbers[i]), font_size=24).move_to(table_ul + DOWN*i + RIGHT*0)
+			obj = objects[i].move_to(table_ul + DOWN*i + RIGHT*1).scale(0.2)
+
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = ITEM_WEIGHT_COLOUR			
+			weight = Text(str(weights[i]), font_size=24, color=colour).move_to(table_ul + DOWN*i + RIGHT*2)	
+
+			if i == 0:
+				colour = WHITE
+			else:
+				colour = VALUE_COLOUR	
+			value = Text(str(values[i]), font_size=24, color=colour).move_to(table_ul + DOWN*i + RIGHT*3)
+
+			table.add(
+				VGroup(
+					item_number,
+					obj,
+					weight,
+					value
+				)
+			)
+
+
+		for weight in range(0, 6):
+			weight_text = Text(f"{weight}", font_size=24).move_to(table_ul + RIGHT*(weight+4))
+			table[0].add(weight_text)
+
+
+		# Value of zero item is 0
+		for cur_weight in range(0, 6):
+			zero_val = Text("0", font_size=24).move_to(table[1][cur_weight+3].get_center()+RIGHT)
+			table[1].add(zero_val)
+
+
+		# Value of zero capacity is 0		
+		for cur_item in range(1, 6):
+			zero_val = Text("0", font_size=24).move_to(table[cur_item][4].get_center()+DOWN)
+			table[cur_item+1].add(zero_val)
+
+
+
+		# Algorithm time!
+		for cur_weight in range(1, 6):
+			j = cur_weight+4
+
+
+			for cur_item in range(1, 6):
+				i, vi, wi = cur_item+1, 3, 2
+				new_val = None
+				fade_out_anim = []
+
+
+				# This item's value and weight
+				cur_item_val = int(table[i][vi].text)
+				cur_item_weight = int(table[i][wi].text)
+
+
+				too_heavy = True
+				if cur_item_weight <= cur_weight:
+					too_heavy = False
+
+
+				if not too_heavy:
+					# Previous best value
+					prev_val = int(table[i-1][j].text)
+
+					# Value of the optimal previous bag
+					best_bag_val = 0
+					if cur_item_weight <= cur_weight:
+						best_bag_val = int(table[i-1][j-cur_item_weight].text)
+
+
+					new_val, new_val_3 = None, None
+					new_pos = table[i][j-1].get_center() + RIGHT
+
+					if cur_item_val + best_bag_val > prev_val:
+						new_val_3 = Text(str(cur_item_val + best_bag_val), font_size=24).move_to(new_pos)
+					else:
+						new_val = table[i-1][j].copy().set_color(WHITE).move_to(new_pos)
+
+					if new_val_3 != None:
+						new_val = new_val_3
+
+				else:
+					# Too heavy, keep the previous item
+					new_val = table[i-1][j].copy().shift(DOWN)
+
+				table[i].add(new_val)
+
+
+		self.add(table.scale(0.7).shift(LEFT + DOWN*0.5))
+
+
+		# Highlight the answer
+		ans_rect = Rectangle(
+			width=1, height=0.75,
+			color=GREEN, 
+			stroke_width=0,
+			fill_opacity=0.2
+		).move_to(table[6][9].get_center())
+		self.add(ans_rect)
+
+
+
+		final_picture = VGroup()
+
+
+		# Given a list of items
+		items, weight_texts, value_texts = VGroup(), VGroup(), VGroup()
+		item_list = [
+			Item("camera", 25, 2),
+			Item("pen", 10, 1),
+			Item("sneakers", 40, 3),
+			Item("toothbrush", 20, 1),
+			Item("headphones", 45, 4)
+		]
+		positions = [RIGHT*3, LEFT*5+UP*2, UP*2+RIGHT*5, LEFT*3, UP*2]
+
+		for i in range(0, len(positions)):
+			item_list[i].item.move_to(positions[i])
+			items.add(item_list[i].item)
+		items.shift(DOWN)		
+
+
+		for i in range(0, len(items)):	
+			final_picture.add(items[i])
+
+
+		# Each item has a weight
+		complete_items = VGroup()
+
+		for i in range(0, len(items)):
+			weight_text = Text(f"w = {item_list[i].weight}kg", font_size=20, color=ITEM_WEIGHT_COLOUR).next_to(items[i], DOWN)
+			weight_texts.add(weight_text)
+			final_picture.add(weight_text)
+
+		# And a value
+		for i in range(len(items)):
+			value_text = Text(f"v = {item_list[i].value}", font_size=20, color=VALUE_COLOUR).next_to(weight_texts[i], DOWN)
+			value_texts.add(value_text)
+			final_picture.add(value_text)
+
+			complete_items.add(VGroup(items[i], weight_texts[i], value_texts[i]))
+
+
+		# You are also given a capacity
+		suitcase = RoundedRectangle(
+			width=2, height=2.5,
+			corner_radius=0.2,
+			color=GRAY,
+			fill_opacity=0.5
+		).scale(0.8).shift(UP*0.15+RIGHT*0.35)
+
+
+		# Move each object around the suitcase
+		bag_radius = 2.5
+		bag_centre = DOWN*0.5
+
+		move_around_bag = []
+		i = 0
+		while i < len(complete_items):
+			up = bag_radius*math.sin(i*2*PI/len(complete_items))
+			right = bag_radius*math.cos(i*2*PI/len(complete_items))
+			position = UP*up + RIGHT*right
+
+			complete_items[i].move_to(position+bag_centre).scale(0.8)
+			i += 1
+
+
+		final_picture.add(suitcase)
+		suitcase_weight = Text("W = 5kg", font_size=24, color=WEIGHT_LIMIT_COLOUR).next_to(suitcase, DOWN)
+		final_picture.add(suitcase_weight)
+
+
+		self.add(final_picture.scale(0.7).shift(DOWN*0.5 + RIGHT*3.5))
