@@ -1,0 +1,304 @@
+from manim import *
+
+config.background_color = "#15131c"
+
+
+def get_value_colour(min_val, max_val, val):
+	val_range, gradient_steps = max_val-min_val, 100
+
+	return color_gradient(
+		[RED, ORANGE, YELLOW, GREEN, TEAL, BLUE, PURPLE, PINK], 
+		gradient_steps
+	)[int((val - min_val)/val_range * (gradient_steps-1))]
+
+
+def get_binary_colour(bit):
+	if bit == 0:
+		return RED
+	else:
+		return GREEN
+
+
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title = Text("8 Epic Bit Manipulation Tricks").move_to(DOWN*0.5)
+		subtitle = Text("From Beginner to Expert", 
+			font_size=24,
+			t2c={"Beginner": GREEN, "Expert": PINK}).next_to(title, DOWN)
+
+		self.add(title)
+		self.add(subtitle)
+
+
+
+class IntroSlide(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title = Text("8 Epic Bit Manipulation Tricks").move_to(UP)
+		subtitle = Text("From Beginner to Expert", 
+			font_size=24,
+			t2c={"Beginner": GREEN, "Expert": PINK}).next_to(title, DOWN)
+
+		self.play(Write(title))
+		self.play(Write(subtitle))
+		self.wait(2)
+
+
+
+class BinaryExplanation(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title = Text("Binary Explanation").move_to(UP*3)
+		self.play(Write(title))
+		self.wait(2)
+
+
+		# Count up to 349
+		d1, d2, d3 = Dot(radius=0.01), Dot(radius=0.01), Dot(radius=0.01)
+		digits = VGroup(d1, d2, d3).arrange(RIGHT, buff=0.5)
+		
+
+		dig1, dig2, dig3 = 0, 0, 0
+		RT = 0.5
+		for dig1 in range(0, 4):
+			if dig3 > 0:
+				RT = 0.005
+
+			self.play(Transform(d1, 
+				Text(str(dig1), color=get_value_colour(0, 9, dig1)).move_to(d1),
+				run_time=RT
+			))
+
+			for dig2 in range(0, 10):
+				if dig1 == 0 and dig2 > 0:
+					RT = 0.01
+
+				self.play(Transform(d2, 
+					Text(str(dig2), color=get_value_colour(0, 9, dig2)).move_to(d2),
+					run_time=RT
+				))
+
+				for dig3 in range(0, 10):
+					self.play(Transform(d3, 
+						Text(str(dig3), color=get_value_colour(0, 9, dig3)).move_to(d3),
+						run_time=RT
+					))							
+
+				if dig1 == 3 and dig2 == 4 and dig3 == 9:
+					break;
+
+		self.wait(2)
+
+		self.play(digits.animate.shift(UP))
+
+		expand = VGroup(
+			Text("3x100", font_size=24, color=get_value_colour(0, 9, dig1)),
+			Text("+", font_size=24),
+			Text("4x10", font_size=24, color=get_value_colour(0, 9, dig2)),
+			Text("+", font_size=24),
+			Text("9x1", font_size=24, color=get_value_colour(0, 9, dig3))
+		).arrange(RIGHT)
+
+		for text in expand:
+			self.play(Write(text))
+		self.wait(1)
+
+		expand2 = VGroup(
+			Tex("$3\\times 10^{2}$", font_size=24, color=get_value_colour(0, 9, dig1)),
+			Tex("+", font_size=24),
+			Tex("$4\\times 10^{1}$", font_size=24, color=get_value_colour(0, 9, dig2)),
+			Tex("+", font_size=24),
+			Tex("$9\\times 10^{0}$", font_size=24, color=get_value_colour(0, 9, dig3))
+		).arrange(RIGHT).next_to(expand, DOWN)
+
+		for text in expand2:
+			self.play(Write(text))
+		self.wait(1)
+
+		self.play(FadeOut(digits), FadeOut(expand), FadeOut(expand2))
+
+
+
+
+		# Display binary 349 = 101011101
+		binary_text = Text("0", t2c={"1": get_binary_colour(1), "0": get_binary_colour(0)}).shift(UP)
+		self.play(Write(binary_text))
+		self.wait(1)
+
+		self.play(
+			Transform(binary_text, 
+			Text("1", t2c={"1": get_binary_colour(1), "0": get_binary_colour(0)}).shift(UP))
+		)
+		self.wait(1)
+
+		for i in range(0, 350):
+			self.play(
+				Transform(binary_text, 
+					Text(format(i, 'b'), t2c={"1": get_binary_colour(1), "0": get_binary_colour(0)}).shift(UP), 
+					run_time=0.005)
+				)
+		self.wait(2)
+
+		binary_str = "101011101"
+		expand = VGroup()
+		expand2 = VGroup()
+		answer = 0
+
+		for i in range(0, len(binary_str)):
+			expand.add(Tex(f"${binary_str[i]}\\times 2^{len(binary_str)-i-1}$", 
+				font_size=28, 
+				color=get_binary_colour(int(binary_str[i])))
+			)
+
+			term = int(binary_str[i]) * 2**(len(binary_str)-i-1)
+			expand2.add(Tex(f"${term}$", 
+				font_size=36, 
+				color=get_binary_colour(int(binary_str[i])))
+			)
+
+			answer += term
+
+			if i < len(binary_str)-1:
+				expand.add(Tex("+", font_size=28))
+				expand2.add(Tex("+", font_size=36))
+
+		expand.arrange(RIGHT)
+		expand2.arrange(RIGHT).next_to(expand, DOWN)
+
+		for text in expand:
+			self.play(Write(text))
+		self.wait(1)
+
+		for text in expand2:
+			self.play(Write(text))
+		self.wait(1)
+
+		term_text = Text(f"= {answer}").next_to(expand2, DOWN, buff=0.5)
+		self.play(Write(term_text))
+		self.wait(2)
+
+		self.play(
+			FadeOut(binary_text), 
+			FadeOut(expand), 
+			FadeOut(expand2), 
+			FadeOut(term_text)
+		)
+
+
+
+class BinaryExplanation2(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		title = Text("Binary Explanation").move_to(UP*3)
+		self.add(title)
+		self.wait(2)
+
+
+		fifty_eight = Text("58").move_to(UP)
+		self.play(Write(fifty_eight))
+		self.wait(2)
+
+
+		self.play(fifty_eight.animate.shift(RIGHT*5))
+
+
+		binary_table = VGroup(VGroup(), VGroup(), VGroup())
+		for i in range(6, -1, -1):
+			power = Tex(f"$2^{i}$", font_size=40, color=get_value_colour(0, 6, i))
+
+			if i == 6:
+				power.move_to(LEFT*3 + UP)
+			else:
+				power.move_to(binary_table[0][6-i-1].get_center() + RIGHT)
+			binary_table[0].add(power)
+
+			num = Tex(f"{2**i}", font_size=40, 
+				color=get_value_colour(0, 6, i)).move_to(binary_table[0][6-i].get_center() + DOWN*0.5)	
+			binary_table[1].add(num)
+
+			self.play(
+				Write(power),
+				Write(num)
+			)
+
+		self.wait(1)
+
+
+		arrow = Arrow(
+			start=binary_table[1][0].get_center()+DOWN*2, 
+			end=binary_table[1][0].get_center()+DOWN
+		).move_to(binary_table[1][0].get_center() + DOWN)
+		self.play(Create(arrow))
+		self.wait(2)
+
+		self.play(arrow.animate.move_to(binary_table[1][1].get_center() + DOWN))
+
+		cur = 58
+		for i in range(5, -1, -1):
+			binary = Text("1" if 2**i <= cur else "0", font_size=28).next_to(binary_table[1][5-i+1], DOWN)
+
+			binary_table[2].add(binary)
+			self.play(Write(binary_table[2][5-i]))
+			self.wait(1)
+
+			if 2**i <= cur:
+				minus = Text(f"{cur} - {2**i}", font_size=30).move_to(UP+RIGHT*5)
+				self.play(Transform(fifty_eight, minus))
+				self.wait(1)
+
+				new_cur = Text(f"{cur - 2**i}").move_to(UP+RIGHT*5)
+				self.play(Transform(fifty_eight, new_cur))
+				self.wait(1)
+
+				cur -= (2**i)
+
+			if i > 0:
+				self.play(arrow.animate.move_to(binary_table[1][5-i+2].get_center() + DOWN))
+			self.wait(2)
+
+		self.play(FadeOut(fifty_eight), FadeOut(arrow))
+
+
+		binary_str = "111010"
+		expand = VGroup()
+		expand2 = VGroup()
+		answer = 0
+
+		for i in range(0, len(binary_str)):
+			expand.add(Tex(f"${binary_str[i]}\\times 2^{len(binary_str)-i-1}$", 
+				font_size=28, 
+				color=get_binary_colour(int(binary_str[i])))
+			)
+
+			term = int(binary_str[i]) * 2**(len(binary_str)-i-1)
+			expand2.add(Tex(f"${term}$", 
+				font_size=36, 
+				color=get_binary_colour(int(binary_str[i])))
+			)
+
+			answer += term
+
+			if i < len(binary_str)-1:
+				expand.add(Tex("+", font_size=28))
+				expand2.add(Tex("+", font_size=36))
+
+		expand.arrange(RIGHT).move_to(DOWN)
+		expand2.arrange(RIGHT).next_to(expand, DOWN)
+
+		for text in expand:
+			self.play(Write(text))
+		self.wait(1)
+
+		for text in expand2:
+			self.play(Write(text))
+		self.wait(1)
+
+		term_text = Text(f"= {answer}").next_to(expand2, DOWN, buff=0.5)
+		self.play(Write(term_text))
+		self.wait(2)
