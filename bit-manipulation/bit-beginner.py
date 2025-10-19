@@ -26,94 +26,15 @@ class Parity(Scene):
 
 		self.wait(5)
 
-		bitwise_table = BitwiseTable(self, "&", GREEN)
+		bitwise_table = BitwiseTable(self, "&", ORANGE)
 		and_table = bitwise_table.bitwise_table.shift(UP)
 		self.add(and_table)
 		self.wait(2)
 
 
-		self.play(and_table.animate.scale(0.6).shift(RIGHT*5))
-
 		string_1 = "11001100"
 		string_2 = "10100101"
-
-		row_1 = VGroup()
-		row_2 = VGroup()
-		for i in range(0, len(string_1)):
-			row_1.add(Text(string_1[i]))
-			if i > 0:
-				row_1[i].move_to(row_1[i-1].get_center() + RIGHT)
-
-			row_2.add(Text(string_2[i]).move_to(row_1[i].get_center() + DOWN))
-		binary_table = VGroup(row_1, row_2).move_to(LEFT*2 + DOWN*0.5)
-
-		num_1 = Text(f"{int(string_1, 2)}").move_to(binary_table[0].get_center())
-		self.play(Write(num_1))
-		self.wait(1)
-		self.play(Transform(num_1, binary_table[0]))
-
-		num_2 = Text(f"{int(string_2, 2)}").move_to(binary_table[1].get_center())
-		self.play(Write(num_2))
-		self.wait(1)
-		self.play(Transform(num_2, binary_table[1]))
-
-
-		# Loop through binary strings and compare
-		arrow = Arrow(start=binary_table[0][0].get_center()+UP*2, 
-			end=binary_table[0][0].get_center()+UP).move_to(binary_table[0][0].get_center()+UP)
-		self.play(Create(arrow))
-
-		and_rect = bitwise_table.highlight_row.move_to(and_table[4].get_center())
-
-		bin_rect = Rectangle(
-			width=1, height=2,
-			color=WHITE, 
-			stroke_width=0,
-			fill_opacity=0.2
-		).move_to(binary_table[0][0].get_center()+DOWN*0.5)
-
-		self.play(Create(bin_rect), Create(and_rect))
-
-		and_row = VGroup()
-		for i in range(0, len(string_1)):
-			# Indicate the combination
-			bit = "0"
-			flash_colour = RED
-			if string_1[i] == '1' and string_2[i] == '1':
-				flash_colour=GREEN
-				bit = "1"
-
-			self.play(Indicate(bin_rect, color=flash_colour), 
-				Indicate(and_rect, color=flash_colour))
-
-
-			# Write the bit
-			bit_text = Text(bit, color=flash_colour).move_to(binary_table[1][i].get_center() + DOWN)
-			and_row.add(bit_text)
-			self.play(Write(bit_text))
-
-
-			# Shift over		
-			if i < len(string_1)-1:
-				move_anim = [
-					arrow.animate.move_to(binary_table[0][i+1].get_center()+UP),
-					bin_rect.animate.move_to(binary_table[0][i+1].get_center()+DOWN*0.5),
-					bitwise_table.shift_highlight_row(string_1[i+1], string_2[i+1])
-				]				
-
-				self.play(*move_anim)
-
-		binary_table.add(and_row)
-		self.wait(2)
-
-		self.play(
-			FadeOut(and_rect), 
-			FadeOut(bin_rect), 
-			FadeOut(arrow), 
-			FadeOut(binary_table),
-			FadeOut(num_1),
-			FadeOut(num_2)
-		)
+		bitwise_table.compare_two_binaries(string_1, string_2)
 
 
 
@@ -121,7 +42,7 @@ class Parity2(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
-		bitwise_table = BitwiseTable(self, "&", GREEN)
+		bitwise_table = BitwiseTable(self, "&", ORANGE)
 		and_table = bitwise_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
 		self.add(and_table)
 
@@ -158,7 +79,7 @@ class Parity2(Scene):
 
 
 		new_highlight = Rectangle(
-			width=7.5, height=2,
+			width=7, height=2,
 			color=GREEN, fill_opacity=0.2,
 			stroke_width=0
 		).move_to(binary.binary_table[0].get_center() + DOWN*0.5 + LEFT*0.5)
@@ -205,7 +126,7 @@ class Parity3(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
-		bitwise_table = BitwiseTable(self, "&", GREEN)
+		bitwise_table = BitwiseTable(self, "&", ORANGE)
 		and_table = bitwise_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
 		self.add(and_table)
 
@@ -225,47 +146,8 @@ class Parity3(Scene):
 			binary.add_num_to_table(1, pace="fast")
 			self.wait(1)
 
+			binary.perform_bitwise_operation(bitwise_table)
 
-			bin_rect = Rectangle(
-				width=0.75, height=1.25,
-				color=WHITE, 
-				stroke_width=0,
-				fill_opacity=0.2
-			).move_to(binary.binary_table[2][0].get_center()+DOWN*0.25)
-			and_rect = bitwise_table.highlight_row.move_to(and_table[3].get_center())
-			self.play(Create(bin_rect), Create(bitwise_table.highlight_row))
-
-
-			and_row = VGroup()
-			for i in range(0, len(binary.binary_table[0])):
-				# Indicate the combination
-				bit = "0"
-				flash_colour = RED
-				if binary_table[2][i].text == '1' and binary_table[3][i].text == '1':
-					flash_colour=GREEN
-					bit = "1"
-
-				self.play(Indicate(bin_rect, color=flash_colour), 
-					Indicate(and_rect, color=flash_colour))
-
-
-				# Write the bit
-				bit_text = Text(bit, color=(WHITE if bit=="1" else GRAY), font_size=28).next_to(binary_table[3][i].get_center(), DOWN)
-				and_row.add(bit_text)
-				self.play(Write(bit_text))
-
-
-				# Shift over		
-				if i < len(binary.binary_table[0])-1:
-					move_anim = [
-						bin_rect.animate.move_to(binary_table[2][i+1].get_center()+DOWN*0.25),
-						bitwise_table.shift_highlight_row(binary_table[2][i+1].text, binary_table[3][i+1].text)
-					]				
-
-					self.play(*move_anim)
-
-			self.wait(2)
-			self.play(FadeOut(bin_rect), FadeOut(bitwise_table.highlight_row), FadeOut(and_row))
 			binary.remove_num_from_table()
 			binary.remove_num_from_table()
 
@@ -314,7 +196,7 @@ class Multiply2K(Scene):
 
 
 
-class Multiply2K(Scene):
+class Multiply2K2(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 		shift_table = make_shift_table()
@@ -408,3 +290,381 @@ class Multiply2K(Scene):
 		show_multiplication(num, -3)
 		binary.remove_num_from_table()
 
+
+
+def set_toggle_unset(mode, scene):
+	binary = BinaryNumber(scene, 8)
+	binary_table = binary.binary_table.move_to(ORIGIN)
+	binary.create_binary_table()
+
+	# Label bit numbers
+	bit_labels = VGroup()
+	for i in range(7, -1, -1):
+		bit_label = Text(str(7-i), font_size=20).next_to(binary.binary_table[0][i], UP)
+		scene.play(Write(bit_label))
+		bit_labels.add(bit_label)
+	scene.wait(2)
+
+
+	k = 3
+	arrow = Arrow(start=binary.binary_table[1][7-k].get_center()+DOWN*2, end=binary.binary_table[1][7-k].get_center()+DOWN)
+	k_equals = Text("k = 3", font_size=20).next_to(arrow, DOWN)
+	scene.play(Create(arrow))
+	scene.play(Write(k_equals))
+	scene.wait(2)
+
+
+	binary.add_num_to_table(38, pace="fast")
+	scene.play(Indicate(binary.binary_table[2][7-k], color=GREEN))
+	if mode == "set" or mode == "toggle":
+		binary.flip_bit(7-k)
+	scene.wait(2)
+
+	binary.remove_num_from_table()
+
+
+	binary.add_num_to_table(59, pace="fast")
+	scene.play(Indicate(binary.binary_table[2][7-k], color=GREEN))
+	if mode == "toggle" or mode == "clear":
+		binary.flip_bit(7-k)
+	scene.wait(2)
+
+	binary.remove_num_from_table()
+
+
+
+class SetKthBit(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		speech_bubble = RoundedRectangle(
+			width=12, height=1.25, 
+			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			corner_radius=0.1, fill_opacity=0.3,
+			stroke_width=1
+		).move_to(UP*2.5)
+		self.play(Create(speech_bubble))
+
+		trick = Text("Trick #3.1: Set the kth bit from the right.", 
+			font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(trick))
+
+
+		set_toggle_unset("set", self)
+
+
+
+class SetKthBit2(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		bitwise_table = BitwiseTable(self, "|", GREEN)
+		or_table = bitwise_table.bitwise_table.shift(UP)
+		self.play(FadeIn(or_table))
+		self.wait(2)
+
+
+		string_1 = "10101100"
+		string_2 = "01100101"
+		bitwise_table.compare_two_binaries(string_1, string_2)
+		self.wait(2)
+
+
+
+class SetKthBit3(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		binary = BinaryNumber(self, 8)
+		binary_table = binary.binary_table.move_to(LEFT*1.5 + UP)
+		self.add(binary.binary_table)
+
+		# Label bit numbers
+		bit_labels = VGroup()
+		for i in range(7, -1, -1):
+			bit_label = Text(str(7-i), font_size=20).next_to(binary.binary_table[0][i], UP)
+			self.add(bit_label)
+			bit_labels.add(bit_label)
+		self.wait(2)
+
+
+		bitwise_table = BitwiseTable(self, "|", GREEN)
+		and_table = bitwise_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
+		self.add(and_table)
+
+
+		k=3
+		check = [38, 59]
+		for c in check:			
+			binary.add_num_to_table(c, pace="fast")
+			self.play(Indicate(binary.binary_table[2][7-k], color=GREEN))
+			self.wait(2)
+
+			step_1 = Text("1. Shift 1 k spots to the left.", 
+				font_size=24).move_to(binary.binary_table.get_center() + DOWN*3)
+			self.play(Write(step_1))
+			self.wait(1)
+
+			binary.add_num_to_table(1, pace="fast")
+			binary.shift("left", k, row=3)
+			self.wait(2)
+
+			step_2 = Text("2. Take the bitwise OR.", font_size=24).next_to(step_1, DOWN)
+			self.play(Write(step_2))
+			self.wait(1)
+
+			binary.perform_bitwise_operation(bitwise_table)
+
+			binary.remove_num_from_table()
+			binary.remove_num_from_table()
+
+
+
+class ToggleKthBit(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		speech_bubble = RoundedRectangle(
+			width=12, height=1.25, 
+			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			corner_radius=0.1, fill_opacity=0.3,
+			stroke_width=1
+		).move_to(UP*2.5)
+		self.play(Create(speech_bubble))
+
+		trick = Text("Trick #3.2: Toggle the kth bit from the right.", 
+			font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(trick))
+
+
+		set_toggle_unset("toggle", self)
+
+
+
+class ToggleKthBit2(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		bitwise_table = BitwiseTable(self, "^", TEAL)
+		xor_table = bitwise_table.bitwise_table.shift(UP)
+		self.play(FadeIn(xor_table))
+		self.wait(2)
+
+
+		string_1 = "10101100"
+		string_2 = "01100101"
+		bitwise_table.compare_two_binaries(string_1, string_2)
+		self.wait(2)
+
+
+
+class ToggleKthBit3(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		binary = BinaryNumber(self, 8)
+		binary_table = binary.binary_table.move_to(LEFT*1.5 + UP)
+		self.add(binary.binary_table)
+
+		# Label bit numbers
+		bit_labels = VGroup()
+		for i in range(7, -1, -1):
+			bit_label = Text(str(7-i), font_size=20).next_to(binary.binary_table[0][i], UP)
+			self.add(bit_label)
+			bit_labels.add(bit_label)
+		self.wait(2)
+
+
+		bitwise_table = BitwiseTable(self, "^", TEAL)
+		and_table = bitwise_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
+		self.add(and_table)
+
+
+		k=3
+		check = [38, 59]
+		for c in check:			
+			binary.add_num_to_table(c, pace="fast")
+			self.play(Indicate(binary.binary_table[2][7-k], color=GREEN))
+			self.wait(2)
+
+			step_1 = Text("1. Shift 1 k spots to the left.", 
+				font_size=24).move_to(binary.binary_table.get_center() + DOWN*3)
+			self.play(Write(step_1))
+			self.wait(1)
+
+			binary.add_num_to_table(1, pace="fast")
+			binary.shift("left", k, row=3)
+			self.wait(2)
+
+			step_2 = Text("2. Take the bitwise XOR.", font_size=24).next_to(step_1, DOWN)
+			self.play(Write(step_2))
+			self.wait(1)
+
+			binary.perform_bitwise_operation(bitwise_table)
+
+			binary.remove_num_from_table()
+			binary.remove_num_from_table()
+
+
+
+class ClearKthBit(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		speech_bubble = RoundedRectangle(
+			width=12, height=1.25, 
+			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			corner_radius=0.1, fill_opacity=0.3,
+			stroke_width=1
+		).move_to(UP*2.5)
+		self.play(Create(speech_bubble))
+
+		trick = Text("Trick #3.3: Clear the kth bit from the right.", 
+			font_size=20).move_to(speech_bubble.get_center())
+		self.play(Write(trick))
+
+
+		set_toggle_unset("clear", self)
+
+
+
+class ClearKthBit2(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		bitwise_table = BitwiseTable(self, "~", RED)
+		not_table = bitwise_table.bitwise_table.shift(UP)
+		self.play(FadeIn(not_table))
+		self.wait(2)
+
+
+		string_1 = "10101100"
+		bitwise_table.not_binary(string_1)
+		self.wait(2)
+
+
+
+class ClearKthBit3(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		binary = BinaryNumber(self, 8)
+		binary_table = binary.binary_table.move_to(LEFT*1.5 + UP)
+		self.add(binary.binary_table)
+
+		# Label bit numbers
+		bit_labels = VGroup()
+		for i in range(7, -1, -1):
+			bit_label = Text(str(7-i), font_size=20).next_to(binary.binary_table[0][i], UP)
+			self.add(bit_label)
+			bit_labels.add(bit_label)
+		self.wait(2)
+
+
+		not_table = BitwiseTable(self, "~", RED)
+		not_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
+		self.add(not_table.bitwise_table)
+
+
+		k=3
+		c = 59		
+		binary.add_num_to_table(c, pace="fast")
+		self.play(Indicate(binary.binary_table[2][7-k], color=GREEN))
+		self.wait(2)
+
+		step_1 = Text("1. Shift 1 k spots to the left.", 
+			font_size=24).move_to(binary.binary_table.get_center() + DOWN*3)
+		self.play(Write(step_1))
+		self.wait(1)
+
+		binary.add_num_to_table(1, pace="fast")
+		binary.shift("left", k, row=3)
+		self.wait(2)
+
+
+		step_2 = Text("2. Apply bitwise NOT to the shifted 1.", font_size=24).next_to(step_1, DOWN)
+		self.play(Write(step_2))
+		self.wait(1)
+
+		binary.perform_bitwise_operation(not_table)
+
+
+		step_3 = Text("3. Take the bitwise AND.", font_size=24).next_to(step_2, DOWN)
+		self.play(Write(step_3))
+		self.wait(1)
+
+		and_table = BitwiseTable(self, "&", ORANGE)
+		and_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
+		self.play(ReplacementTransform(not_table.bitwise_table, and_table.bitwise_table))
+
+		binary.perform_bitwise_operation(and_table)
+
+		binary.remove_num_from_table()
+		binary.remove_num_from_table()
+
+		self.play(ReplacementTransform(and_table.bitwise_table, not_table.bitwise_table))
+
+
+
+class ClearKthBit4(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		binary = BinaryNumber(self, 8)
+		binary_table = binary.binary_table.move_to(LEFT*1.5 + UP)
+		self.add(binary.binary_table)
+
+		# Label bit numbers
+		bit_labels = VGroup()
+		for i in range(7, -1, -1):
+			bit_label = Text(str(7-i), font_size=20).next_to(binary.binary_table[0][i], UP)
+			self.add(bit_label)
+			bit_labels.add(bit_label)
+		self.wait(2)
+
+
+		not_table = BitwiseTable(self, "~", RED)
+		not_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
+		self.add(not_table.bitwise_table)
+
+
+		k=3
+		c = 38		
+		binary.add_num_to_table(c, pace="fast")
+		self.play(Indicate(binary.binary_table[2][7-k], color=GREEN))
+		self.wait(2)
+
+		step_1 = Text("1. Shift 1 k spots to the left.", 
+			font_size=24).move_to(binary.binary_table.get_center() + DOWN*3)
+		self.play(Write(step_1))
+		self.wait(1)
+
+		binary.add_num_to_table(1, pace="fast")
+		binary.shift("left", k, row=3)
+		self.wait(2)
+
+
+		step_2 = Text("2. Apply bitwise NOT to the shifted 1.", font_size=24).next_to(step_1, DOWN)
+		self.play(Write(step_2))
+		self.wait(1)
+
+		binary.perform_bitwise_operation(not_table)
+
+
+		step_3 = Text("3. Take the bitwise AND.", font_size=24).next_to(step_2, DOWN)
+		self.play(Write(step_3))
+		self.wait(1)
+
+		and_table = BitwiseTable(self, "&", ORANGE)
+		and_table.bitwise_table.shift(UP).scale(0.6).shift(RIGHT*5)
+		self.play(ReplacementTransform(not_table.bitwise_table, and_table.bitwise_table))
+
+		binary.perform_bitwise_operation(and_table)
+
+		binary.remove_num_from_table()
+		binary.remove_num_from_table()
+
+		self.play(ReplacementTransform(and_table.bitwise_table, not_table.bitwise_table))
