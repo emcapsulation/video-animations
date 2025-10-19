@@ -1,4 +1,6 @@
+*
+!*/
+!*.py
 __pycache__/
 media/
 out/
-*.txt
