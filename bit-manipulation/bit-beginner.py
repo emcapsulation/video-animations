@@ -13,14 +13,14 @@ class Parity(Scene):
 
 		speech_bubble = RoundedRectangle(
 			width=12, height=1.25, 
-			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			fill_color=[GREEN_A, GREEN], stroke_color=[GREEN_A, GREEN],
 			corner_radius=0.1, fill_opacity=0.3,
 			stroke_width=1
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
 		trick = Text("Trick #1: Check if a number is even or odd.", 
-			font_size=20).move_to(speech_bubble.get_center())
+			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 
 
@@ -176,14 +176,14 @@ class Multiply2K(Scene):
 
 		speech_bubble = RoundedRectangle(
 			width=12, height=1.25, 
-			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			fill_color=[GREEN_A, GREEN], stroke_color=[GREEN_A, GREEN],
 			corner_radius=0.1, fill_opacity=0.3,
 			stroke_width=1
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
 		trick = Text("Trick #2: Multiply and divide by 2^k.", 
-			font_size=20).move_to(speech_bubble.get_center())
+			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 
 
@@ -340,14 +340,14 @@ class SetKthBit(Scene):
 
 		speech_bubble = RoundedRectangle(
 			width=12, height=1.25, 
-			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			fill_color=[GREEN_A, GREEN], stroke_color=[GREEN_A, GREEN],
 			corner_radius=0.1, fill_opacity=0.3,
 			stroke_width=1
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
 		trick = Text("Trick #3.1: Set the kth bit from the right.", 
-			font_size=20).move_to(speech_bubble.get_center())
+			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 
 
@@ -428,14 +428,14 @@ class ToggleKthBit(Scene):
 
 		speech_bubble = RoundedRectangle(
 			width=12, height=1.25, 
-			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			fill_color=[GREEN_A, GREEN], stroke_color=[GREEN_A, GREEN],
 			corner_radius=0.1, fill_opacity=0.3,
 			stroke_width=1
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
 		trick = Text("Trick #3.2: Toggle the kth bit from the right.", 
-			font_size=20).move_to(speech_bubble.get_center())
+			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 
 
@@ -516,14 +516,14 @@ class ClearKthBit(Scene):
 
 		speech_bubble = RoundedRectangle(
 			width=12, height=1.25, 
-			fill_color=[GREEN_B, GREEN], stroke_color=[GREEN_B, GREEN],
+			fill_color=[GREEN_A, GREEN], stroke_color=[GREEN_A, GREEN],
 			corner_radius=0.1, fill_opacity=0.3,
 			stroke_width=1
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
 		trick = Text("Trick #3.3: Clear the kth bit from the right.", 
-			font_size=20).move_to(speech_bubble.get_center())
+			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 
 

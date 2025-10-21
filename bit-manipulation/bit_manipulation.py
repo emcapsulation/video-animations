@@ -1,6 +1,12 @@
 from manim import *
 
 
+def fade_out_scene(scene):
+	scene.play(
+		*[FadeOut(mob)for mob in scene.mobjects]
+	)
+
+
 def get_value_colour(min_val, max_val, val):
 	val_range, gradient_steps = max_val-min_val, 100
 
@@ -8,6 +14,10 @@ def get_value_colour(min_val, max_val, val):
 		[RED, ORANGE, YELLOW, GREEN, TEAL, BLUE, PURPLE, PINK], 
 		gradient_steps
 	)[int((val - min_val)/val_range * (gradient_steps-1))]
+
+
+def get_bin_colour(bit):
+	return WHITE if bit=="1" else GRAY
 
 
 
@@ -283,7 +293,7 @@ class BitwiseTable():
 		)
 
 
-	def shift_highlight_row(self, a, b):
+	def shift_highlight_row(self, a, b, animate=True):
 		pos = self.bitwise_table[1].get_center()
 		if a == '0' and b == '1':
 			pos = self.bitwise_table[2].get_center()
@@ -292,6 +302,8 @@ class BitwiseTable():
 		elif a == '1' and b == '1':
 			pos = self.bitwise_table[4].get_center()
 
+		if not animate:
+			return self.highlight_row.move_to(pos)
 		return self.highlight_row.animate.move_to(pos)
 
 
@@ -304,12 +316,7 @@ class BitwiseTable():
 
 
 	def compare_two_binaries(self, bin_1, bin_2):
-		self.scene.play(self.bitwise_table.animate.scale(0.6).shift(RIGHT*5))
-
-
-		def get_bin_colour(bit):
-			return WHITE if bit=="1" else GRAY
-
+		self.scene.play(self.bitwise_table.animate.scale(0.6).shift(RIGHT*5))		
 
 		# Add the two binary strings to the grid
 		row_1 = VGroup()
@@ -338,7 +345,7 @@ class BitwiseTable():
 			end=binary_table[0][0].get_center()+UP).move_to(binary_table[0][0].get_center()+UP)
 		self.scene.play(Create(arrow))
 
-		bw_rect = self.highlight_row.move_to(self.bitwise_table[1].get_center())
+		bw_rect = self.shift_highlight_row(bin_1[0], bin_2[0], animate=False)
 
 		bin_rect = Rectangle(
 			width=1, height=2,
@@ -458,3 +465,72 @@ class BitwiseTable():
 
 		binary_table.add(bw_row)
 		self.scene.wait(2)
+
+
+
+class BitwiseSubtraction():
+	def __init__(self, scene, num_1, num_2):
+		self.scene = scene
+
+		self.num_1 = num_1
+		self.num_2 = num_2
+		self.num_1_bin = bin(self.num_1)[2:]
+		self.num_2_bin = bin(self.num_2)[2:].rjust(len(self.num_1_bin), '0')
+
+		self.subtraction_table = self.make_subtraction_table()
+
+
+	def make_subtraction_table(self):
+		subtraction_table = VGroup()
+
+		num_1_group = VGroup()
+		for bit in self.num_1_bin:
+			bit_text = Text(bit, color=get_bin_colour(bit))
+			num_1_group.add(bit_text)
+		subtraction_table.add(num_1_group.arrange(RIGHT))
+		
+		num_2_group = VGroup()
+		for i in range(0, len(self.num_2_bin)):
+			bit_text = Text(self.num_2_bin[i], color=get_bin_colour(self.num_2_bin[i])).move_to(subtraction_table[0][i].get_center()+DOWN)
+			num_2_group.add(bit_text)
+		subtraction_table.add(num_2_group)
+
+		return subtraction_table
+
+
+	def perform_subtraction(self):
+		num_1_bits = self.subtraction_table[0].copy()
+		line = None
+		result = VGroup()
+
+		for i in range(len(self.num_1_bin)-1, -1, -1):
+			if num_1_bits[i].text == '0' and self.num_2_bin[i] == '1':
+				# Trade
+				j = i
+				while (num_1_bits[j].text != '1'):
+					j -= 1
+
+				line = Line(start=self.subtraction_table[0][j].get_center()+LEFT*0.1, end=self.subtraction_table[0][i].get_center()+RIGHT*0.1, color=RED, stroke_width=2)
+				self.scene.play(Create(line))
+
+				carry_bit = Text('0', color=RED, font_size=20).move_to(num_1_bits[j].get_center()).shift(UP*0.75+RIGHT*0.2)
+				num_1_bits[j] = carry_bit
+				self.scene.play(Write(carry_bit))
+
+				for k in range(j+1, i+1):
+					carry_bit = Text('1', color=RED, font_size=20).move_to(num_1_bits[k].get_center()).shift(UP*0.75+RIGHT*0.2)
+					num_1_bits[k] = carry_bit
+					self.scene.play(Write(carry_bit))
+
+			bit = str(int(num_1_bits[i].text)-int(self.num_2_bin[i]))
+			bit_text = Text(bit, color=get_bin_colour(bit)).move_to(self.subtraction_table[1][i].get_center()+DOWN*1.25)
+			self.scene.play(Write(bit_text))
+
+			result.add(bit_text)
+
+		self.subtraction_table.add(result, num_1_bits)
+
+		if line is not None:
+			self.subtraction_table.add(line)
+
+
