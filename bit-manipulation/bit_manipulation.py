@@ -145,6 +145,7 @@ class BinaryNumber():
 				color=(WHITE if new_text == "1" else GRAY), 
 				font_size=28).next_to(self.binary_table[row-1][k], DOWN)
 		self.scene.play(Transform(self.binary_table[row][k], new_text_text))
+		self.binary_table[row][k] = new_text_text
 
 
 	def perform_bitwise_operation(self, bitwise_table):

@@ -269,7 +269,13 @@ class ClearLsb2(Scene):
 			subtraction_tables.add(bw_subtraction.subtraction_table)
 
 
-		params = [[15, DOWN*2.5+LEFT*6], [22, DOWN*2.3+LEFT*3], [108, DOWN*2.3], [88, DOWN*2.3+RIGHT*3], [48, DOWN*2.3+RIGHT*6]]
+		params = [
+			[15, DOWN*2.5+LEFT*6], 
+			[22, DOWN*2.3+LEFT*3], 
+			[108, DOWN*2.3], 
+			[88, DOWN*2.3+RIGHT*3], 
+			[48, DOWN*2.3+RIGHT*6]
+		]
 		for param in params:
 			play_subtraction(*param)
 
@@ -281,6 +287,7 @@ class ClearLsb2(Scene):
 
 
 		bitwise_table = BitwiseTable(self, "&", ORANGE)
+		and_table = bitwise_table.bitwise_table.shift(UP)
 
 		string_1 = "01011000"
 		string_2 = "01010111"
