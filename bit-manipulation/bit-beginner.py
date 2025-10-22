@@ -2,7 +2,7 @@ from manim import *
 
 from bit_manipulation import BinaryNumber, BitwiseTable
 
-config.background_color = "#070d05"
+config.background_color = "#041200"
 
 
 
