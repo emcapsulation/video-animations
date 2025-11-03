@@ -26,10 +26,10 @@ class Thumbnail(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
-		title = Text("8 Epic Bit Manipulation Tricks").move_to(DOWN*0.5)
+		title = Text("8 Epic Bit Manipulation Tricks").move_to(UP*3)
 		subtitle = Text("From Beginner to Expert", 
 			font_size=24,
-			t2c={"Beginner": GREEN, "Expert": PINK}).next_to(title, DOWN)
+			t2c={"Beginner": GREEN, "Expert": PINK}).move_to(UP*2)
 
 		self.add(title)
 		self.add(subtitle)
@@ -99,11 +99,11 @@ class BinaryNumberExplanation(Scene):
 		self.play(digits.animate.shift(UP))
 
 		expand = VGroup(
-			Tex("3x100", font_size=44, color=get_value_colour(0, 9, dig1)),
+			Tex("$3\\times 100$", font_size=44, color=get_value_colour(0, 9, dig1)),
 			Tex("+", font_size=44),
-			Tex("4x10", font_size=44, color=get_value_colour(0, 9, dig2)),
+			Tex("$4\\times 10$", font_size=44, color=get_value_colour(0, 9, dig2)),
 			Tex("+", font_size=44),
-			Tex("9x1", font_size=44, color=get_value_colour(0, 9, dig3))
+			Tex("$9\\times 1$", font_size=44, color=get_value_colour(0, 9, dig3))
 		).arrange(RIGHT)
 
 		for text in expand:
@@ -202,22 +202,15 @@ class BinaryNumberExplanation2(Scene):
 		self.wait(2)
 
 
-		fifty_eight = Text("58").move_to(UP)
-		self.play(Write(fifty_eight))
-		self.wait(2)
-		self.play(fifty_eight.animate.shift(RIGHT*5))
-
-
-		binary = BinaryNumber(self, 7)
-		binary_table = binary.binary_table.shift(LEFT*3 + UP)
+		binary = BinaryNumber(self, 8)
+		binary_table = binary.binary_table.move_to(ORIGIN)
 		binary.create_binary_table()
 		self.wait(1)
 
-		binary.add_num_to_table(58)
-		self.play(FadeOut(fifty_eight))
+		binary.add_num_to_table(77)
 
 
-		binary_str = "111010"
+		binary_str = "1001101"
 		expand = VGroup()
 		expand2 = VGroup()
 		answer = 0
@@ -240,7 +233,7 @@ class BinaryNumberExplanation2(Scene):
 				expand.add(Tex("+", font_size=28))
 				expand2.add(Tex("+", font_size=36))
 
-		expand.arrange(RIGHT).move_to(DOWN)
+		expand.arrange(RIGHT).move_to(DOWN*2)
 		expand2.arrange(RIGHT).next_to(expand, DOWN)
 
 		for text in expand:
@@ -254,3 +247,21 @@ class BinaryNumberExplanation2(Scene):
 		term_text = Text(f"= {answer}").next_to(expand2, DOWN, buff=0.5)
 		self.play(Write(term_text))
 		self.wait(2)
+
+
+
+class DrawAndGlowLetter(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		self.play(Write(Text("Thank you for watching!").shift(UP*2)))
+
+		letter_e = Text("e", font_size=200, color=TEAL)
+		self.play(Write(letter_e))
+
+		letter_e_stroke = letter_e.copy().set_color(TEAL).set_opacity(1).set_stroke(width=3)        
+		glow_effect = letter_e_stroke.copy().set_stroke(width=3, color=WHITE).set_opacity(0.6)
+		self.play(FadeIn(letter_e_stroke), Transform(letter_e_stroke, glow_effect))
+		self.play(FadeOut(letter_e_stroke, glow_effect))
+
+		self.wait(3)

@@ -19,7 +19,7 @@ class Parity(Scene):
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
-		trick = Text("Trick #1: Check if a number is even or odd.", 
+		trick = Text("Trick #1: Check if an integer is even or odd.", 
 			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 

@@ -237,13 +237,13 @@ class ClearLsb(Scene):
 		binary.remove_num_from_table()
 
 
-		num = 56
+		num = 24
 		binary.add_num_to_table(num, pace="fast")
 		binary.flip_bit(4)
 		binary.remove_num_from_table()
 
 
-		num = 127
+		num = 15
 		binary.add_num_to_table(num, pace="fast")
 		binary.flip_bit(7)
 		binary.remove_num_from_table()
