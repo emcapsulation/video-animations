@@ -13,13 +13,13 @@ class PowerOfTwo(Scene):
 
 		speech_bubble = RoundedRectangle(
 			width=12, height=1.25, 
-			fill_color=[RED_A, RED], stroke_color=[RED_A, RED],
+			fill_color=[RED, MAROON], stroke_color=[RED, MAROON],
 			corner_radius=0.1, fill_opacity=0.3,
 			stroke_width=1
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
-		trick = Text("Trick #6: Check if a number is a power of 2.", 
+		trick = Text("Trick #6: Check if an integer is a power of 2.", 
 			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 
@@ -119,13 +119,13 @@ class DivisibleBy2K(Scene):
 
 		speech_bubble = RoundedRectangle(
 			width=12, height=1.25, 
-			fill_color=[RED_A, RED], stroke_color=[RED_A, RED],
+			fill_color=[RED, MAROON], stroke_color=[RED, MAROON],
 			corner_radius=0.1, fill_opacity=0.3,
 			stroke_width=1
 		).move_to(UP*2.5)
 		self.play(Create(speech_bubble))
 
-		trick = Text("Trick #7: Check if a number is divisible by 2^k.", 
+		trick = Text("Trick #7: Check if an integer is divisible by 2^k.", 
 			font_size=24).move_to(speech_bubble.get_center())
 		self.play(Write(trick))
 

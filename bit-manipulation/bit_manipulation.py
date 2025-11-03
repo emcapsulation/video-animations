@@ -110,6 +110,27 @@ class BinaryNumber():
 		self.binary_table.remove(self.binary_table[len(self.binary_table)-1])
 
 
+	def replace_num_in_table(self, num):
+		num_bin = bin(num)[2:]
+		if num < 0:
+			num_bin = bin(num & 0b11111111)[2:]
+
+		tab_len = len(self.binary_table)
+
+		row = self.binary_table[2].copy()
+		for i in range(self.num_bits-1, -1, -1):
+			bin_index = len(num_bin)-(self.num_bits-1-i)-1
+			if bin_index < 0:
+				this_bit = '0'
+			else:
+				this_bit = num_bin[bin_index]
+			binary = Text(this_bit, color=(WHITE if this_bit=='1' else GRAY), font_size=28).move_to(self.binary_table[2][i].get_center())
+
+			row[i] = binary
+		
+		self.scene.play(Transform(self.binary_table[2], row))
+
+
 	def shift(self, direction, k, row=2):
 		num_text = Text(f"<< {k}" if direction=="left" else f">> {k}", 
 			t2c={"<<": PURPLE, ">>": PURPLE},
@@ -504,26 +525,31 @@ class BitwiseSubtraction():
 		line = None
 		result = VGroup()
 
-		for i in range(len(self.num_1_bin)-1, -1, -1):
+		trade_end = -1
+		for i in range(len(self.num_1_bin)-1, -1, -1):		
 			if num_1_bits[i].text == '0' and self.num_2_bin[i] == '1':
 				# Trade
 				j = i
 				while (num_1_bits[j].text != '1'):
 					j -= 1
 
-				line = Line(start=self.subtraction_table[0][j].get_center()+LEFT*0.1, end=self.subtraction_table[0][i].get_center()+RIGHT*0.1, color=RED, stroke_width=2)
+				line = Line(start=self.subtraction_table[0][j].get_center()+LEFT*0.2, end=self.subtraction_table[0][i-1].get_center()+RIGHT*0.2, color=RED, stroke_width=3)
 				self.scene.play(Create(line))
 
-				carry_bit = Text('0', color=RED, font_size=20).move_to(num_1_bits[j].get_center()).shift(UP*0.75+RIGHT*0.2)
+				carry_bit = Text('0', color=RED, font_size=20).move_to(num_1_bits[j].get_center()).shift(UP*0.75+LEFT*0.2)
 				num_1_bits[j] = carry_bit
 				self.scene.play(Write(carry_bit))
 
 				for k in range(j+1, i+1):
-					carry_bit = Text('1', color=RED, font_size=20).move_to(num_1_bits[k].get_center()).shift(UP*0.75+RIGHT*0.2)
+					carry_bit = Text('1', color=RED, font_size=20).move_to(num_1_bits[k].get_center()).shift(UP*0.75+LEFT*0.2)
 					num_1_bits[k] = carry_bit
 					self.scene.play(Write(carry_bit))
 
+				trade_end = i
+
 			bit = str(int(num_1_bits[i].text)-int(self.num_2_bin[i]))
+			if i == trade_end: 
+				bit = str(2-int(self.num_2_bin[i]))
 			bit_text = Text(bit, color=get_bin_colour(bit)).move_to(self.subtraction_table[1][i].get_center()+DOWN*1.25)
 			self.scene.play(Write(bit_text))
 
