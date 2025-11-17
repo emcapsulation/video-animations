@@ -1,27 +1,9 @@
 from manim import *
 from entities import *
+from introduction import move_to_seat
 
 
 config.background_color = "#00141a"
-
-
-def move_to_seat(scene, family_list, table_radius, table_centre, animate=True):
-	move_to_seat_animations = []
-	i = 0
-	while i < len(family_list):
-		up = table_radius*math.sin(i*2*PI/len(family_list))
-		right = table_radius*math.cos(i*2*PI/len(family_list))
-		seat_position = UP*up + RIGHT*right
-
-		if animate:
-			move_to_seat_animations.append(family_list[i].get_human().animate.move_to(seat_position+table_centre))
-		else:
-			family_list[i].get_human().move_to(seat_position+table_centre)
-			scene.add(family_list[i].get_human())
-		i += 1
-
-	if animate:
-		scene.play(*move_to_seat_animations)
 
 
 
@@ -356,7 +338,7 @@ class Asymmetric(Scene):
 		secret_sauce = SecretSauce("encrypted").get_secret_sauce().move_to(LEFT*4.5).scale(sauce_scale)
 		key_words = Text("secret_key", font_size=14)
 		sauce_key = VGroup(secret_sauce, key_words).arrange(DOWN).move_to(LEFT*4.5)
-		self.play(FadeIn(path), FadeIn(secret_sauce))
+		self.play(FadeIn(path), FadeIn(sauce_key))
 		self.wait(1)
 
 		key_words_encrypted = Text("x?v%Oa2hF!", font_size=14).move_to(key_words.get_center())
@@ -408,13 +390,14 @@ class AccessControls(Scene):
 
 		subtitle = Text("Protection of data from those who are not authorised to access it.", font_size=20).next_to(title, DOWN)
 		self.add(subtitle)
+		self.wait(5)
 
 
 		strong_auth = Text("Authentication and Authorisation", font_size=24, color=GOLD).move_to(UP*1.5)
 		auth_def = Text("")
 		self.play(Write(strong_auth))
 
-		auth_def = Text("Authentication: Verifying the requestor is who they claim to be.", font_size=20).next_to(strong_auth, DOWN)
+		auth_def = Text("Authentication: Verifying the entity is who they claim to be.", font_size=20).next_to(strong_auth, DOWN)
 		self.add(auth_def)
 
 
@@ -432,7 +415,7 @@ class AccessControls(Scene):
 
 
 		# Authorisation
-		auth_def_2 = Text("Authorisation: Determining what actions the requestor is allowed to perform.", font_size=20).next_to(strong_auth, DOWN)
+		auth_def_2 = Text("Authorisation: Determining what actions the entity is allowed to perform.", font_size=20).next_to(strong_auth, DOWN)
 		self.play(Transform(auth_def, auth_def_2))
 
 

@@ -285,7 +285,7 @@ class SecretSauce:
 
 
 		title = None
-		if self.type == "shapes" or self.type == "text":
+		if self.type == "shapes" or self.type == "text" or self.type == "tampered" or self.type == "tampered_2":
 			title = Text(
 				"Secret Sauce",
 				color=BLACK,
@@ -318,12 +318,16 @@ class SecretSauce:
 				writing.copy()
 			).arrange(DOWN, buff=0.5).scale(0.5).shift(DOWN*0.5)
 
-		elif self.type == "text":
+		elif self.type == "text" or self.type == "tampered" or self.type == "tampered_2":
 			text_1 = Text("2 tbsp mayonnaise", font_size=16, color=BLACK)
 			text_2 = Text("2 tbsp ketchup", font_size=16, color=BLACK)
 			text_3 = Text("1 tbsp mustard", font_size=16, color=BLACK)
 			text_4 = Text("1 tsp paprika", font_size=16, color=BLACK)
 			text_5 = Text("1 clove garlic", font_size=16, color=BLACK)
+			if self.type == "tampered":
+				text_5 = Text("10 chillis", font_size=16, color=RED)
+			elif self.type == "tampered_2":
+				text_5 = Text("0 clove garlic", font_size=16, color=RED)
 			lines = VGroup(text_1, text_2, text_3, text_4, text_5).arrange(DOWN, buff=0.2).shift(DOWN*0.5)
 
 		elif self.type == "encrypted":
@@ -466,3 +470,28 @@ class Usb:
 		)
 
 		return VGroup(body, head).arrange(RIGHT, buff=0)
+
+
+
+class FloppyDisk:
+	def __init__(self):
+		self.floppy_disk = self.make_floppy()
+
+
+	def make_floppy(self):
+		disk = RoundedRectangle(
+			width=1, height=1,
+			corner_radius=[0, 0, 0, 0.1],
+			stroke_color=GRAY,
+			fill_color=GRAY,
+			fill_opacity=0.85
+		)
+
+		circle = Circle(
+			radius=0.1,
+			stroke_color=GRAY_A,
+			fill_color=GRAY_A,
+			fill_opacity=0.85
+		).move_to(disk.get_center())
+
+		return VGroup(disk, circle)
