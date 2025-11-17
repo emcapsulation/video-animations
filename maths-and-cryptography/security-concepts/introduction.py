@@ -122,3 +122,39 @@ class Introduction(Scene):
 		)
 
 		self.wait(2)
+
+
+
+class Conclusion(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		# Store contains (wall, poster, counter)
+		burger_store = BurgerStore()
+		self.add(burger_store.get_burger_store())
+
+
+		# Draw in each member of the family
+		y_pos = DOWN*0.37
+		positions = [RIGHT*5+y_pos, *[LEFT*x+y_pos for x in range(5, -5, -2)]]
+
+		family = Family(0.8, 0.4, 1, positions)
+		family.set_labels(["You", "Grandpa", "Uncle", "Dad", "Mum", "Brother"])
+		family.set_colours([PURPLE, ORANGE, GOLD, GREEN, TEAL, BLUE])
+
+		family_list = family.get_family_list()
+		for family_member in family_list:
+			self.play(Create(family_member.get_body()), Write(family_member.get_label()))
+		self.wait(2)
+
+
+		self.play(Wiggle(family_list[2].get_body()))
+		self.play(Wiggle(family_list[4].get_body()))
+
+
+		usb = Usb().usb.move_to(family_list[2].get_body().get_center() + UP*1.5)
+		self.play(FadeIn(usb))
+		self.play(Indicate(usb), color=GREEN)
+		self.wait(2)
+
