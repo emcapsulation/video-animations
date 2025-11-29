@@ -12,7 +12,7 @@ class Sorter:
 		self.scene_elems = VGroup()
 
 		if len(colours) == 0:
-			self.colours = self.generate_colors()
+			self.colours = self.generate_colours_2()
 		else:
 			self.colours = colours
 
@@ -91,6 +91,23 @@ class Sorter:
 		return colors 
 
 
+	def generate_colours_2(self):
+		min_elem = min(self.elements)
+		max_elem = max(self.elements)
+		num_colors = max_elem-min_elem+1
+
+		val_range, gradient_steps = max_elem-min_elem, 100
+
+		colors = [None]*self.get_num_elements()
+		for e in self.elements:
+			colors[e-1] = color_gradient(
+				[RED, ORANGE, YELLOW, GREEN, TEAL, BLUE, PURPLE, PINK], 
+				gradient_steps
+			)[int((e - min_elem)/val_range * (gradient_steps-1))]
+		
+		return colors
+
+
 	def animate_last_pass(self, scene, p1_arrow, p2_arrow, run_time):
 		for p in range(0, self.get_num_elements()):
 			scene.play(p1_arrow.animate.next_to(self.get_scene_element(p+1), DOWN, buff=0.2), 
@@ -141,6 +158,7 @@ class Sorter:
 			font_size=24, font="Monospace").shift(UP)
 		scene.play(Write(tutorial_text), run_time=run_time)
 		self.mf.write_pause(run_time)
+		scene.wait(1)
 
 		rect_shape = RoundedRectangle(
 			width=2.5, height=1.5,
@@ -155,7 +173,7 @@ class Sorter:
 		rect_drawn = False
 		
 
-		for p1 in range(0, self.get_num_elements()):
+		for p1 in range(0, self.get_num_elements()-1):
 			p2 = p1			
 
 			scene.play(
@@ -163,6 +181,7 @@ class Sorter:
 				run_time=run_time
 			)
 			self.mf.write_int(self.get_element(p1), run_time)
+			scene.wait(1)
 
 			scene.play(
 				p2_arrow.animate.next_to(self.get_scene_element(p2+1), DOWN, buff=0.2),
@@ -172,6 +191,7 @@ class Sorter:
 				run_time=run_time
 			)
 			self.mf.write_int(self.get_element(p2), run_time)
+			scene.wait(1)
 
 			min_elem = self.get_element(p2)
 			min_p2 = p2
@@ -185,7 +205,7 @@ class Sorter:
 						font_size=24, font="Monospace").shift(UP)),
 					Create(rect_shape), Write(rect_text), Transform(rect_num, new_rect_num), run_time=run_time)
 
-				self.mf.write_pause(run_time)	
+				self.mf.write_pause(run_time)					
 				rect_drawn = True	
 
 			else:
@@ -195,6 +215,7 @@ class Sorter:
 					Transform(rect_num, new_rect_num), run_time=run_time)
 
 				self.mf.write_pause(run_time)	
+			scene.wait(1)
 
 
 			for p2 in range(p1+1, self.get_num_elements()):
@@ -218,12 +239,14 @@ class Sorter:
 						run_time=run_time*0.1
 					)		
 					self.mf.write_int(self.get_element(p2), run_time*0.1)
+			scene.wait(1)
 
 
 			scene.play(Transform(tutorial_text, 
-				MarkupText(f"""swap min with <span fgcolor="{p1_col}">p1</span>""", 
+				MarkupText(f"""swap min with element at <span fgcolor="{p1_col}">p1</span>""", 
 					font_size=24, font="Monospace").shift(UP)), run_time=run_time)
 			self.mf.write_pause(run_time)	
+			scene.wait(1)
 
 			tmp = self.elements[p1]
 			self.elements[p1] = self.elements[min_p2]
@@ -231,7 +254,7 @@ class Sorter:
 
 			self.animate_swap(scene, p1, min_p2, run_time=run_time)			
 
-			if p1 < self.get_num_elements()-1:
+			if p1 < self.get_num_elements()-2:
 				scene.play(Transform(tutorial_text, 
 					MarkupText(f"""increment <span fgcolor="{p1_col}">p1</span>""", 
 						font_size=24, font="Monospace").shift(UP)), run_time=run_time)
@@ -244,6 +267,7 @@ class Sorter:
 						font_size=24, font="Monospace").shift(UP)), run_time=run_time)
 
 				self.mf.write_pause(run_time)
+			scene.wait(1)
 
 
 		self.animate_last_pass(scene, p1_arrow, p2_arrow, run_time)

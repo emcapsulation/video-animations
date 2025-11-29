@@ -1,5 +1,5 @@
 from manim import *
-from bit_manipulation import BinaryNumber, BitwiseTable
+from bit_manipulation import BinaryNumber, BitwiseTable, fade_out_scene
 
 
 config.background_color = "#15131c"
@@ -432,3 +432,179 @@ class MultiplyDivide2PowK(Scene):
 		binary.add_num_to_table(num, pace="fast")
 		show_multiplication(num, -3)
 		binary.remove_num_from_table()
+
+
+
+
+class Swap(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+		self.wait(5)
+
+
+		FZ = 24
+		question_group = VGroup()
+
+		question_1 = Text("Can you swap two ints without", font_size=FZ, t2c={"swap": ORANGE})
+		question_group.add(question_1)
+
+		question_2 = Text("using a third temp variable?", font_size=FZ, t2c={"temp": GOLD})
+		question_group.add(question_2)
+
+		question_group.arrange(DOWN).move_to(ORIGIN)
+
+		self.play(FadeIn(question_group))
+		self.wait(1)
+		self.play(question_group.animate.shift(UP*5))
+		self.wait(5)
+
+
+		xor_tip = Text("Anything XORed with itself gives 0.", font_size=24).move_to(UP*5)
+		self.play(Transform(question_group, xor_tip))
+		self.wait(2)
+
+
+		bitwise_table = BitwiseTable(self, "^", TEAL)
+		xor_table = bitwise_table.bitwise_table.shift(UP)
+		self.play(FadeIn(xor_table))
+		self.wait(2)
+
+
+		# 210
+		string_1 = "11010010"
+		string_2 = "11010010"
+		binary_table = bitwise_table.compare_two_binaries(string_1, string_2, mobile=True)
+		self.wait(2)
+
+
+		fade_out_scene(self)
+
+
+		xor_tip_2 = Text("Anything XORed with 0 retains its value.", font_size=24).move_to(UP*5)
+		self.play(FadeIn(xor_tip_2))
+		self.wait(2)		
+
+
+		bitwise_table = BitwiseTable(self, "^", TEAL)
+		xor_table = bitwise_table.bitwise_table.shift(UP)
+		self.play(FadeIn(xor_table))
+		self.wait(2)
+
+
+		string_1 = "01110101"
+		string_2 = "00000000"
+		binary_table = bitwise_table.compare_two_binaries(string_1, string_2, mobile=True)
+		self.wait(2)
+
+
+
+
+class SwapTable(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		A_COLOUR = ORANGE
+		B_COLOUR = PURPLE
+		FZ=30
+		FZ2=40
+
+
+		swap_table = VGroup(
+			VGroup(
+				Text("Line #", font_size=FZ),
+				Text("a", color=A_COLOUR, font_size=FZ),
+				Text("b", color=B_COLOUR, font_size=FZ)
+			).arrange(RIGHT, buff=2)
+		).scale(0.9).shift(UP*5)
+
+		for h in swap_table[0]:
+			self.play(Write(h))
+		self.wait(2)
+
+
+		# Row 0
+		row_0 = VGroup(
+			Text("0", font_size=FZ).move_to(swap_table[0][0].get_center()+DOWN),
+			Tex("$a_0$", font_size=FZ2).move_to(swap_table[0][1].get_center()+DOWN),
+			Tex("$b_0$", font_size=FZ2).move_to(swap_table[0][2].get_center()+DOWN)
+		)
+		swap_table.add(row_0)
+
+		for h in swap_table[1]:
+			self.play(Write(h))
+		self.wait(2)
+
+
+		# Row 1
+		row_1 = VGroup(
+			Text("1", font_size=FZ).move_to(swap_table[1][0].get_center()+DOWN),
+			Text("a^b", font_size=FZ, t2c={"a": A_COLOUR, "b": B_COLOUR}).move_to(swap_table[1][1].get_center()+DOWN),
+			Tex("$b_0$", font_size=FZ2).move_to(swap_table[1][2].get_center()+DOWN)
+		)
+		swap_table.add(row_1)
+
+		for h in swap_table[2]:
+			self.play(Write(h))
+		self.wait(2)
+
+
+		a_xor_b = Tex("$a_0 \\> ^{\\wedge} b_0$", font_size=FZ2).move_to(swap_table[1][1].get_center()+DOWN)
+		self.play(Transform(swap_table[2][1], a_xor_b))
+		self.wait(2)
+
+
+		# Row 2
+		row_2 = VGroup(
+			Text("2", font_size=FZ).move_to(swap_table[2][0].get_center()+DOWN),
+			Tex("$a_0 \\> ^{\\wedge} b_0$", font_size=FZ2).move_to(swap_table[2][1].get_center()+DOWN),
+			Text("a^b", font_size=FZ, t2c={"a": A_COLOUR, "b": B_COLOUR}).move_to(swap_table[2][2].get_center()+DOWN)
+		)
+		swap_table.add(row_2)
+
+		for h in swap_table[3]:
+			self.play(Write(h))
+		self.wait(2)
+
+
+		a_xor_b = Tex("$a_0 \\> ^{\\wedge} b_0 \\> ^{\\wedge} b_0$", font_size=FZ2).move_to(swap_table[2][2].get_center()+DOWN)
+		self.play(Transform(swap_table[3][2], a_xor_b))
+		self.wait(2)
+
+
+		a_xor_b = Tex("$a_0$", font_size=FZ2).move_to(swap_table[2][2].get_center()+DOWN)
+		self.play(Transform(swap_table[3][2], a_xor_b))
+		self.wait(2)
+
+
+		# Row 3
+		row_3 = VGroup(
+			Text("3", font_size=FZ).move_to(swap_table[3][0].get_center()+DOWN),
+			Text("a^b", font_size=FZ, t2c={"a": A_COLOUR, "b": B_COLOUR}).move_to(swap_table[3][1].get_center()+DOWN),
+			Tex("$a_0$", font_size=FZ2).move_to(swap_table[3][2].get_center()+DOWN)
+		)
+		swap_table.add(row_3)
+
+		for h in swap_table[4]:
+			self.play(Write(h))
+		self.wait(2)
+
+
+		a_xor_b = Tex("$a_0 \\> ^{\\wedge} b_0 \\> ^{\\wedge} a_0$", font_size=FZ2).move_to(swap_table[3][1].get_center()+DOWN)
+		self.play(Transform(swap_table[4][1], a_xor_b))
+		self.wait(2)
+
+
+		a_xor_b = Tex("$a_0 \\> ^{\\wedge} a_0 \\> ^{\\wedge} b_0$", font_size=FZ2).move_to(swap_table[3][1].get_center()+DOWN)
+		self.play(Transform(swap_table[4][1], a_xor_b))
+		self.wait(2)
+
+
+		a_xor_b = Tex("$0 \\> ^{\\wedge} b_0$", font_size=FZ2).move_to(swap_table[3][1].get_center()+DOWN)
+		self.play(Transform(swap_table[4][1], a_xor_b))
+		self.wait(2)
+
+
+		a_xor_b = Tex("$b_0$", font_size=FZ2).move_to(swap_table[3][1].get_center()+DOWN)
+		self.play(Transform(swap_table[4][1], a_xor_b))
+		self.wait(2)

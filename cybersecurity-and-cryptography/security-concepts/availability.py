@@ -276,3 +276,32 @@ class AvailabilityConversation2(Scene):
 
 		self.play(Wiggle(family.get_family_group_member("Brother")))
 		self.wait(2)
+
+
+
+class MaintenanceMonitoring(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		title = Text("Availability", color=PINK).move_to(UP*3)
+		self.add(title)
+
+
+		subtitle = Text("Data can be quickly and reliably accessed whenever it's needed.", font_size=20).next_to(title, DOWN)
+		self.add(subtitle)
+		self.wait(1)
+
+
+		maintenance = Text("Maintenance", font_size=24)
+		self.add(maintenance)
+		self.wait(1)
+
+		monitoring = Text("Monitoring", font_size=24).next_to(maintenance, DOWN)
+		self.add(monitoring)
+		self.wait(1)
+
+		dr = Text("Disaster Recovery", font_size=24).next_to(monitoring, DOWN)
+		self.add(dr)
+		self.wait(1)

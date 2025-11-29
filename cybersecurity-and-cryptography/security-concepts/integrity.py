@@ -535,3 +535,15 @@ class IntegrityConversation2(Scene):
 
 		self.play(Wiggle(family.get_family_group_member("Grandpa")))
 		self.wait(2)
+
+
+
+class CollisionResistance(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		collision_resistance = Text("Collision Resistance: Infeasible to find two different inputs that output the same hash.", font_size=16, t2c={"Collision Resistance:": PURPLE}).move_to(DOWN*3)
+		self.play(Write(collision_resistance))
+		self.wait(5)

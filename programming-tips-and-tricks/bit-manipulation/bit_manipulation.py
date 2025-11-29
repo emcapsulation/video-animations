@@ -337,8 +337,8 @@ class BitwiseTable():
 		return self.highlight_row.animate.move_to(pos)
 
 
-	def compare_two_binaries(self, bin_1, bin_2):
-		self.scene.play(self.bitwise_table.animate.scale(0.6).shift(RIGHT*5))		
+	def compare_two_binaries(self, bin_1, bin_2, mobile=False):
+		self.scene.play(self.bitwise_table.animate.scale(0.6).shift(DOWN*2 if mobile else RIGHT*5))		
 
 		# Add the two binary strings to the grid
 		row_1 = VGroup()
@@ -349,7 +349,7 @@ class BitwiseTable():
 				row_1[i].move_to(row_1[i-1].get_center() + RIGHT)
 
 			row_2.add(Text(bin_2[i], color=get_bin_colour(bin_2[i])).move_to(row_1[i].get_center() + DOWN))
-		binary_table = VGroup(row_1, row_2).move_to(LEFT*2 + DOWN*0.5)
+		binary_table = VGroup(row_1, row_2).scale(0.8 if mobile else 1).move_to(UP*2 if mobile else (LEFT*2 + DOWN*0.5))
 
 		num_1 = Text(f"{int(bin_1, 2)}").move_to(binary_table[0].get_center())
 		self.scene.play(Write(num_1))
@@ -370,11 +370,11 @@ class BitwiseTable():
 		bw_rect = self.shift_highlight_row(bin_1[0], bin_2[0], animate=False)
 
 		bin_rect = Rectangle(
-			width=1, height=2,
+			width=1*(0.8 if mobile else 1), height=2*(0.8 if mobile else 1),
 			color=WHITE, 
 			stroke_width=0,
 			fill_opacity=0.2
-		).move_to(binary_table[0][0].get_center()+DOWN*0.5)
+		).move_to(binary_table[0][0].get_center()+DOWN*0.5*(0.8 if mobile else 1))
 
 		self.scene.play(Create(bin_rect), Create(bw_rect))
 
@@ -407,7 +407,7 @@ class BitwiseTable():
 			if i < len(bin_1)-1:
 				move_anim = [
 					arrow.animate.move_to(binary_table[0][i+1].get_center()+UP),
-					bin_rect.animate.move_to(binary_table[0][i+1].get_center()+DOWN*0.5),
+					bin_rect.animate.move_to(binary_table[0][i+1].get_center()+DOWN*0.5*(0.8 if mobile else 1)),
 					self.shift_highlight_row(bin_1[i+1], bin_2[i+1])
 				]				
 
