@@ -1,6 +1,7 @@
 from manim import *
+import math
 
-from bit_manipulation import BinaryNumber
+from bit_manipulation import BinaryNumber, BitwiseTable
 
 config.background_color = "#15131c"
 
@@ -33,6 +34,92 @@ class Thumbnail(Scene):
 
 		self.add(title)
 		self.add(subtitle)
+
+
+
+		number_line = NumberLine(
+			x_range=[-8, 7, 1],
+			length=12,
+			include_numbers=True,
+			include_tip=False,
+			stroke_width=2,
+		)
+
+
+		bins = VGroup()
+		right = 6
+		for i in range(7, -9, -1):
+			cur = i
+			if i < 0:
+				cur = -1*i
+
+			num_bin = bin(cur)[2:]
+			num_bin = '0'*(4-len(num_bin)) + num_bin
+
+			# Show two's complement
+			if i < 0:
+				flip_bits = ""
+				for c in num_bin:
+					flip_bits += ('1' if c == '0' else '0')
+
+				num_bin = bin(i & 0b1111)[2:]
+
+			right -= 0.8
+			bins.add(Text(num_bin, color=GRAY, font_size=16).move_to(RIGHT*right + DOWN))
+
+
+		ticks, numbers = VGroup(), VGroup()
+		numbers = VGroup()
+		for mob in number_line.get_family():
+			if isinstance(mob, Line):
+				ticks.add(mob)
+			if isinstance(mob, DecimalNumber):
+				numbers.add(mob)
+
+
+		centre, radius, total = ORIGIN+RIGHT*3.5+DOWN, 1.5, 8*2
+		angle_step = (2*PI)/total
+
+		target_ticks, target_numbers, target_bins = VGroup(), VGroup(), VGroup()
+		directions = []
+		for i in range(total):
+			up = math.sin(i*2*PI/total)
+			right = math.cos(i*2*PI/total)
+			direction = UP*up + RIGHT*right
+			directions.append(direction)
+
+			tick_centre = centre + radius*direction
+			tick = Line(
+				tick_centre,
+				tick_centre + 0.2*direction
+			)
+
+			number = Text(str(int(i-total/2)), font_size=24).move_to(tick_centre + 0.4*direction)
+			binary_shifted = bins[len(bins)-1-i].copy().move_to(tick_centre + direction)
+
+			target_ticks.add(tick)
+			target_numbers.add(number)
+			target_bins.add(binary_shifted)
+
+
+		ring = Circle(radius=radius, stroke_color=WHITE).move_to(centre)
+
+		self.add(target_ticks, target_numbers, target_bins, ring)
+
+
+		bitwise_table = BitwiseTable(self, "&", ORANGE)
+		and_table = bitwise_table.bitwise_table.scale(0.5).shift(LEFT*4.5)
+		self.add(and_table)
+
+
+		bitwise_table_2 = BitwiseTable(self, "^", TEAL)
+		or_table = bitwise_table_2.bitwise_table.scale(0.5).shift(LEFT*1.5)
+		self.add(or_table)
+
+
+		binary = BinaryNumber(self, 8)
+		binary.add_num_to_table(77, pace="add")
+		self.add(binary.binary_table.scale(0.8).move_to(LEFT*3 + UP*0.5))
 
 
 
