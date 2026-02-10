@@ -56,7 +56,7 @@ class NaiveApproachTimeComplexityDescriptions(Scene):
 	def construct(self):
 		Text.set_default(font="Monospace")
 
-		title = Text("Time Complexity").move_to(UP*3)
+		title = Text("Time Complexity (Naive Approach)").move_to(UP*3)
 		self.play(Write(title))
 		self.wait(2)
 
@@ -68,7 +68,7 @@ class NaiveApproachTimeComplexityDescriptions(Scene):
 		self.play(Transform(text, text_2))
 		self.wait(2)
 
-		text_3 = Text("Given n >> m, then n-m+1 is approximately n", font_size=24).move_to(DOWN*3)
+		text_3 = Text("Given n >> m, then n-m+1 is upper-bounded by n", font_size=24).move_to(DOWN*3)
 		self.play(Transform(text, text_3))
 		self.wait(2)
 
@@ -150,6 +150,7 @@ class KMPDemoWithCode(Scene):
 
 
 
+
 class PrefixSuffixExplanation(Scene):
 
 	def construct(self):
@@ -183,7 +184,7 @@ class PrefixSuffixExplanation(Scene):
 		self.wait(2)
 
 
-		proper_prefix = Text("Proper Prefix: A substring at the start of the pattern, not including the entire pattern.", font_size=16, t2c={'Proper Prefix:': TEAL}).move_to(DOWN*3)
+		proper_prefix = Text("Proper Prefix: A substring at the start of a string, not including the entire string.", font_size=16, t2c={'Proper Prefix:': TEAL}).move_to(DOWN*3)
 		self.play(Write(proper_prefix))
 
 		brace = BraceBetweenPoints(pattern_group[0].get_left()+DOWN, pattern_group[0].get_left()+DOWN, direction=DOWN)
@@ -198,7 +199,7 @@ class PrefixSuffixExplanation(Scene):
 		self.play(FadeOut(brace), pattern_group.animate.set_color(WHITE))
 
 
-		proper_suffix = Text("Proper Suffix: A substring at the end of the pattern, not including the entire pattern.", font_size=16, t2c={'Proper Suffix:': PURPLE}).move_to(DOWN*3)
+		proper_suffix = Text("Proper Suffix: A substring at the end of a string, not including the entire string.", font_size=16, t2c={'Proper Suffix:': PURPLE}).move_to(DOWN*3)
 		self.play(ReplacementTransform(proper_prefix, proper_suffix))
 
 		brace = BraceBetweenPoints(pattern_group[m-1].get_right()+DOWN, pattern_group[m-1].get_right()+DOWN, direction=DOWN)
@@ -240,6 +241,19 @@ class LPSAlgorithm(Scene):
 
 
 
+class LPSAlgorithm(Scene):
+
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		pattern = "ABABCABABAB"
+
+		KMP = KnuthMorrisPratt(self, pattern, "ABABCABABAB")
+		KMP.show_lps_creation(True)
+
+
+
 class KMPFullAlgorithm(Scene):
 
 	def construct(self):
@@ -274,3 +288,35 @@ class KMPAlgorithmExample(Scene):
 		KMP.show_full_kmp(True, True)
 
 		self.wait(5)
+
+
+
+class DrawAndGlowLetter(Scene):
+    def construct(self):
+        Text.set_default(font="Monospace")
+
+        self.play(Write(Text("Thank you for watching!").shift(UP*2)))
+
+        letter_e = Text("e", font_size=200, color=TEAL)
+        self.play(Write(letter_e))
+
+        letter_e_stroke = letter_e.copy().set_color(TEAL).set_opacity(1).set_stroke(width=3)        
+        glow_effect = letter_e_stroke.copy().set_stroke(width=3, color=WHITE).set_opacity(0.6)
+        self.play(FadeIn(letter_e_stroke), Transform(letter_e_stroke, glow_effect))
+        self.play(FadeOut(letter_e_stroke, glow_effect))
+
+        self.wait(3)
+
+
+
+
+class Thumbnail(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+
+		text = "AABCAACAABCAAABCAAAB"		
+		pattern = "AABCAAAB"
+
+		KMP = KnuthMorrisPratt(self, pattern, text)
+		KMP.create_thumbnail()

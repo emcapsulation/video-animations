@@ -1,5 +1,5 @@
 from manim import *
-from bit_manipulation import BinaryNumber, BitwiseTable, fade_out_scene
+from bit_manipulation import BinaryNumber, BitwiseTable, BitwiseSubtraction, fade_out_scene
 
 
 config.background_color = "#15131c"
@@ -608,3 +608,99 @@ class SwapTable(Scene):
 		a_xor_b = Tex("$b_0$", font_size=FZ2).move_to(swap_table[3][1].get_center()+DOWN)
 		self.play(Transform(swap_table[4][1], a_xor_b))
 		self.wait(2)
+
+
+
+class PowerOfTwo(Scene):
+	def construct(self):
+		Text.set_default(font="Monospace")
+
+		def play_subtraction(num):
+			self.play(Write(Text(f"{num} - 1").move_to(DOWN*2)))
+
+			bw_subtraction = BitwiseSubtraction(self, num, 1)
+			self.play(Create(bw_subtraction.subtraction_table.move_to(UP*2)))
+			self.wait(1)
+
+			bw_subtraction.perform_subtraction()
+			self.wait(2)
+
+		play_subtraction(88)
+		self.wait(1)
+
+		self.play(Write(Text("Flips least significant set bit to 0", font_size=16).move_to(DOWN*3)))
+		self.wait(2)
+		self.play(Write(Text("Flips all following 0s to 1", font_size=16).move_to(DOWN*3.5)))
+
+		self.wait(5)
+		fade_out_scene(self)
+
+
+		powers = VGroup()
+
+		down = -1
+		right = 1
+		for i in range(0, 6):
+			row = VGroup()
+
+			power_of_two = Tex(f"$2^{i}$").move_to(DOWN*down+LEFT*2)
+			self.play(Write(power_of_two))
+			row.add(power_of_two)
+
+			power_of_two = Tex(f"${2**i}$").move_to(row[0].get_center()+RIGHT)
+			self.play(Write(power_of_two))
+			row.add(power_of_two)
+
+			power_of_two = Tex(f"${bin(2**i)[2:]}$").move_to(row[1].get_center()+RIGHT*right)
+			self.play(Write(power_of_two))
+			row.add(power_of_two)
+
+			powers.add(row)
+
+			down += 0.75
+			right += 0.13
+
+		self.wait(5)
+		fade_out_scene(self)
+
+
+		play_subtraction(32)
+		self.wait(5)
+		fade_out_scene(self)
+
+
+		bitwise_table = BitwiseTable(self, "&", ORANGE)
+		and_table = bitwise_table.bitwise_table.shift(UP)
+
+		string_1 = "100000"
+		string_2 = "011111"
+		bitwise_table.compare_two_binaries(string_1, string_2, mobile=True)
+
+		self.wait(5)
+		fade_out_scene(self)
+
+
+		bitwise_table = BitwiseTable(self, "&", ORANGE)
+		and_table = bitwise_table.bitwise_table.shift(UP)
+
+		string_1 = "110000"
+		string_2 = "101111"
+		bitwise_table.compare_two_binaries(string_1, string_2, mobile=True)
+		self.wait(5)
+		fade_out_scene(self)
+
+
+		play_subtraction(16)
+		self.wait(5)
+		fade_out_scene(self)
+
+
+		bitwise_table = BitwiseTable(self, "&", ORANGE)
+		and_table = bitwise_table.bitwise_table.shift(UP)
+
+		string_1 = "10000"
+		string_2 = "01111"
+		bitwise_table.compare_two_binaries(string_1, string_2, mobile=True)
+
+		self.wait(5)
+		fade_out_scene(self)

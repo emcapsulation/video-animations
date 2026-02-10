@@ -53,7 +53,8 @@ class BinaryNumber():
 
 	def add_num_to_table(self, num, pace="slow", num_pos=UP):
 		num_text = Text(f"{num}", font_size=24).move_to(self.binary_table[0].get_center()+num_pos)
-		self.scene.play(Write(num_text))
+		if pace == "slow" or pace == "fast":
+			self.scene.play(Write(num_text))
 
 		tab_len = len(self.binary_table)
 
@@ -97,7 +98,7 @@ class BinaryNumber():
 
 		if pace == "slow":
 			self.scene.play(FadeOut(num_text), FadeOut(arrow))
-		else:
+		elif pace == "fast":
 			self.scene.wait(2)
 			self.scene.play(ReplacementTransform(num_text, row))			
 			self.scene.wait(2)
