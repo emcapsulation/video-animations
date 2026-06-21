@@ -1,0 +1,1 @@
+from .move_to_seat import move_to_seat
