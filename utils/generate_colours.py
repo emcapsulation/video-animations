@@ -4,7 +4,7 @@ from manim import *
 rainbow = [MAROON, RED, ORANGE, GOLD, YELLOW, GREEN, TEAL, BLUE, PURPLE, PINK, LIGHT_PINK]
 
 
-def generate_colours(array, in_order=False):
+def generate_colours(array, in_order=False, colour_scheme=rainbow):
 	if in_order:
 		array = list(range(len(array)))
 
@@ -14,6 +14,6 @@ def generate_colours(array, in_order=False):
 	colours = [None]*len(array)
 	for i in range(0, len(array)):
 		this_colour = int((array[i]-min_elem)/val_range * (gradient_steps-1))
-		colours[i] = color_gradient(rainbow, gradient_steps)[this_colour]
+		colours[i] = color_gradient(colour_scheme, gradient_steps)[this_colour]
 	
 	return colours

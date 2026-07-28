@@ -17,8 +17,8 @@ class ShortHint:
 	def create_hint(self):
 		self.scene.play(Create(self.hint))
 
-	def change_hint(self, new_text, font_size=24):
-		hint_text_2 = Text(new_text, font_size=font_size)
+	def change_hint(self, new_text, font_size=24, t2c={}):
+		hint_text_2 = Text(new_text, font_size=font_size, t2c=t2c)
 		hint_2 = VGroup(self.background_rectangle, hint_text_2.move_to(self.background_rectangle.get_center()))
 		self.scene.play(Transform(self.hint, hint_2))
 
