@@ -1,15 +1,19 @@
 from manim import *
-from entities import *
 import random
 
+from constants import *
+from props import Human
+from props.burger import BurgerStore, Family
+from props.items import Lock
 
-config.background_color = "#15131c"
+
+config.background_color = DEFAULT_BACKGROUND
 
 
 class Introduction(Scene):
 
 	def construct(self):
-		Text.set_default(font="Monospace")
+		Text.set_default(font=MONOSPACE_FONT)
 
 		# Store contains (wall, poster, counter)
 		burger_store = BurgerStore()
@@ -54,7 +58,7 @@ class Introduction(Scene):
 class WhatIsXss(Scene):
 
 	def construct(self):
-		Text.set_default(font="Monospace")
+		Text.set_default(font=MONOSPACE_FONT)
 
 		title = Text("Cross-Site Scripting").move_to(UP*3)
 		self.play(Write(title))
@@ -137,7 +141,7 @@ class WhatIsXss(Scene):
 class ReflectedXss(Scene):
 
 	def construct(self):
-		Text.set_default(font="Monospace")	
+		Text.set_default(font=MONOSPACE_FONT)	
 
 
 		screen = RoundedRectangle(height=2, width=3, fill_color=BLACK, stroke_color=GRAY, stroke_width=5, fill_opacity=0.8, corner_radius=0.1)
@@ -192,7 +196,7 @@ class ReflectedXss(Scene):
 class StoredXss(Scene):
 
 	def construct(self):
-		Text.set_default(font="Monospace")	
+		Text.set_default(font=MONOSPACE_FONT)	
 
 
 		screen = RoundedRectangle(height=2, width=3, fill_color=BLACK, stroke_color=GRAY, stroke_width=5, fill_opacity=0.8, corner_radius=0.1)
@@ -269,7 +273,7 @@ class StoredXss(Scene):
 class DomXss(Scene):
 
 	def construct(self):
-		Text.set_default(font="Monospace")	
+		Text.set_default(font=MONOSPACE_FONT)	
 
 
 		screen = RoundedRectangle(height=2, width=3, fill_color=BLACK, stroke_color=GRAY, stroke_width=5, fill_opacity=0.8, corner_radius=0.1)
@@ -315,28 +319,10 @@ class DomXss(Scene):
 
 
 
-class DrawAndGlowLetter(Scene):
-	def construct(self):
-		Text.set_default(font="Monospace")
-
-		self.play(Write(Text("Thank you for watching!").shift(UP*2)))
-
-		letter_e = Text("e", font_size=200, color=TEAL)
-		self.play(Write(letter_e))
-
-		letter_e_stroke = letter_e.copy().set_color(TEAL).set_opacity(1).set_stroke(width=3)        
-		glow_effect = letter_e_stroke.copy().set_stroke(width=3, color=WHITE).set_opacity(0.6)
-		self.play(FadeIn(letter_e_stroke), Transform(letter_e_stroke, glow_effect))
-		self.play(FadeOut(letter_e_stroke, glow_effect))
-
-		self.wait(3)
-
-
-
 class Thumbnail(Scene):
 	def construct(self):
 
-		Text.set_default(font="Monospace")
+		Text.set_default(font=MONOSPACE_FONT)
 
 		title_text = Text("Cross-Site Scripting").shift(UP*3)
 		self.add(title_text)

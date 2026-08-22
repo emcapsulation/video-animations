@@ -1,25 +1,17 @@
 from manim import *
 from constants import *
+from props import HintBox
 
 from ArrayGroup import ArrayGroup
 from BinaryByte import BinaryByte
 from CodeBlock import CodeBlock
 from FenwickTree import FenwickTree
-from HintBox import HintBox
 from SkewedBellCurve import SkewedBellCurve
 
 import math
 import random
 
 config.background_color = DEFAULT_BACKGROUND
-
-
-PASTEL_RED = "#ff8a8a"
-PASTEL_PINK = "#ff8adc"
-PASTEL_PURPLE = "#ce8aff"
-PASTEL_INDIGO = "#9a8aff"
-PASTEL_BLUE = "#8ab9ff"
-PASTEL_TEAL = "#8afbff"
 
 
 def lsb(i):

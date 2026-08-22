@@ -11,13 +11,14 @@ MOBILE_FRAME_WIDTH = 9.0
 MOBILE_FRAME_HEIGHT = 16.0
 
 
-PASTEL_RED = "#ff928a"
+PASTEL_RED = "#ff8a8a"
 PASTEL_ORANGE = "#ffaf80"
 PASTEL_GOLD = "#ffcc7a"
 PASTEL_YELLOW = "#ffec75"
 PASTEL_GREEN = "#8fff8f"
-PASTEL_TEAL = "#94ffdf"
-PASTEL_BLUE = "#94e4ff"
-PASTEL_PURPLE = "#bfc7ff"
+PASTEL_TEAL = "#8afbff"
+PASTEL_BLUE = "#8ab9ff"
+PASTEL_PURPLE = "#ce8aff"
+PASTEL_INDIGO = "#9a8aff"
 PASTEL_VIOLET = "#ddb5ff"
-PASTEL_PINK = "#ffadcc"
+PASTEL_PINK = "#ff8adc"
